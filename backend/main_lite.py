@@ -7,9 +7,8 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
-import sys
-
-sys.path.append('/Users/hendrixjohn/warefy')
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.database_lite import get_db, init_db
 from backend.models_lite import User, Warehouse, Inventory, SalesHistory, Anomaly
