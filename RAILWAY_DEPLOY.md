@@ -75,7 +75,8 @@ Your API will be available at:
 - **API Docs**: `https://your-app.up.railway.app/docs`
 - **Health Check**: `https://your-app.up.railway.app/health`
 
-## Step 4: Deploy Frontend (Optional)
+
+## Step 4: Deploy Frontend
 
 ### Option A: Vercel (Recommended for Next.js)
 1. Go to [vercel.com](https://vercel.com)
@@ -87,11 +88,16 @@ Your API will be available at:
    ```
 5. Deploy!
 
-### Option B: Railway (Alternative)
-1. In Railway project, click "New" → "GitHub Repo"
-2. Select same repository
-3. Set "Root Directory" to `frontend`
-4. Add environment variables as above
+### Option B: Railway (All-in-One)
+1. In your Railway project, click "New" → "GitHub Repo"
+2. Select the same `warefy` repository
+3. Click "Variables" and add:
+   ```
+   NEXT_PUBLIC_API_URL=https://your-backend-service.up.railway.app
+   ```
+4. Click "Settings" → "General"
+5. Scroll down to "Root Directory" and set it to `/frontend`
+6. Railway will detect the `railway.json` we created and deploy automatically.
 
 ## Troubleshooting
 
@@ -119,9 +125,18 @@ Railway free tier includes:
 ## Next Steps
 
 1. Test your API endpoints using the `/docs` interface
-2. Deploy frontend to Vercel
+2. Deploy frontend to Vercel or Railway
 3. Add your OpenAI API key for AI features
 4. Monitor usage in Railway dashboard
+
+## Verification
+
+You can verify your backend is running correctly by using the provided health check script:
+
+```bash
+# Run locally (requires backend running on port 8000)
+python backend/health_check.py
+```
 
 ## Estimated Deploy Time
 - Initial deployment: 5-10 minutes
