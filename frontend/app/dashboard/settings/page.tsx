@@ -1,57 +1,144 @@
 'use client';
 
+import { useState } from 'react';
+import { User, Bell, Shield, CreditCard, Globe, Moon, Save } from 'lucide-react';
+
 export default function SettingsPage() {
+    const [activeTab, setActiveTab] = useState('profile');
+
+    const tabs = [
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'security', label: 'Security', icon: Shield },
+        { id: 'billing', label: 'Billing', icon: CreditCard },
+    ];
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
+            {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-                <p className="text-gray-500 mt-1">Manage your account and application preferences</p>
+                <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+                <p className="text-gray-500 mt-1">Manage your account preferences and workspace settings</p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">General Settings</h3>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-                        <input
-                            type="text"
-                            defaultValue="Warefy Logistics"
-                            className="w-full max-w-md border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Time Zone</label>
-                        <select className="w-full max-w-md border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary-500">
-                            <option>UTC (GMT+00:00)</option>
-                            <option>EST (GMT-05:00)</option>
-                            <option>PST (GMT-08:00)</option>
-                        </select>
+            <div className="flex flex-col lg:flex-row gap-8">
+                {/* Sidebar Navigation */}
+                <div className="w-full lg:w-64 flex-shrink-0">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="p-2 space-y-1">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-colors ${activeTab === tab.id
+                                            ? 'bg-blue-50 text-blue-700'
+                                            : 'text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    <tab.icon className={`h-5 w-5 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h3>
-                <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                        <input type="checkbox" id="email_alerts" defaultChecked className="h-4 w-4 text-primary-600 rounded border-gray-300" />
-                        <label htmlFor="email_alerts" className="text-gray-700">Email Alerts for Critical Anomalies</label>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <input type="checkbox" id="sms_alerts" className="h-4 w-4 text-primary-600 rounded border-gray-300" />
-                        <label htmlFor="sms_alerts" className="text-gray-700">SMS Notifications for Drivers</label>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <input type="checkbox" id="weekly_report" defaultChecked className="h-4 w-4 text-primary-600 rounded border-gray-300" />
-                        <label htmlFor="weekly_report" className="text-gray-700">Weekly AI Performance Report</label>
+                {/* Main Content Area */}
+                <div className="flex-1">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                        {activeTab === 'profile' && (
+                            <div className="space-y-8">
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900 mb-6">Profile Information</h2>
+                                    <div className="flex items-center gap-6 mb-8">
+                                        <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                                            JD
+                                        </div>
+                                        <div>
+                                            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                                Change Avatar
+                                            </button>
+                                            <p className="text-xs text-gray-500 mt-2">JPG, GIF or PNG. Max size of 800K</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                                            <input
+                                                type="text"
+                                                defaultValue="John"
+                                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                                            <input
+                                                type="text"
+                                                defaultValue="Doe"
+                                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                            <input
+                                                type="email"
+                                                defaultValue="john.doe@warefy.com"
+                                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                                            <textarea
+                                                rows={4}
+                                                defaultValue="Supply Chain Manager with 10+ years of experience."
+                                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-8 border-t border-gray-100 flex justify-end">
+                                    <button className="flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-medium shadow-lg shadow-blue-500/30">
+                                        <Save className="h-4 w-4 mr-2" />
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'notifications' && (
+                            <div className="space-y-6">
+                                <h2 className="text-xl font-bold text-gray-900 mb-6">Notification Preferences</h2>
+                                <div className="space-y-4">
+                                    {['Email Notifications', 'Push Notifications', 'Weekly Reports', 'Critical Alerts'].map((item) => (
+                                        <div key={item} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                            <div>
+                                                <h3 className="font-medium text-gray-900">{item}</h3>
+                                                <p className="text-sm text-gray-500">Receive updates about {item.toLowerCase()}</p>
+                                            </div>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" className="sr-only peer" defaultChecked />
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Placeholders for other tabs */}
+                        {(activeTab === 'security' || activeTab === 'billing') && (
+                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                <div className="p-4 bg-gray-50 rounded-full mb-4">
+                                    <Shield className="h-8 w-8 text-gray-400" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900">Coming Soon</h3>
+                                <p className="text-gray-500 max-w-sm mt-2">This section is currently under development. Check back later for updates.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
-            </div>
-
-            <div className="flex justify-end">
-                <button className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium">
-                    Save Changes
-                </button>
             </div>
         </div>
     );

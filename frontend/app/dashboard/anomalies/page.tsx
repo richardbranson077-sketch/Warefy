@@ -1,133 +1,151 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, Clock, Filter } from 'lucide-react';
-import { anomalies } from '@/lib/api';
+import { useState } from 'react';
+import { AlertTriangle, AlertOctagon, Search, Filter, CheckCircle, XCircle, ArrowRight, Activity } from 'lucide-react';
 
 export default function AnomaliesPage() {
-    const [anomalyList, setAnomalyList] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('all');
-
-    useEffect(() => {
-        const fetchAnomalies = async () => {
-            try {
-                // Mock data for demo if API is empty
-                const data = await anomalies.getRecent();
-                if (data && data.length > 0) {
-                    setAnomalyList(data);
-                } else {
-                    setAnomalyList([
-                        {
-                            id: 1,
-                            type: 'Demand Spike',
-                            severity: 'critical',
-                            description: 'Unusual demand spike for SKU-005 (Wireless Mouse). Sales 300% above average.',
-                            detected_at: new Date().toISOString(),
-                            status: 'active'
-                        },
-                        {
-                            id: 2,
-                            type: 'Delivery Delay',
-                            severity: 'high',
-                            description: 'Vehicle VH-002 is delayed by 45 minutes due to traffic congestion.',
-                            detected_at: new Date(Date.now() - 3600000).toISOString(),
-                            status: 'active'
-                        },
-                        {
-                            id: 3,
-                            type: 'Stockout Risk',
-                            severity: 'medium',
-                            description: 'Inventory for Desk Lamp (SKU-003) approaching critical levels.',
-                            detected_at: new Date(Date.now() - 7200000).toISOString(),
-                            status: 'resolved'
-                        }
-                    ]);
-                }
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching anomalies:', error);
-                setLoading(false);
-            }
-        };
-
-        fetchAnomalies();
-    }, []);
-
-    const getSeverityColor = (severity) => {
-        switch (severity) {
-            case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-            case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-            case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-            default: return 'bg-blue-100 text-blue-800 border-blue-200';
+    const [anomalies, setAnomalies] = useState([
+        {
+            id: 1,
+            severity: 'critical',
+            title: 'Sudden Demand Spike',
+            description: 'Product SKU-998 experienced a 400% increase in orders within 2 hours. Potential viral trend or bot activity.',
+            detectedAt: '10 mins ago',
+            status: 'Open',
+            metric: 'Order Volume'
+        },
+        {
+            id: 2,
+            severity: 'warning',
+            title: 'Inventory Discrepancy',
+            description: 'Warehouse B reported 50 units of SKU-123, but system shows 45. Manual count recommended.',
+            detectedAt: '2 hours ago',
+            status: 'Investigating',
+            metric: 'Stock Count'
+        },
+        {
+            id: 3,
+            severity: 'info',
+            title: 'Delivery Delay Pattern',
+            description: 'Route 5 vehicles are consistently 15 minutes late due to new road construction.',
+            detectedAt: 'Yesterday',
+            status: 'Resolved',
+            metric: 'Delivery Time'
         }
-    };
+    ]);
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Anomaly Detection</h1>
-                    <p className="text-gray-500 mt-1">Real-time alerts for supply chain disruptions</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Anomaly Detection</h1>
+                    <p className="text-gray-500 mt-1">Real-time monitoring of irregularities in your supply chain</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Filter className="h-5 w-5 text-gray-400" />
-                    <select
-                        className="border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary-500"
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                    >
-                        <option value="all">All Alerts</option>
-                        <option value="critical">Critical Only</option>
-                        <option value="active">Active Only</option>
-                    </select>
+                <div className="flex gap-3">
+                    <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 font-medium flex items-center shadow-sm">
+                        <Filter className="h-4 w-4 mr-2" />
+                        Filter
+                    </button>
+                    <button className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium shadow-lg shadow-red-500/30 flex items-center">
+                        <Activity className="h-4 w-4 mr-2" />
+                        Run Scan
+                    </button>
                 </div>
             </div>
 
-            <div className="space-y-4">
-                {anomalyList.map((anomaly) => (
-                    <div
-                        key={anomaly.id}
-                        className={`bg-white rounded-xl border p-6 transition-all hover:shadow-md ${anomaly.status === 'resolved' ? 'opacity-75 border-gray-200' : 'border-l-4 border-l-red-500 border-gray-200'
-                            }`}
-                    >
-                        <div className="flex justify-between items-start">
-                            <div className="flex gap-4">
-                                <div className={`p-3 rounded-full h-fit ${anomaly.severity === 'critical' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <p className="text-sm font-medium text-gray-500">Active Anomalies</p>
+                    <h3 className="text-3xl font-bold text-gray-900 mt-2">12</h3>
+                    <div className="mt-2 text-xs font-medium text-red-600 bg-red-50 inline-block px-2 py-1 rounded-lg">
+                        +3 since yesterday
+                    </div>
+                </div>
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <p className="text-sm font-medium text-gray-500">Critical Issues</p>
+                    <h3 className="text-3xl font-bold text-gray-900 mt-2">2</h3>
+                    <div className="mt-2 text-xs font-medium text-orange-600 bg-orange-50 inline-block px-2 py-1 rounded-lg">
+                        Needs attention
+                    </div>
+                </div>
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <p className="text-sm font-medium text-gray-500">Avg Resolution Time</p>
+                    <h3 className="text-3xl font-bold text-gray-900 mt-2">4.2h</h3>
+                    <div className="mt-2 text-xs font-medium text-green-600 bg-green-50 inline-block px-2 py-1 rounded-lg">
+                        -15% improvement
+                    </div>
+                </div>
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <p className="text-sm font-medium text-gray-500">System Health</p>
+                    <h3 className="text-3xl font-bold text-gray-900 mt-2">98.5%</h3>
+                    <div className="mt-2 text-xs font-medium text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded-lg">
+                        Operational
+                    </div>
+                </div>
+            </div>
+
+            {/* Anomalies List */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h3 className="text-lg font-bold text-gray-900">Detected Issues</h3>
+                    <div className="relative w-full sm:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search anomalies..."
+                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
+                        />
+                    </div>
+                </div>
+
+                <div className="divide-y divide-gray-100">
+                    {anomalies.map((anomaly) => (
+                        <div key={anomaly.id} className="p-6 hover:bg-gray-50 transition-colors group">
+                            <div className="flex items-start gap-4">
+                                <div className={`flex-shrink-0 mt-1 ${anomaly.severity === 'critical' ? 'text-red-500' :
+                                        anomaly.severity === 'warning' ? 'text-orange-500' :
+                                            'text-blue-500'
                                     }`}>
-                                    <AlertTriangle className="h-6 w-6" />
+                                    {anomaly.severity === 'critical' ? <AlertOctagon className="h-6 w-6" /> : <AlertTriangle className="h-6 w-6" />}
                                 </div>
-                                <div>
-                                    <div className="flex items-center gap-3 mb-1">
-                                        <h3 className="text-lg font-semibold text-gray-900">{anomaly.type}</h3>
-                                        <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${getSeverityColor(anomaly.severity)} uppercase`}>
+
+                                <div className="flex-1">
+                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
+                                        <div>
+                                            <h4 className="text-base font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                                                {anomaly.title}
+                                            </h4>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Detected {anomaly.detectedAt} • Metric: <span className="font-medium text-gray-700">{anomaly.metric}</span>
+                                            </p>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${anomaly.severity === 'critical' ? 'bg-red-100 text-red-700' :
+                                                anomaly.severity === 'warning' ? 'bg-orange-100 text-orange-700' :
+                                                    'bg-blue-100 text-blue-700'
+                                            }`}>
                                             {anomaly.severity}
                                         </span>
                                     </div>
-                                    <p className="text-gray-600 mb-2">{anomaly.description}</p>
-                                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                                        <span className="flex items-center gap-1">
-                                            <Clock className="h-4 w-4" />
-                                            {new Date(anomaly.detected_at).toLocaleString()}
-                                        </span>
-                                        {anomaly.status === 'resolved' && (
-                                            <span className="flex items-center gap-1 text-green-600">
-                                                <CheckCircle className="h-4 w-4" />
-                                                Resolved
-                                            </span>
-                                        )}
+
+                                    <p className="text-gray-600 text-sm mb-4 leading-relaxed max-w-3xl">
+                                        {anomaly.description}
+                                    </p>
+
+                                    <div className="flex items-center gap-3">
+                                        <button className="text-sm font-medium text-gray-900 bg-white border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                            Investigate
+                                        </button>
+                                        <button className="text-sm font-medium text-gray-500 hover:text-gray-700 px-4 py-2 transition-colors">
+                                            Ignore
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-
-                            {anomaly.status !== 'resolved' && (
-                                <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                    Resolve
-                                </button>
-                            )}
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );
