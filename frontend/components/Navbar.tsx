@@ -16,25 +16,17 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="bg-white border-b border-gray-200 h-16 fixed w-full z-30 top-0 left-0 shadow-sm">
+        <nav className="bg-white border-b border-gray-200 h-16 fixed w-full z-30 top-0 left-0">
             <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
-                        <Link href="/" className="flex-shrink-0 flex items-center space-x-3">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg blur opacity-50"></div>
-                                <div className="relative bg-gradient-to-r from-blue-600 to-cyan-500 p-2 rounded-lg">
-                                    <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
-                                </div>
+                        <Link href="/" className="flex items-center space-x-2">
+                            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-2 rounded-lg">
+                                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
                             </div>
-                            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                                Warefy
-                            </span>
-                            <span className="ml-2 text-xs px-2 py-1 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 font-semibold border border-blue-200">
-                                AI Powered
-                            </span>
+                            <span className="text-xl font-bold text-gray-900">Warefy</span>
                         </Link>
                     </div>
 
