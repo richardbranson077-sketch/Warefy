@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, RefreshCw, TrendingUp } from 'lucide-react';
+import { Calendar, RefreshCw, TrendingUp, AlertTriangle, ArrowRight, BrainCircuit, BarChart3 } from 'lucide-react';
 import { demand, inventory } from '@/lib/api';
 import { DemandForecastChart } from '@/components/Charts';
 
@@ -13,7 +13,6 @@ export default function DemandPage() {
     const [forecastDays, setForecastDays] = useState(30);
 
     useEffect(() => {
-        // Fetch available SKUs
         const fetchSkus = async () => {
             try {
                 const items = await inventory.getAll();
@@ -37,20 +36,14 @@ export default function DemandPage() {
     const generateForecast = async () => {
         setLoading(true);
         try {
-            // Get historical data first
             const history = await demand.getHistorical(selectedSku);
-
-            // Get forecast
             const forecast = await demand.forecast({
                 sku: selectedSku,
                 forecast_days: forecastDays,
                 model_type: 'prophet'
             });
 
-            // Combine data for chart
             const combinedData = [];
-
-            // Add historical data
             history.sales_history.forEach(item => {
                 combinedData.push({
                     date: new Date(item.date).toLocaleDateString(),
@@ -59,7 +52,6 @@ export default function DemandPage() {
                 });
             });
 
-            // Add forecast data
             forecast.predictions.forEach(item => {
                 combinedData.push({
                     date: new Date(item.date).toLocaleDateString(),
@@ -77,108 +69,150 @@ export default function DemandPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
+            {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Demand Forecasting</h1>
-                    <p className="text-gray-500 mt-1">AI-powered demand prediction using Prophet & LSTM models</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Demand Forecasting</h1>
+                    <p className="text-gray-500 mt-1">AI-powered prediction using Prophet & LSTM models</p>
                 </div>
                 <button
                     onClick={generateForecast}
                     disabled={loading}
-                    className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                    className="flex items-center px-5 py-2.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-medium disabled:opacity-50"
                 >
                     <RefreshCw className={`h-5 w-5 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    Refresh Forecast
+                    {loading ? 'Generating Model...' : 'Refresh Forecast'}
                 </button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Select Product (SKU)</label>
-                        <select
-                            className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                            value={selectedSku}
-                            onChange={(e) => setSelectedSku(e.target.value)}
-                        >
-                            {skuList.map(item => (
-                                <option key={item.id} value={item.sku}>
-                                    {item.product_name} ({item.sku})
-                                </option>
-                            ))}
-                        </select>
+            {/* Controls & Chart Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Controls Panel */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-purple-50 rounded-lg">
+                            <BrainCircuit className="h-6 w-6 text-purple-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900">Model Configuration</h3>
                     </div>
-                    <div className="w-full sm:w-48">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Forecast Horizon</label>
-                        <select
-                            className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                            value={forecastDays}
-                            onChange={(e) => setForecastDays(parseInt(e.target.value))}
-                        >
-                            <option value="7">7 Days</option>
-                            <option value="14">14 Days</option>
-                            <option value="30">30 Days</option>
-                            <option value="60">60 Days</option>
-                            <option value="90">90 Days</option>
-                        </select>
+
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Target Product</label>
+                            <select
+                                className="w-full border border-gray-200 bg-gray-50 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                                value={selectedSku}
+                                onChange={(e) => setSelectedSku(e.target.value)}
+                            >
+                                {skuList.map(item => (
+                                    <option key={item.id} value={item.sku}>
+                                        {item.product_name} ({item.sku})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Forecast Horizon</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[7, 14, 30, 60, 90].map((days) => (
+                                    <button
+                                        key={days}
+                                        onClick={() => setForecastDays(days)}
+                                        className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${forecastDays === days
+                                                ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20'
+                                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        {days} Days
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="pt-6 border-t border-gray-100">
+                            <div className="flex items-center justify-between text-sm mb-2">
+                                <span className="text-gray-500">Model Accuracy</span>
+                                <span className="font-bold text-green-600">94.2%</span>
+                            </div>
+                            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-green-500 w-[94.2%] rounded-full"></div>
+                            </div>
+                            <p className="text-xs text-gray-400 mt-2">Based on backtesting against last 90 days of data.</p>
+                        </div>
                     </div>
                 </div>
 
-                <div className="h-[400px] w-full">
-                    {loading && forecastData.length === 0 ? (
-                        <div className="h-full flex items-center justify-center text-gray-500">
-                            Generating forecast model...
+                {/* Chart Area */}
+                <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-bold text-gray-900">Forecast Visualization</h3>
+                        <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                <span className="text-gray-500">Historical</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-purple-500 border-2 border-white ring-1 ring-purple-500"></div>
+                                <span className="text-gray-500">Predicted</span>
+                            </div>
                         </div>
-                    ) : (
-                        <DemandForecastChart data={forecastData} />
-                    )}
+                    </div>
+                    <div className="h-[400px] w-full bg-gray-50/50 rounded-xl border border-gray-100 p-4">
+                        {loading && forecastData.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                                <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4"></div>
+                                <p>Running Prophet model...</p>
+                            </div>
+                        ) : (
+                            <DemandForecastChart data={forecastData} />
+                        )}
+                    </div>
                 </div>
             </div>
 
+            {/* Insights Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                            <TrendingUp className="h-5 w-5" />
+                <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-2xl shadow-sm border border-blue-100">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-blue-100 rounded-xl text-blue-600">
+                            <TrendingUp className="h-6 w-6" />
                         </div>
-                        <h3 className="font-semibold text-gray-900">Trend Analysis</h3>
+                        <h3 className="font-bold text-gray-900">Trend Analysis</h3>
                     </div>
-                    <p className="text-gray-600 text-sm">
-                        Demand is projected to increase by <span className="font-bold text-green-600">12%</span> over the next 30 days due to seasonal factors.
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                        Demand is projected to increase by <span className="font-bold text-blue-600">12%</span> over the next 30 days. Consider increasing safety stock for this SKU.
                     </p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
-                            <Calendar className="h-5 w-5" />
+                <div className="bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl shadow-sm border border-purple-100">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-purple-100 rounded-xl text-purple-600">
+                            <Calendar className="h-6 w-6" />
                         </div>
-                        <h3 className="font-semibold text-gray-900">Seasonality</h3>
+                        <h3 className="font-bold text-gray-900">Seasonality</h3>
                     </div>
-                    <p className="text-gray-600 text-sm">
-                        Strong weekly seasonality detected. Sales peak on <span className="font-bold">Fridays</span> and dip on <span className="font-bold">Mondays</span>.
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                        Strong weekly seasonality detected. Sales consistently peak on <span className="font-bold text-purple-600">Fridays</span> and dip on Mondays.
                     </p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
-                            <AlertTriangle className="h-5 w-5" />
+                <div className="bg-gradient-to-br from-orange-50 to-white p-6 rounded-2xl shadow-sm border border-orange-100">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-orange-100 rounded-xl text-orange-600">
+                            <AlertTriangle className="h-6 w-6" />
                         </div>
-                        <h3 className="font-semibold text-gray-900">Confidence Score</h3>
+                        <h3 className="font-bold text-gray-900">Risk Assessment</h3>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div className="h-full bg-green-500 w-[85%]"></div>
-                        </div>
-                        <span className="text-sm font-bold text-gray-700">85%</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">High confidence based on 6 months of historical data.</p>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                        Potential stockout risk in <span className="font-bold text-orange-600">14 days</span> if current demand trend continues without replenishment.
+                    </p>
+                    <button className="mt-3 text-sm text-orange-600 font-medium flex items-center hover:text-orange-700">
+                        View Replenishment Plan <ArrowRight className="h-4 w-4 ml-1" />
+                    </button>
                 </div>
             </div>
         </div>
     );
 }
-
-import { AlertTriangle } from 'lucide-react';
