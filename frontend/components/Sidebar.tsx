@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
     { name: 'Demand Forecast', href: '/dashboard/demand', icon: TrendingUp },
     { name: 'Route Optimization', href: '/dashboard/routes', icon: Map },
@@ -34,8 +34,8 @@ export default function Sidebar() {
                             key={item.name}
                             href={item.href}
                             className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive
-                                    ? 'bg-primary-50 text-primary-700'
-                                    : 'text-gray-700 hover:bg-gray-100'
+                                ? 'bg-primary-50 text-primary-700'
+                                : 'text-gray-700 hover:bg-gray-100'
                                 }`}
                         >
                             <item.icon className={`mr-3 h-5 w-5 ${isActive ? 'text-primary-600' : 'text-gray-400'}`} />
