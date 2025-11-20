@@ -62,12 +62,12 @@ yarn-error.log*
 out/
 .vercel
 
-# ML Models
+# ML Models (trained model files, not source code)
 *.pkl
 *.h5
 *.joblib
 *.model
-models/
+ml-pipelines/**/models/
 *.ckpt
 
 # Logs
