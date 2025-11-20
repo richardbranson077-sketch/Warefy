@@ -16,7 +16,7 @@ from backend.models_lite import User, Warehouse, Inventory, SalesHistory, Anomal
 from backend.schemas import (
     InventoryResponse, WarehouseResponse, AnomalyResponse
 )
-from backend.auth import get_current_user, require_role
+from backend.auth_lite import get_current_user, require_role
 
 # Initialize database on startup
 init_db()
