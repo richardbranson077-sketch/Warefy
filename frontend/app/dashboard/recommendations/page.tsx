@@ -1,44 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { BrainCircuit, ArrowRight, Check, X, Zap, TrendingUp, Package, Truck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sparkles, ArrowRight, TrendingUp, AlertTriangle, Package, Zap, RefreshCw } from 'lucide-react';
+import { aiRecommendations } from '@/lib/api'; // Assuming this path is correct
 
 export default function RecommendationsPage() {
-    // Mock recommendations
-    const [recommendations, setRecommendations] = useState([
-        {
-            id: 1,
-            type: 'inventory',
-            title: 'Restock High-Demand Items',
-            description: 'Product SKU-123 (Wireless Earbuds) is projected to stock out in 3 days based on current sales velocity.',
-            impact: 'High',
-            confidence: 98,
-            action: 'Order 500 units',
-            icon: Package,
-            color: 'blue'
-        },
-        {
-            id: 2,
-            type: 'logistics',
-            title: 'Optimize Route B-205',
-            description: 'Traffic congestion detected on I-95. Rerouting could save 45 minutes and 12% fuel.',
-            impact: 'Medium',
-            confidence: 92,
-            action: 'Apply New Route',
-            icon: Truck,
-            color: 'purple'
-        },
-        {
-            id: 3,
-            type: 'pricing',
-            title: 'Dynamic Pricing Opportunity',
-            description: 'Demand for "Smart Watch Series 5" has increased by 25%. Increasing price by 5% could maximize revenue without hurting conversion.',
-            impact: 'High',
-            confidence: 89,
-            action: 'Update Price',
-            icon: TrendingUp,
-            color: 'green'
-        }
     ]);
 
     return (
@@ -100,8 +66,8 @@ export default function RecommendationsPage() {
                             <div className="flex flex-col md:flex-row gap-6">
                                 {/* Icon Column */}
                                 <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${rec.color === 'blue' ? 'bg-blue-50 text-blue-600' :
-                                        rec.color === 'purple' ? 'bg-purple-50 text-purple-600' :
-                                            'bg-green-50 text-green-600'
+                                    rec.color === 'purple' ? 'bg-purple-50 text-purple-600' :
+                                        'bg-green-50 text-green-600'
                                     }`}>
                                     <rec.icon className="h-6 w-6" />
                                 </div>
