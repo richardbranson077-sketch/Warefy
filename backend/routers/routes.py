@@ -137,3 +137,14 @@ def get_driver_routes(
     
     routes = query.all()
     return routes
+
+@router.get("/", response_model=list[RouteResponse])
+def get_all_routes(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get all routes"""
+    routes = db.query(Route).offset(skip).limit(limit).all()
+    return routes

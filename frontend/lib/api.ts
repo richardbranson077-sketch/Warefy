@@ -125,6 +125,11 @@ export const routes = {
         return response.data;
     },
 
+    getAll: async (params) => {
+        const response = await api.get('/api/routes', { params });
+        return response.data;
+    },
+
     create: async (data) => {
         const response = await api.post('/api/routes/create', data);
         return response.data;
@@ -172,6 +177,24 @@ export const anomalies = {
 
     resolve: async (id) => {
         const response = await api.put(`/api/anomalies/${id}/resolve`);
+        return response.data;
+    },
+};
+
+// Vehicles
+export const vehicles = {
+    getAll: async (params) => {
+        const response = await api.get('/api/vehicles', { params });
+        return response.data;
+    },
+
+    getById: async (id) => {
+        const response = await api.get(`/api/vehicles/${id}`);
+        return response.data;
+    },
+
+    create: async (data) => {
+        const response = await api.post('/api/vehicles', data);
         return response.data;
     },
 };

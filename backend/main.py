@@ -20,7 +20,8 @@ from routers import (
     demand,
     routes,
     ai_recommendations,
-    anomalies
+    anomalies,
+    vehicles
 )
 
 # Import mobile API
@@ -66,6 +67,7 @@ app.include_router(demand.router)
 app.include_router(routes.router)
 app.include_router(ai_recommendations.router)
 app.include_router(anomalies.router)
+app.include_router(vehicles.router)
 app.include_router(driver_router)
 
 # WebSocket connection manager

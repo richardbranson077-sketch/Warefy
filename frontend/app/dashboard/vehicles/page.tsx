@@ -1,51 +1,64 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Truck, Battery, AlertCircle, CheckCircle, MapPin, Fuel, Wrench, Search, Filter } from 'lucide-react';
+import { vehicles as vehiclesApi } from '@/lib/api';
 
 export default function FleetPage() {
-    const [vehicles, setVehicles] = useState([
-        {
-            id: 'V-101',
-            type: 'Heavy Truck',
-            driver: 'Mike Ross',
-            status: 'Active',
-            fuel: 75,
-            location: 'Route 66, Sector 4',
-            lastMaintenance: '2023-10-15',
-            health: 98
-        },
-        {
-            id: 'V-102',
-            type: 'Delivery Van',
-            driver: 'Rachel Green',
-            status: 'Idle',
-            fuel: 45,
-            location: 'Warehouse A',
-            lastMaintenance: '2023-11-01',
-            health: 100
-        },
-        {
-            id: 'V-103',
-            type: 'Heavy Truck',
-            driver: 'Harvey Specter',
-            status: 'Maintenance',
-            fuel: 20,
-            location: 'Service Center',
-            lastMaintenance: '2023-09-20',
-            health: 65
-        },
-        {
-            id: 'V-104',
-            type: 'Drone Unit',
-            driver: 'Auto-Pilot',
-            status: 'Active',
-            fuel: 88,
-            location: 'Sector 7',
-            lastMaintenance: '2023-11-10',
-            health: 92
-        }
-    ]);
+    const [vehicles, setVehicles] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchVehicles = async () => {
+            try {
+                setLoading(true);
+                const data = await vehiclesApi.getAll();
+                if (data && data.length > 0) {
+                    const mappedVehicles = data.map((v: any) => ({
+                        id: v.vehicle_number,
+                        type: v.vehicle_type,
+                        driver: v.driver_id ? `Driver #${v.driver_id}` : 'Unassigned',
+                        status: v.status,
+                        fuel: Math.floor(Math.random() * 40) + 60, // Mock fuel level 60-100%
+                        location: 'Active Sector', // Simplified
+                        lastMaintenance: v.last_service_date ? new Date(v.last_service_date).toLocaleDateString() : 'N/A',
+                        health: Math.floor(Math.random() * 20) + 80 // Mock health 80-100%
+                    }));
+                    setVehicles(mappedVehicles);
+                } else {
+                    // Fallback to mock data if empty
+                    setVehicles([
+                        {
+                            id: 'V-101',
+                            type: 'Heavy Truck',
+                            driver: 'Mike Ross',
+                            status: 'Active',
+                            fuel: 75,
+                            location: 'Route 66, Sector 4',
+                            lastMaintenance: '2023-10-15',
+                            health: 98
+                        },
+                        {
+                            id: 'V-102',
+                            type: 'Delivery Van',
+                            driver: 'Rachel Green',
+                            status: 'Idle',
+                            fuel: 45,
+                            location: 'Warehouse A',
+                            lastMaintenance: '2023-11-01',
+                            health: 100
+                        }
+                    ]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch vehicles:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchVehicles();
+    }, []);
 
     return (
         <div className="space-y-8">
@@ -120,8 +133,8 @@ export default function FleetPage() {
                                 </div>
                             </div>
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${vehicle.status === 'Active' ? 'bg-green-100 text-green-700' :
-                                    vehicle.status === 'Maintenance' ? 'bg-red-100 text-red-700' :
-                                        'bg-gray-100 text-gray-700'
+                                vehicle.status === 'Maintenance' ? 'bg-red-100 text-red-700' :
+                                    'bg-gray-100 text-gray-700'
                                 }`}>
                                 {vehicle.status}
                             </span>
@@ -159,7 +172,7 @@ export default function FleetPage() {
                                     Health Score
                                 </div>
                                 <span className={`font-bold ${vehicle.health > 90 ? 'text-green-600' :
-                                        vehicle.health > 70 ? 'text-orange-600' : 'text-red-600'
+                                    vehicle.health > 70 ? 'text-orange-600' : 'text-red-600'
                                     }`}>{vehicle.health}%</span>
                             </div>
                         </div>

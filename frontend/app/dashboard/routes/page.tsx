@@ -18,10 +18,38 @@ export default function RoutesPage() {
     ];
 
     useEffect(() => {
-        // In a real app, we would fetch from API
-        // const fetchRoutes = async () => { ... }
-        setActiveRoutes(mockRoutes);
-        setSelectedRoute(mockRoutes[0]);
+        const fetchRoutes = async () => {
+            try {
+                setLoading(true);
+                const data = await routes.getAll();
+                if (data && data.length > 0) {
+                    // Map API response to UI format
+                    const mappedRoutes = data.map((r: any) => ({
+                        id: r.id,
+                        name: r.route_name || `Route #${r.id}`,
+                        driver: r.driver_id ? `Driver #${r.driver_id}` : 'Unassigned',
+                        status: r.status || 'Planned',
+                        progress: r.status === 'completed' ? 100 : 0, // Simplified progress
+                        eta: r.estimated_duration ? `${Math.round(r.estimated_duration)} min` : 'N/A',
+                        stops: r.optimized_sequence ? r.optimized_sequence.length : 0,
+                        vehicle: r.vehicle_id ? `Vehicle #${r.vehicle_id}` : 'N/A'
+                    }));
+                    setActiveRoutes(mappedRoutes);
+                    setSelectedRoute(mappedRoutes[0]);
+                } else {
+                    setActiveRoutes(mockRoutes);
+                    setSelectedRoute(mockRoutes[0]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch routes:", error);
+                setActiveRoutes(mockRoutes);
+                setSelectedRoute(mockRoutes[0]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRoutes();
     }, []);
 
     return (
