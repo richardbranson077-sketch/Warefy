@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { BrainCircuit, Lightbulb, ArrowRight, CheckCircle, AlertTriangle } from 'lucide-react';
-import { aiRecommendations } from '../../lib/api';
+import { aiRecommendations } from '@/lib/api';
 
 export default function RecommendationsPage() {
     const [loading, setLoading] = useState(false);
@@ -78,8 +78,8 @@ export default function RecommendationsPage() {
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-2 font-medium text-sm capitalize border-b-2 transition-colors ${activeTab === tab
-                                ? 'border-purple-600 text-purple-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            ? 'border-purple-600 text-purple-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         {tab} Planning
@@ -96,8 +96,8 @@ export default function RecommendationsPage() {
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-start gap-4">
                                         <div className={`p-3 rounded-lg ${rec.impact === 'Critical' ? 'bg-red-100 text-red-600' :
-                                                rec.impact === 'High Risk' ? 'bg-orange-100 text-orange-600' :
-                                                    'bg-blue-100 text-blue-600'
+                                            rec.impact === 'High Risk' ? 'bg-orange-100 text-orange-600' :
+                                                'bg-blue-100 text-blue-600'
                                             }`}>
                                             <Lightbulb className="h-6 w-6" />
                                         </div>
@@ -105,8 +105,8 @@ export default function RecommendationsPage() {
                                             <h3 className="text-lg font-semibold text-gray-900">{rec.title}</h3>
                                             <div className="flex items-center gap-3 mt-1">
                                                 <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${rec.impact === 'Critical' ? 'bg-red-100 text-red-800' :
-                                                        rec.impact === 'High Risk' ? 'bg-orange-100 text-orange-800' :
-                                                            'bg-blue-100 text-blue-800'
+                                                    rec.impact === 'High Risk' ? 'bg-orange-100 text-orange-800' :
+                                                        'bg-blue-100 text-blue-800'
                                                     }`}>
                                                     {rec.impact}
                                                 </span>

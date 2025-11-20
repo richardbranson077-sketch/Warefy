@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Map, Truck, Navigation, Clock } from 'lucide-react';
-import { routes } from '../../lib/api';
+import { routes } from '@/lib/api';
 
 export default function RoutesPage() {
     const [activeRoutes, setActiveRoutes] = useState([]);

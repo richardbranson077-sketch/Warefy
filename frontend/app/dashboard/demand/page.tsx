@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Calendar, RefreshCw, TrendingUp } from 'lucide-react';
-import { demand, inventory } from '../../lib/api';
-import { DemandForecastChart } from '../../components/Charts';
+import { demand, inventory } from '@/lib/api';
+import { DemandForecastChart } from '@/components/Charts';
 
 export default function DemandPage() {
     const [selectedSku, setSelectedSku] = useState('');

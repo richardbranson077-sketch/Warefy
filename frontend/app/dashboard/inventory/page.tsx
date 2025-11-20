@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Search, Filter, Plus, AlertCircle } from 'lucide-react';
-import { inventory, warehouses } from '../../lib/api';
-import { InventoryChart } from '../../components/Charts';
+import { inventory, warehouses } from '@/lib/api';
+import { InventoryChart } from '@/components/Charts';
 
 export default function InventoryPage() {
     const [items, setItems] = useState([]);

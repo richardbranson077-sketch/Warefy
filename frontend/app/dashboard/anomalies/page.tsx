@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, Clock, Filter } from 'lucide-react';
-import { anomalies } from '../../lib/api';
+import { anomalies } from '@/lib/api';
 
 export default function AnomaliesPage() {
     const [anomalyList, setAnomalyList] = useState([]);
