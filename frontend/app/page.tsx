@@ -98,6 +98,7 @@ export default function LandingPage() {
                             <a href="#features" className="text-gray-300 hover:text-white transition">Features</a>
                             <a href="#technology" className="text-gray-300 hover:text-white transition">Technology</a>
                             <a href="#testimonials" className="text-gray-300 hover:text-white transition">Success Stories</a>
+                            <Link href="/login" className="text-gray-300 hover:text-white transition font-medium">Sign In</Link>
                             <Link
                                 href="/dashboard"
                                 className="group relative px-6 py-2.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-lg font-semibold overflow-hidden"

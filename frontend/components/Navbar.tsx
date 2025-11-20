@@ -9,6 +9,19 @@ import { auth } from '../lib/api';
 export default function Navbar() {
     const router = useRouter();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const userData = await auth.getCurrentUser();
+                setUser(userData);
+            } catch (error) {
+                console.error("Failed to fetch user:", error);
+            }
+        };
+        fetchUser();
+    }, []);
 
     const handleLogout = () => {
         auth.logout();
@@ -50,7 +63,9 @@ export default function Navbar() {
                                 <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm">
                                     <User className="h-4 w-4" />
                                 </div>
-                                <span className="text-sm font-medium text-gray-300 hidden md:block">Admin</span>
+                                <span className="text-sm font-medium text-gray-300 hidden md:block">
+                                    {user ? user.username : 'Admin'}
+                                </span>
                             </button>
 
                             {showProfileMenu && (
