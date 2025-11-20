@@ -2,114 +2,108 @@
 
 import Link from 'next/link';
 import {
-    TrendingUp,
-    Package,
-    Truck,
-    Brain,
-    BarChart3,
-    Shield,
+    Sparkles,
+    Cpu,
+    Network,
     Zap,
-    Globe,
+    Shield,
+    TrendingUp,
+    BarChart3,
+    Brain,
+    Layers,
     ArrowRight,
-    CheckCircle,
+    CheckCircle2,
     Star,
-    Users,
-    Clock,
-    Target
+    ChevronRight,
+    Activity,
+    Target,
+    Gauge
 } from 'lucide-react';
 
 export default function LandingPage() {
     const features = [
         {
             icon: Brain,
-            title: 'AI-Powered Forecasting',
-            description: 'Leverage advanced machine learning to predict demand with 95% accuracy. Make data-driven decisions with confidence.',
-            color: 'from-purple-500 to-pink-500'
+            title: 'Neural Demand Forecasting',
+            description: 'Advanced deep learning models predict demand patterns with 98% accuracy using transformer architecture.',
+            gradient: 'from-blue-500 via-purple-500 to-pink-500'
         },
         {
-            icon: Package,
-            title: 'Smart Inventory Management',
-            description: 'Real-time tracking across multiple warehouses with automated reordering and stock optimization.',
-            color: 'from-blue-500 to-cyan-500'
+            icon: Network,
+            title: 'Autonomous Supply Network',
+            description: 'Self-optimizing supply chain that adapts in real-time to market changes and disruptions.',
+            gradient: 'from-cyan-500 via-blue-500 to-purple-500'
         },
         {
-            icon: Truck,
-            title: 'Route Optimization',
-            description: 'Reduce delivery costs by 30% with AI-powered route planning and real-time traffic analysis.',
-            color: 'from-green-500 to-emerald-500'
+            icon: Cpu,
+            title: 'Quantum Route Optimization',
+            description: 'Next-gen algorithms reduce delivery time by 40% and fuel costs by 35% simultaneously.',
+            gradient: 'from-green-500 via-emerald-500 to-cyan-500'
         },
         {
-            icon: BarChart3,
-            title: 'Advanced Analytics',
-            description: 'Comprehensive dashboards with actionable insights, KPIs, and customizable reports.',
-            color: 'from-orange-500 to-red-500'
+            icon: Activity,
+            title: 'Predictive Analytics Engine',
+            description: 'AI-powered insights that forecast trends 6 months ahead with real-time data processing.',
+            gradient: 'from-orange-500 via-red-500 to-pink-500'
         },
         {
             icon: Shield,
-            title: 'Anomaly Detection',
-            description: 'Identify supply chain disruptions before they impact operations with predictive alerts.',
-            color: 'from-indigo-500 to-purple-500'
+            title: 'Intelligent Risk Detection',
+            description: 'Machine learning models identify potential disruptions before they impact operations.',
+            gradient: 'from-purple-500 via-pink-500 to-red-500'
         },
         {
-            icon: Zap,
-            title: 'Real-Time Updates',
-            description: 'Live data synchronization across all operations with instant notifications and alerts.',
-            color: 'from-yellow-500 to-orange-500'
+            icon: Layers,
+            title: 'Multi-Modal Integration',
+            description: 'Seamlessly connects with 500+ platforms through our advanced API infrastructure.',
+            gradient: 'from-yellow-500 via-orange-500 to-red-500'
         }
     ];
 
     const stats = [
-        { value: '95%', label: 'Forecast Accuracy', icon: Target },
-        { value: '30%', label: 'Cost Reduction', icon: TrendingUp },
-        { value: '24/7', label: 'Monitoring', icon: Clock },
-        { value: '500+', label: 'Companies', icon: Users }
-    ];
-
-    const testimonials = [
-        {
-            name: 'Sarah Johnson',
-            role: 'Supply Chain Director',
-            company: 'TechCorp Inc.',
-            content: 'Warefy transformed our operations. We reduced costs by 35% and improved delivery times significantly.',
-            rating: 5
-        },
-        {
-            name: 'Michael Chen',
-            role: 'Operations Manager',
-            company: 'Global Logistics',
-            content: 'The AI forecasting is incredibly accurate. We\'ve eliminated stockouts and reduced excess inventory.',
-            rating: 5
-        },
-        {
-            name: 'Emily Rodriguez',
-            role: 'CEO',
-            company: 'FastShip Solutions',
-            content: 'Best investment we\'ve made. The ROI was visible within the first month of implementation.',
-            rating: 5
-        }
+        { value: '98%', label: 'AI Accuracy', icon: Target, color: 'from-blue-500 to-cyan-500' },
+        { value: '40%', label: 'Faster Delivery', icon: Zap, color: 'from-purple-500 to-pink-500' },
+        { value: '24/7', label: 'Auto-Pilot', icon: Gauge, color: 'from-green-500 to-emerald-500' },
+        { value: '1000+', label: 'Enterprises', icon: TrendingUp, color: 'from-orange-500 to-red-500' }
     ];
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950 to-purple-950 text-white overflow-hidden">
+            {/* Animated Background */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+                <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+            </div>
+
             {/* Navigation */}
-            <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
+            <nav className="fixed top-0 w-full z-50 backdrop-blur-xl bg-gray-900/50 border-b border-white/10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center space-x-2">
-                            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-2 rounded-lg">
-                                <Package className="h-5 w-5 text-white" />
+                    <div className="flex justify-between items-center h-20">
+                        <Link href="/" className="flex items-center space-x-3 group">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl blur-lg opacity-75 group-hover:opacity-100 transition"></div>
+                                <div className="relative bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-2.5 rounded-xl">
+                                    <Sparkles className="h-6 w-6 text-white" />
+                                </div>
                             </div>
-                            <span className="text-xl font-bold text-gray-900">Warefy</span>
-                        </div>
+                            <div>
+                                <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                    Warefy
+                                </span>
+                                <div className="text-xs text-gray-400 font-medium">AI Supply Chain</div>
+                            </div>
+                        </Link>
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#features" className="text-gray-600 hover:text-gray-900 transition">Features</a>
-                            <a href="#benefits" className="text-gray-600 hover:text-gray-900 transition">Benefits</a>
-                            <a href="#testimonials" className="text-gray-600 hover:text-gray-900 transition">Testimonials</a>
+                            <a href="#features" className="text-gray-300 hover:text-white transition">Features</a>
+                            <a href="#technology" className="text-gray-300 hover:text-white transition">Technology</a>
+                            <a href="#testimonials" className="text-gray-300 hover:text-white transition">Success Stories</a>
                             <Link
                                 href="/dashboard"
-                                className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-2 rounded-lg hover:shadow-lg transition"
+                                className="group relative px-6 py-2.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-lg font-semibold overflow-hidden"
                             >
-                                Get Started
+                                <span className="relative z-10">Launch Platform</span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
                             </Link>
                         </div>
                     </div>
@@ -117,173 +111,231 @@ export default function LandingPage() {
             </nav>
 
             {/* Hero Section */}
-            <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 to-white">
+            <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div>
-                            <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                                <Zap className="h-4 w-4" />
-                                <span>AI-Powered Supply Chain Platform</span>
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center space-x-2 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full mb-8">
+                            <div className="flex items-center space-x-1">
+                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                <span className="text-sm text-gray-300">Powered by Advanced AI</span>
                             </div>
-                            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-                                Optimize Your Supply Chain with{' '}
-                                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                                    Artificial Intelligence
-                                </span>
-                            </h1>
-                            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                                Transform your operations with cutting-edge AI technology. Predict demand, optimize routes,
-                                and maximize efficiency—all in one powerful platform.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <Link
-                                    href="/dashboard"
-                                    className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl hover:shadow-xl transition transform hover:-translate-y-0.5"
-                                >
-                                    Start Free Trial
-                                    <ArrowRight className="ml-2 h-5 w-5" />
-                                </Link>
-                                <a
-                                    href="#features"
-                                    className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-xl hover:border-blue-500 hover:text-blue-600 transition"
-                                >
-                                    Learn More
-                                </a>
-                            </div>
+                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent font-semibold">
+                                Next-Gen Platform
+                            </span>
                         </div>
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-3xl blur-3xl opacity-20"></div>
-                            <div className="relative bg-white rounded-2xl shadow-2xl p-8 border border-gray-200">
-                                <div className="grid grid-cols-2 gap-6">
-                                    {stats.map((stat, index) => (
-                                        <div key={index} className="text-center p-6 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100">
-                                            <stat.icon className="h-8 w-8 mx-auto mb-3 text-blue-600" />
-                                            <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-1">
-                                                {stat.value}
-                                            </div>
-                                            <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
+
+                        <h1 className="text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+                            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                Autonomous Supply Chain
+                            </span>
+                            <br />
+                            <span className="text-white">Powered by Neural AI</span>
+                        </h1>
+
+                        <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed">
+                            Transform your operations with cutting-edge artificial intelligence.
+                            Our neural networks predict, optimize, and automate your entire supply chain ecosystem.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                            <Link
+                                href="/dashboard"
+                                className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl font-semibold text-lg overflow-hidden shadow-2xl shadow-purple-500/50"
+                            >
+                                <span className="relative z-10 flex items-center justify-center">
+                                    Start Free Trial
+                                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition" />
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                            </Link>
+                            <a
+                                href="#technology"
+                                className="px-8 py-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl font-semibold text-lg hover:bg-white/10 transition"
+                            >
+                                Explore Technology
+                            </a>
+                        </div>
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                            {stats.map((stat, index) => (
+                                <div
+                                    key={index}
+                                    className="relative group"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition"></div>
+                                    <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition">
+                                        <stat.icon className={`h-8 w-8 mb-3 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent', WebkitBackgroundClip: 'text', backgroundClip: 'text' }} />
+                                        <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
+                                            {stat.value}
                                         </div>
-                                    ))}
+                                        <div className="text-sm text-gray-400">{stat.label}</div>
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Features Section */}
-            <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+            <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                            Powerful Features for Modern Supply Chains
+                        <div className="inline-flex items-center space-x-2 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full mb-6">
+                            <Cpu className="h-4 w-4 text-purple-400" />
+                            <span className="text-sm text-gray-300">Advanced Capabilities</span>
+                        </div>
+                        <h2 className="text-5xl font-bold mb-4">
+                            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                Next-Generation Features
+                            </span>
                         </h2>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Everything you need to optimize, automate, and scale your supply chain operations
+                        <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                            Powered by state-of-the-art AI models and quantum-inspired algorithms
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {features.map((feature, index) => (
                             <div
                                 key={index}
-                                className="group bg-white rounded-2xl p-8 border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300"
+                                className="group relative"
                             >
-                                <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.color} mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
-                                    <feature.icon className="h-7 w-7 text-white" />
+                                <div className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-50 transition duration-500`}></div>
+                                <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition h-full">
+                                    <div className={`inline-flex p-4 rounded-xl bg-gradient-to-r ${feature.gradient} mb-6 shadow-lg`}>
+                                        <feature.icon className="h-7 w-7 text-white" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-3">
+                                        {feature.title}
+                                    </h3>
+                                    <p className="text-gray-400 leading-relaxed">
+                                        {feature.description}
+                                    </p>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                                    {feature.title}
-                                </h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    {feature.description}
-                                </p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Benefits Section */}
-            <section id="benefits" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-cyan-500">
+            {/* Technology Section */}
+            <section id="technology" className="relative py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <div className="text-white">
-                            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-                                Why Leading Companies Choose Warefy
-                            </h2>
-                            <p className="text-xl text-blue-100 mb-8">
-                                Join hundreds of companies optimizing their supply chains with AI-powered intelligence
-                            </p>
-                            <div className="space-y-4">
-                                {[
-                                    'Reduce operational costs by up to 30%',
-                                    'Improve forecast accuracy to 95%+',
-                                    'Real-time visibility across all operations',
-                                    'Seamless integration with existing systems',
-                                    'Enterprise-grade security and compliance',
-                                    '24/7 dedicated customer support'
-                                ].map((benefit, index) => (
-                                    <div key={index} className="flex items-start space-x-3">
-                                        <div className="flex-shrink-0 mt-1">
-                                            <CheckCircle className="h-6 w-6 text-cyan-300" />
-                                        </div>
-                                        <span className="text-lg text-blue-50">{benefit}</span>
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-3xl"></div>
+                        <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 lg:p-16">
+                            <div className="grid lg:grid-cols-2 gap-12 items-center">
+                                <div>
+                                    <div className="inline-flex items-center space-x-2 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full mb-6">
+                                        <Brain className="h-4 w-4 text-blue-400" />
+                                        <span className="text-sm text-gray-300">AI Technology Stack</span>
                                     </div>
-                                ))}
+                                    <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                                        <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                            Built on Advanced AI
+                                        </span>
+                                    </h2>
+                                    <p className="text-lg text-gray-300 mb-8">
+                                        Our platform leverages cutting-edge machine learning, neural networks,
+                                        and quantum-inspired algorithms to deliver unprecedented performance.
+                                    </p>
+                                    <div className="space-y-4">
+                                        {[
+                                            'Deep Learning Transformer Models',
+                                            'Real-Time Neural Processing',
+                                            'Quantum-Inspired Optimization',
+                                            'Autonomous Decision Making',
+                                            'Predictive Analytics Engine',
+                                            'Multi-Agent Reinforcement Learning'
+                                        ].map((tech, index) => (
+                                            <div key={index} className="flex items-center space-x-3">
+                                                <div className="flex-shrink-0">
+                                                    <CheckCircle2 className="h-6 w-6 text-green-400" />
+                                                </div>
+                                                <span className="text-gray-300">{tech}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur-2xl opacity-30"></div>
+                                    <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
+                                        <div className="space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-300">Neural Network Accuracy</span>
+                                                <span className="text-green-400 font-bold">98.7%</span>
+                                            </div>
+                                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{ width: '98.7%' }}></div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-300">Processing Speed</span>
+                                                <span className="text-blue-400 font-bold">10ms</span>
+                                            </div>
+                                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style={{ width: '95%' }}></div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-300">Cost Reduction</span>
+                                                <span className="text-purple-400 font-bold">42%</span>
+                                            </div>
+                                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style={{ width: '85%' }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-10 border border-white/20">
-                            <div className="text-center text-white mb-8">
-                                <Globe className="h-16 w-16 mx-auto mb-6 text-cyan-300" />
-                                <h3 className="text-3xl font-bold mb-4">Trusted Globally</h3>
-                                <p className="text-blue-100 text-lg mb-8">
-                                    Managing supply chains across 50+ countries with proven results
-                                </p>
-                            </div>
-                            <Link
-                                href="/dashboard"
-                                className="w-full inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-xl hover:bg-blue-50 transition shadow-lg"
-                            >
-                                Start Your Free Trial
-                                <ArrowRight className="ml-2 h-5 w-5" />
-                            </Link>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Testimonials Section */}
-            <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+            {/* Testimonials */}
+            <section id="testimonials" className="relative py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                            Loved by Supply Chain Professionals
+                        <h2 className="text-5xl font-bold mb-4">
+                            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                Trusted by Industry Leaders
+                            </span>
                         </h2>
-                        <p className="text-xl text-gray-600">
-                            See what our customers have to say about Warefy
+                        <p className="text-xl text-gray-400">
+                            See how AI is transforming supply chains worldwide
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {testimonials.map((testimonial, index) => (
-                            <div key={index} className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                                <div className="flex mb-4">
-                                    {[...Array(testimonial.rating)].map((_, i) => (
-                                        <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                                    ))}
-                                </div>
-                                <p className="text-gray-700 mb-6 leading-relaxed">
-                                    "{testimonial.content}"
-                                </p>
-                                <div className="flex items-center">
-                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg mr-4">
-                                        {testimonial.name.charAt(0)}
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {[
+                            { name: 'Alex Thompson', role: 'Chief Supply Chain Officer', company: 'TechCorp Global', content: 'Warefy\'s AI reduced our operational costs by 45% in just 3 months. The neural forecasting is incredibly accurate.' },
+                            { name: 'Maria Garcia', role: 'VP of Operations', company: 'LogiTech Solutions', content: 'The autonomous optimization saved us millions. It\'s like having a team of data scientists working 24/7.' },
+                            { name: 'James Chen', role: 'CEO', company: 'FastShip Logistics', content: 'Best AI platform we\'ve implemented. ROI was visible within weeks. The technology is truly next-generation.' }
+                        ].map((testimonial, index) => (
+                            <div key={index} className="relative group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition"></div>
+                                <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition">
+                                    <div className="flex mb-4">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                                        ))}
                                     </div>
-                                    <div>
-                                        <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                                        <div className="text-sm text-gray-600">{testimonial.role}</div>
-                                        <div className="text-sm text-gray-500">{testimonial.company}</div>
+                                    <p className="text-gray-300 mb-6 leading-relaxed">
+                                        "{testimonial.content}"
+                                    </p>
+                                    <div className="flex items-center">
+                                        <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold mr-4">
+                                            {testimonial.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold text-white">{testimonial.name}</div>
+                                            <div className="text-sm text-gray-400">{testimonial.role}</div>
+                                            <div className="text-xs text-gray-500">{testimonial.company}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -293,76 +345,76 @@ export default function LandingPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+            <section className="relative py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto text-center">
-                    <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-12 lg:p-16 shadow-2xl">
-                        <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-                            Ready to Transform Your Supply Chain?
-                        </h2>
-                        <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                            Join the future of supply chain management. Start your free trial today—no credit card required.
-                        </p>
-                        <Link
-                            href="/dashboard"
-                            className="inline-flex items-center justify-center px-10 py-5 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl hover:shadow-2xl transition transform hover:-translate-y-1"
-                        >
-                            Access Dashboard Now
-                            <ArrowRight className="ml-2 h-5 w-5" />
-                        </Link>
-                        <p className="text-gray-400 mt-6 text-sm">
-                            Free 14-day trial • No credit card required • Cancel anytime
-                        </p>
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-3xl opacity-30"></div>
+                        <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 lg:p-16">
+                            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                    Ready to Transform Your Supply Chain?
+                                </span>
+                            </h2>
+                            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                                Join 1000+ enterprises using AI to revolutionize their operations
+                            </p>
+                            <Link
+                                href="/dashboard"
+                                className="inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl font-semibold text-lg shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/75 transition"
+                            >
+                                Launch AI Platform
+                                <ArrowRight className="ml-2 h-5 w-5" />
+                            </Link>
+                            <p className="text-gray-400 mt-6 text-sm">
+                                Free 14-day trial • No credit card required • Full AI access
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="bg-gray-900 text-gray-400 py-12 px-4 sm:px-6 lg:px-8">
+            <footer className="relative border-t border-white/10 py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-4 gap-8 mb-8">
                         <div>
                             <div className="flex items-center space-x-2 mb-4">
-                                <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-2 rounded-lg">
-                                    <Package className="h-5 w-5 text-white" />
+                                <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-2 rounded-lg">
+                                    <Sparkles className="h-5 w-5 text-white" />
                                 </div>
-                                <span className="text-white font-bold text-lg">Warefy</span>
+                                <span className="font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Warefy</span>
                             </div>
-                            <p className="text-sm text-gray-500">
-                                AI-powered supply chain optimization platform for modern businesses.
+                            <p className="text-sm text-gray-400">
+                                Next-generation AI supply chain platform
                             </p>
                         </div>
                         <div>
-                            <h4 className="text-white font-semibold mb-4">Product</h4>
-                            <ul className="space-y-2 text-sm">
+                            <h4 className="font-semibold mb-4 text-white">Platform</h4>
+                            <ul className="space-y-2 text-sm text-gray-400">
                                 <li><a href="#features" className="hover:text-white transition">Features</a></li>
-                                <li><a href="#benefits" className="hover:text-white transition">Benefits</a></li>
+                                <li><a href="#technology" className="hover:text-white transition">Technology</a></li>
                                 <li><a href="/dashboard" className="hover:text-white transition">Dashboard</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-white font-semibold mb-4">Company</h4>
-                            <ul className="space-y-2 text-sm">
-                                <li><a href="#" className="hover:text-white transition">About Us</a></li>
-                                <li><a href="#testimonials" className="hover:text-white transition">Testimonials</a></li>
+                            <h4 className="font-semibold mb-4 text-white">Company</h4>
+                            <ul className="space-y-2 text-sm text-gray-400">
+                                <li><a href="#" className="hover:text-white transition">About</a></li>
+                                <li><a href="#testimonials" className="hover:text-white transition">Success Stories</a></li>
                                 <li><a href="#" className="hover:text-white transition">Contact</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-white font-semibold mb-4">Legal</h4>
-                            <ul className="space-y-2 text-sm">
-                                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
+                            <h4 className="font-semibold mb-4 text-white">Legal</h4>
+                            <ul className="space-y-2 text-sm text-gray-400">
+                                <li><a href="#" className="hover:text-white transition">Privacy</a></li>
+                                <li><a href="#" className="hover:text-white transition">Terms</a></li>
                                 <li><a href="#" className="hover:text-white transition">Security</a></li>
                             </ul>
                         </div>
                     </div>
-                    <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-                        <p className="text-sm">© 2025 Warefy. All rights reserved. Powered by AI.</p>
-                        <div className="flex space-x-6 mt-4 md:mt-0">
-                            <a href="#" className="hover:text-white transition">Twitter</a>
-                            <a href="#" className="hover:text-white transition">LinkedIn</a>
-                            <a href="#" className="hover:text-white transition">GitHub</a>
-                        </div>
+                    <div className="border-t border-white/10 pt-8 text-center text-sm text-gray-400">
+                        © 2025 Warefy. All rights reserved. Powered by Advanced AI.
                     </div>
                 </div>
             </footer>
