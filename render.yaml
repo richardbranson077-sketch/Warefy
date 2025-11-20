@@ -1,0 +1,35 @@
+services:
+  # FastAPI Backend
+  - type: web
+    name: warefy-backend
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: warefy-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 1440
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+databases:
+  # PostgreSQL Database with PostGIS
+  - name: warefy-db
+    databaseName: warefy_db
+    user: warefy_user
+    plan: free
+    region: oregon
+    postgresMajorVersion: 15
