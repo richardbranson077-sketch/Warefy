@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle, Clock, Filter } from 'lucide-react';
 import { anomalies } from '@/lib/api';
 
 export default function AnomaliesPage() {
-    const [anomalyList, setAnomalyList] = useState([]);
+    const [anomalyList, setAnomalyList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
 
