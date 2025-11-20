@@ -5,6 +5,7 @@ Authentication router for user login, registration, and token management.
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -53,7 +54,10 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Login and get access token"""
-    user = db.query(User).filter(User.username == form_data.username).first()
+    # Allow login with either username or email
+    user = db.query(User).filter(
+        or_(User.username == form_data.username, User.email == form_data.username)
+    ).first()
     
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
