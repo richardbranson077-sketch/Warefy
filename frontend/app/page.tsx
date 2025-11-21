@@ -20,7 +20,8 @@ import {
     Network,
     Activity,
     Settings,
-    Zap as Workflow
+    Zap as Workflow,
+    Settings as Server
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -303,26 +304,62 @@ export default function LandingPage() {
             <section id="integration" className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-900 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
                 <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-[128px] opacity-20"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500 rounded-full blur-[128px] opacity-20"></div>
 
                 <div className="max-w-7xl mx-auto relative z-10">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-20">
                         <div className="inline-flex items-center space-x-2 bg-blue-900/50 border border-blue-500/30 px-3 py-1 rounded-full mb-6">
                             <Network className="h-4 w-4 text-blue-400" />
                             <span className="text-sm text-blue-300 font-bold uppercase tracking-wide">Enterprise Integration</span>
                         </div>
-                        <h2 className="text-3xl md:text-5xl font-bold mb-6">Connects with Your Existing Systems</h2>
-                        <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-                            Pre-built connectors for ERP, WMS, TMS, and e-commerce platforms. Deploy in weeks, not months.
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6">Seamlessly Connect Your Entire Tech Stack</h2>
+                        <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-8">
+                            Pre-built connectors, REST APIs, and webhooks that integrate with 100+ enterprise systems. Deploy in weeks, not months.
                         </p>
+                        <div className="flex flex-wrap justify-center gap-4 text-sm">
+                            <span className="px-4 py-2 bg-blue-900/50 border border-blue-500/30 rounded-full text-blue-200">
+                                <CheckCircle className="inline h-4 w-4 mr-2 text-green-400" />
+                                No-Code Connectors
+                            </span>
+                            <span className="px-4 py-2 bg-blue-900/50 border border-blue-500/30 rounded-full text-blue-200">
+                                <CheckCircle className="inline h-4 w-4 mr-2 text-green-400" />
+                                Real-Time Data Sync
+                            </span>
+                            <span className="px-4 py-2 bg-blue-900/50 border border-blue-500/30 rounded-full text-blue-200">
+                                <CheckCircle className="inline h-4 w-4 mr-2 text-green-400" />
+                                Enterprise Security
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    {/* Integration Categories */}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
                         {[
-                            { title: 'ERP Systems', items: ['SAP', 'Oracle', 'Microsoft Dynamics', 'NetSuite'] },
-                            { title: 'E-Commerce', items: ['Shopify', 'Magento', 'WooCommerce', 'BigCommerce'] },
-                            { title: 'Logistics', items: ['FedEx', 'UPS', 'DHL', 'Custom Carriers'] }
+                            {
+                                title: 'ERP Systems',
+                                icon: Server,
+                                items: ['SAP S/4HANA', 'Oracle ERP Cloud', 'Microsoft Dynamics 365', 'NetSuite', 'Odoo', 'Infor CloudSuite']
+                            },
+                            {
+                                title: 'E-Commerce Platforms',
+                                icon: Globe,
+                                items: ['Shopify Plus', 'Magento Commerce', 'WooCommerce', 'BigCommerce', 'Salesforce Commerce', 'Amazon Marketplace']
+                            },
+                            {
+                                title: 'Warehouse Management',
+                                icon: Layers,
+                                items: ['Manhattan WMS', 'Blue Yonder', 'HighJump', 'Fishbowl', 'Cin7', 'Custom WMS']
+                            },
+                            {
+                                title: 'Logistics & Carriers',
+                                icon: Truck,
+                                items: ['FedEx Ship Manager', 'UPS WorldShip', 'DHL Express', 'USPS', 'Custom Carriers', '3PL Providers']
+                            }
                         ].map((category, i) => (
-                            <div key={i} className="bg-white/5 backdrop-blur-sm border border-white/10 p-6 rounded-xl">
+                            <div key={i} className="bg-white/5 backdrop-blur-sm border border-white/10 p-6 rounded-xl hover:bg-white/10 transition group">
+                                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                                    <category.icon className="h-6 w-6 text-blue-400" />
+                                </div>
                                 <h3 className="text-lg font-bold mb-4 text-blue-300">{category.title}</h3>
                                 <ul className="space-y-2">
                                     {category.items.map((item, j) => (
@@ -336,11 +373,94 @@ export default function LandingPage() {
                         ))}
                     </div>
 
-                    <div className="mt-12 text-center">
-                        <p className="text-blue-200 mb-6">Plus REST APIs, webhooks, and custom integrations</p>
-                        <button className="px-8 py-3 bg-white text-slate-900 rounded-lg font-bold hover:bg-blue-50 transition">
-                            View Integration Docs
-                        </button>
+                    {/* API & Developer Tools */}
+                    <div className="grid md:grid-cols-2 gap-8 mb-16">
+                        <div className="bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border border-blue-500/30 rounded-2xl p-8">
+                            <h3 className="text-2xl font-bold mb-4 flex items-center">
+                                <Activity className="h-6 w-6 text-blue-400 mr-3" />
+                                REST API & Webhooks
+                            </h3>
+                            <p className="text-blue-100 mb-6">
+                                Build custom integrations with our comprehensive RESTful API and real-time webhook system.
+                            </p>
+                            <ul className="space-y-3 mb-6">
+                                {[
+                                    'Complete API documentation',
+                                    'Real-time webhook notifications',
+                                    'OAuth 2.0 authentication',
+                                    'Rate limiting & monitoring',
+                                    'Sandbox environment',
+                                    'SDKs for Python, Node.js, Java'
+                                ].map((feature, i) => (
+                                    <li key={i} className="flex items-center text-blue-200">
+                                        <Zap className="h-4 w-4 text-yellow-400 mr-3 flex-shrink-0" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition">
+                                View API Docs
+                            </button>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-indigo-500/30 rounded-2xl p-8">
+                            <h3 className="text-2xl font-bold mb-4 flex items-center">
+                                <Clock className="h-6 w-6 text-indigo-400 mr-3" />
+                                Rapid Deployment
+                            </h3>
+                            <p className="text-blue-100 mb-6">
+                                Get up and running quickly with our proven implementation methodology.
+                            </p>
+                            <div className="space-y-4">
+                                {[
+                                    { phase: 'Week 1-2', task: 'Discovery & Planning', status: 'Setup' },
+                                    { phase: 'Week 3-4', task: 'Integration Configuration', status: 'Connect' },
+                                    { phase: 'Week 5-6', task: 'Data Migration & Testing', status: 'Validate' },
+                                    { phase: 'Week 7-8', task: 'Training & Go-Live', status: 'Launch' }
+                                ].map((step, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                                        <div>
+                                            <div className="text-sm font-bold text-white">{step.phase}</div>
+                                            <div className="text-xs text-blue-200">{step.task}</div>
+                                        </div>
+                                        <span className="px-3 py-1 bg-indigo-500/30 text-indigo-200 rounded-full text-xs font-bold">
+                                            {step.status}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Integration Stats */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                        {[
+                            { value: '100+', label: 'Pre-Built Connectors' },
+                            { value: '99.9%', label: 'API Uptime SLA' },
+                            { value: '<100ms', label: 'Average Response Time' },
+                            { value: '24/7', label: 'Integration Support' }
+                        ].map((stat, i) => (
+                            <div key={i} className="text-center p-6 bg-white/5 rounded-xl border border-white/10">
+                                <div className="text-3xl font-extrabold text-blue-400 mb-2">{stat.value}</div>
+                                <div className="text-sm text-blue-200">{stat.label}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="text-center bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-12">
+                        <h3 className="text-3xl font-bold mb-4">Ready to Integrate?</h3>
+                        <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                            Our integration specialists will help you connect Warefy to your existing systems in weeks.
+                        </p>
+                        <div className="flex flex-col sm:flex-row justify-center gap-4">
+                            <button className="px-8 py-4 bg-white text-blue-700 rounded-xl font-bold hover:bg-blue-50 transition shadow-xl">
+                                Schedule Integration Call
+                            </button>
+                            <button className="px-8 py-4 bg-blue-800/50 border-2 border-blue-400/30 hover:bg-blue-800 text-white rounded-xl font-bold transition">
+                                Download Integration Guide
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
