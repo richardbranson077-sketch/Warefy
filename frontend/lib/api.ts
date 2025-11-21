@@ -28,23 +28,50 @@ if (typeof window !== 'undefined') {
 
 // Authentication
 export const auth = {
-    login: async (username, password) => {
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
+    login: async (username: string, password: string) => {
+        // Demo mode fallback
+        if (username === 'demo@warefy.com' || username === 'demo' || username === 'admin') {
+            if (password === 'demo123' || password === 'admin123') {
+                // Create a demo token
+                const demoToken = btoa(JSON.stringify({
+                    username: username,
+                    role: 'admin',
+                    exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+                }));
 
-        const response = await api.post('/api/auth/login', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-        });
+                localStorage.setItem('token', demoToken);
+                localStorage.setItem('username', username);
 
-        if (response.data.access_token) {
-            localStorage.setItem('token', response.data.access_token);
+                return {
+                    access_token: demoToken,
+                    token_type: 'bearer'
+                };
+            }
         }
 
-        return response.data;
+        // Try real backend login
+        try {
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+
+            const response = await api.post('/api/auth/login', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            if (response.data.access_token) {
+                localStorage.setItem('token', response.data.access_token);
+                localStorage.setItem('username', username);
+            }
+
+            return response.data;
+        } catch (error) {
+            // If backend login fails, throw error
+            throw new Error('Invalid credentials. Use demo/admin123 for demo access.');
+        }
     },
 
-    register: async (userData) => {
+    register: async (userData: any) => {
         const response = await api.post('/api/auth/register', userData);
         return response.data;
     },
