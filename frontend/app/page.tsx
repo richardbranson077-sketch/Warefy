@@ -73,11 +73,14 @@ export default function LandingPage() {
             <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
-                        <Link href="/" className="flex items-center space-x-3">
-                            <div className="relative w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/20">
-                                <span className="text-white font-bold text-xl">W</span>
+                        <Link href="/" className="flex items-center space-x-3 group">
+                            <div className="relative w-10 h-10">
+                                <Image src="/logo.png" alt="Warefy" width={40} height={40} className="rounded-lg relative z-10 shadow-sm" />
                             </div>
-                            <span className="text-2xl font-bold text-slate-900 tracking-tight">Warefy</span>
+                            <div>
+                                <span className="text-2xl font-bold text-slate-900 tracking-tight">Warefy</span>
+                                <div className="text-[10px] uppercase tracking-widest text-blue-600 font-semibold">Intelligent Logistics</div>
+                            </div>
                         </Link>
                         <div className="hidden md:flex items-center space-x-8">
                             <a href="#features" className="text-slate-600 hover:text-blue-600 transition font-medium">Features</a>
@@ -338,8 +341,8 @@ export default function LandingPage() {
             <footer className="bg-slate-50 text-slate-600 py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-200">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
                     <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold">W</span>
+                        <div className="relative w-8 h-8">
+                            <Image src="/logo.png" alt="Warefy" width={32} height={32} className="rounded-lg" />
                         </div>
                         <span className="text-slate-900 font-bold text-xl">Warefy</span>
                     </div>
