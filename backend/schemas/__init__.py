@@ -16,13 +16,13 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-class UserResponse(UserBase):
-    id: int
-    is_active: bool
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True
+class UserUpdate(BaseModel):
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_2fa_enabled: Optional[bool] = None
+    full_name: Optional[str] = None
+    password: Optional[str] = None
+
 
 class Token(BaseModel):
     access_token: str
@@ -197,6 +197,87 @@ class AIRecommendationRequest(BaseModel):
     warehouse_id: Optional[int] = None
     sku: Optional[str] = None
     additional_context: Optional[Dict[str, Any]] = None
+
+# ============= Order Schemas =============
+class OrderItemBase(BaseModel):
+    sku: str
+    quantity: int
+    unit_price: float
+
+class OrderItemCreate(OrderItemBase):
+    pass
+
+class OrderItemResponse(OrderItemBase):
+    id: int
+    order_id: int
+    
+    class Config:
+        from_attributes = True
+
+class OrderBase(BaseModel):
+    customer_name: str
+    customer_email: Optional[str] = None
+    shipping_address: Optional[str] = None
+    status: str = "pending"
+
+class OrderCreate(OrderBase):
+    items: List[OrderItemCreate]
+
+class OrderUpdate(BaseModel):
+    status: Optional[str] = None
+    shipping_address: Optional[str] = None
+
+class OrderResponse(OrderBase):
+    id: int
+    total_amount: float
+    created_at: datetime
+    updated_at: datetime
+    items: List[OrderItemResponse]
+    
+    class Config:
+        from_attributes = True
+
+# ============= Integration Schemas =============
+class IntegrationBase(BaseModel):
+    name: str
+    api_key: str
+    api_secret: Optional[str] = None
+    webhook_url: Optional[str] = None
+    status: str = "active"
+    settings: Optional[str] = None
+
+class IntegrationCreate(IntegrationBase):
+    pass
+
+class IntegrationResponse(IntegrationBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# ============= Warehouse Schemas =============
+class WarehouseBase(BaseModel):
+    name: str
+    address: str
+    latitude: float
+    longitude: float
+    capacity: int
+
+class WarehouseCreate(WarehouseBase):
+    pass
+
+class WarehouseUpdateLayout(BaseModel):
+    layout_config: str
+
+class WarehouseResponse(WarehouseBase):
+    id: int
+    layout_config: Optional[str] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
 
 class AIRecommendationResponse(BaseModel):
     recommendations: List[Dict[str, Any]]

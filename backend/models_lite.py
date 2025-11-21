@@ -28,6 +28,7 @@ class Warehouse(Base):
     latitude = Column(Float)
     longitude = Column(Float)
     capacity = Column(Integer)
+    layout_config = Column(Text, nullable=True)  # JSON string for grid layout
     manager_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
     
@@ -103,7 +104,7 @@ class Route(Base):
 
 class Anomaly(Base):
     __tablename__ = "anomalies"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     anomaly_type = Column(String)
     severity = Column(String)
@@ -111,6 +112,60 @@ class Anomaly(Base):
     detected_at = Column(DateTime, default=datetime.utcnow)
     resolved_at = Column(DateTime, nullable=True)
     status = Column(String, default="active")
+
+# ------------------------------------------------------------------
+# AuditLog – records admin actions (role changes, 2FA toggles, etc.)
+# ------------------------------------------------------------------
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # actor
+    target_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # who was affected
+    action = Column(String, nullable=False)  # e.g., "role_change", "2fa_enabled"
+    details = Column(Text, nullable=True)   # optional JSON string
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    actor = relationship("User", foreign_keys=[user_id])
+    target = relationship("User", foreign_keys=[target_user_id])
+
+class Integration(Base):
+    __tablename__ = "integrations"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)  # shopify, woocommerce, slack, etc.
+    api_key = Column(String)
+    api_secret = Column(String, nullable=True)
+    webhook_url = Column(String, nullable=True)
+    status = Column(String, default="inactive")  # active, inactive, error
+    settings = Column(Text, nullable=True)  # JSON string for extra config
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Order(Base):
+    __tablename__ = "orders"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    customer_name = Column(String, index=True)
+    customer_email = Column(String)
+    status = Column(String, default="pending")  # pending, processing, shipped, delivered, cancelled
+    total_amount = Column(Float)
+    shipping_address = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    items = relationship("OrderItem", back_populates="order")
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"))
+    sku = Column(String, index=True)
+    quantity = Column(Integer)
+    unit_price = Column(Float)
+    
+    order = relationship("Order", back_populates="items")
 
 class MaintenanceLog(Base):
     __tablename__ = "maintenance_logs"

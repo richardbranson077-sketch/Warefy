@@ -88,28 +88,35 @@ export const auth = {
 
 // Inventory
 export const inventory = {
-    getAll: async (params) => {
+    getAll: async (params: any) => {
         const response = await api.get('/api/inventory', { params });
         return response.data;
     },
 
-    getById: async (id) => {
+    getById: async (id: number) => {
         const response = await api.get(`/api/inventory/${id}`);
         return response.data;
     },
 
-    create: async (data) => {
+    create: async (data: any) => {
         const response = await api.post('/api/inventory', data);
         return response.data;
     },
 
-    update: async (id, data) => {
+    update: async (id: number, data: any) => {
         const response = await api.put(`/api/inventory/${id}`, data);
         return response.data;
     },
 
     getWarehouseSummary: async (warehouseId) => {
         const response = await api.get(`/api/inventory/warehouse/${warehouseId}/summary`);
+        return response.data;
+    },
+
+    getByWarehouse: async (warehouseId: number) => {
+        const response = await api.get('/api/inventory', {
+            params: { warehouse_id: warehouseId },
+        });
         return response.data;
     },
 };
@@ -121,39 +128,44 @@ export const warehouses = {
         return response.data;
     },
 
-    getById: async (id) => {
+    getById: async (id: number) => {
         const response = await api.get(`/api/warehouses/${id}`);
         return response.data;
     },
 
-    create: async (data) => {
-        const response = await api.post('/api/warehouses', data);
-        return response.data;
+    create: async (data: any) => {
+        const resp = await api.post('/api/warehouses', data);
+        return resp.data;
+    },
+
+    updateLayout: async (id: number, layout: any) => {
+        const resp = await api.patch(`/api/warehouses/${id}/layout`, { layout_config: JSON.stringify(layout) });
+        return resp.data;
     },
 };
 
 // Demand Forecasting
 export const demand = {
-    forecast: async (data) => {
-        const response = await api.post('/api/demand/forecast', data);
+    getForecast: async (sku: string, params: any) => {
+        const response = await api.post('/api/demand/forecast', { sku, ...params });
         return response.data;
     },
 
-    getHistorical: async (sku, params) => {
-        const response = await api.get(`/api/demand/historical/${sku}`, { params });
+    getHistorical: async (sku: string) => {
+        const response = await api.get(`/api/demand/historical/${sku}`);
         return response.data;
     },
 };
 
 // Routes
 export const routes = {
-    optimize: async (data) => {
+    optimize: async (data: any) => {
         const response = await api.post('/api/routes/optimize', data);
         return response.data;
     },
 
-    getAll: async (params) => {
-        const response = await api.get('/api/routes', { params });
+    getOptimized: async (params: any) => {
+        const response = await api.get('/api/routes/optimized', { params });
         return response.data;
     },
 
@@ -166,13 +178,6 @@ export const routes = {
         const response = await api.get(`/api/routes/${id}`);
         return response.data;
     },
-
-    getByDriver: async (driverId, status) => {
-        const response = await api.get(`/api/routes/driver/${driverId}`, {
-            params: { status },
-        });
-        return response.data;
-    },
 };
 
 // AI Recommendations
@@ -183,47 +188,159 @@ export const aiRecommendations = {
     },
 };
 
+// AI Command Center
+export const ai = {
+    command: async (prompt: string) => {
+        const response = await api.post('/api/ai/command', { prompt });
+        return response.data;
+    },
+};
+
 // Anomalies
 export const anomalies = {
-    detectDemand: async (params) => {
-        const response = await api.get('/api/anomalies/detect/demand', { params });
+    detect: async (data: any) => {
+        const response = await api.post('/api/anomalies/detect', data);
         return response.data;
     },
 
-    detectInventory: async (params) => {
-        const response = await api.get('/api/anomalies/detect/inventory', { params });
+    detectInventory: async (id: number) => {
+        const response = await api.get(`/api/anomalies/detect/inventory/${id}`);
         return response.data;
     },
 
-    getRecent: async (limit = 50) => {
+    getRecent: async (driverId: number, status: string) => {
         const response = await api.get('/api/anomalies/recent', {
-            params: { limit },
+            params: { driver_id: driverId, status },
         });
         return response.data;
     },
 
-    resolve: async (id) => {
-        const response = await api.put(`/api/anomalies/${id}/resolve`);
+    resolve: async (data: any) => {
+        const response = await api.put('/api/anomalies/resolve', data);
         return response.data;
     },
 };
 
 // Vehicles
 export const vehicles = {
-    getAll: async (params) => {
+    getAll: async (params: any) => {
         const response = await api.get('/api/vehicles', { params });
         return response.data;
     },
 
-    getById: async (id) => {
+    getById: async (id: number) => {
         const response = await api.get(`/api/vehicles/${id}`);
         return response.data;
     },
 
-    create: async (data) => {
+    create: async (data: any) => {
         const response = await api.post('/api/vehicles', data);
         return response.data;
     },
+};
+
+// ------------------------------------------------------------------
+// Users – admin only
+// ------------------------------------------------------------------
+export const getAllUsers = async () => {
+    const resp = await api.get('/api/users/');
+    return resp.data;
+};
+
+export const updateUser = async (userId: number, payload: any) => {
+    const resp = await api.patch(`/api/users/${userId}`, payload);
+    return resp.data;
+};
+
+export const getUserUsage = async (userId: number) => {
+    const resp = await api.get(`/api/users/${userId}/usage`);
+    return resp.data;
+};
+
+export const getAuditLogs = async (limit: number = 50) => {
+    const resp = await api.get(`/api/users/audit/logs`, { params: { limit } });
+    return resp.data;
+};
+
+// ------------------------------------------------------------------
+// Notifications helpers
+// ------------------------------------------------------------------
+export const sendPush = async (payload: {
+    title: string;
+    body: string;
+    device_token?: string;
+    topic?: string;
+}) => {
+    const resp = await api.post('/api/notifications/push', payload);
+    return resp.data;
+};
+
+export const sendEmail = async (payload: {
+    to: string;
+    subject: string;
+    body: string;
+    html?: string;
+}) => {
+    const resp = await api.post('/api/notifications/email', payload);
+    return resp.data;
+};
+
+export const sendSMS = async (payload: {
+    to: string;
+    message: string;
+}) => {
+    const resp = await api.post('/api/notifications/sms', payload);
+    return resp.data;
+};
+
+// ------------------------------------------------------------------
+// Orders
+// ------------------------------------------------------------------
+export const orders = {
+    getAll: async (params?: any) => {
+        const resp = await api.get('/api/orders', { params });
+        return resp.data;
+    },
+    getById: async (id: number) => {
+        const resp = await api.get(`/api/orders/${id}`);
+        return resp.data;
+    },
+    create: async (data: any) => {
+        const resp = await api.post('/api/orders', data);
+        return resp.data;
+    },
+    update: async (id: number, data: any) => {
+        const resp = await api.patch(`/api/orders/${id}`, data);
+        return resp.data;
+    }
+};
+
+// ------------------------------------------------------------------
+// Reports
+// ------------------------------------------------------------------
+export const reports = {
+    getDashboardStats: async () => {
+        const resp = await api.get('/api/reports/dashboard');
+        return resp.data;
+    }
+};
+
+// ------------------------------------------------------------------
+// Integrations
+// ------------------------------------------------------------------
+export const integrations = {
+    getAll: async () => {
+        const resp = await api.get('/api/integrations/');
+        return resp.data;
+    },
+    create: async (data: any) => {
+        const resp = await api.post('/api/integrations/', data);
+        return resp.data;
+    },
+    delete: async (id: number) => {
+        const resp = await api.delete(`/api/integrations/${id}`);
+        return resp.data;
+    }
 };
 
 export default api;

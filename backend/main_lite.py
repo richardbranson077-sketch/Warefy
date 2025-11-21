@@ -37,7 +37,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+from backend.routers import ai_command, users, notifications, orders, reports, integrations, warehouses_lite as warehouses
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -45,6 +45,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(notifications.router)
+app.include_router(orders.router)
+app.include_router(reports.router)
+app.include_router(integrations.router)
+app.include_router(warehouses.router)
+app.include_router(users.router)
 
 @app.post("/api/auth/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

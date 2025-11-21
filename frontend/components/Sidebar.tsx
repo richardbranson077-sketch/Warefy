@@ -8,17 +8,36 @@ import {
     BrainCircuit,
     AlertTriangle,
     Truck,
-    Settings
+    Settings,
+    Brain,
+    Camera,
+    FileText,
+    User,
+    Laptop,
+    BookOpen,
+    Link as LucideLink,
+    ShoppingCart,
+    DollarSign
 } from 'lucide-react';
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
     { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
     { name: 'Demand Forecast', href: '/dashboard/demand', icon: TrendingUp },
     { name: 'Route Optimization', href: '/dashboard/routes', icon: Map },
     { name: 'AI Recommendations', href: '/dashboard/recommendations', icon: BrainCircuit },
     { name: 'Anomalies', href: '/dashboard/anomalies', icon: AlertTriangle },
     { name: 'Fleet Management', href: '/dashboard/vehicles', icon: Truck },
+    { name: 'Financials', href: '/dashboard/financials', icon: DollarSign },
+    // Advanced features
+    { name: 'AI Command Center', href: '/dashboard/ai-command', icon: Brain },
+    { name: 'Computer Vision', href: '/dashboard/computer-vision', icon: Camera },
+    { name: 'AI Reports', href: '/dashboard/ai-reports', icon: FileText },
+    { name: 'Collaboration', href: '/dashboard/collaboration', icon: User },
+    { name: 'Edge AI', href: '/dashboard/edge-ai', icon: Laptop },
+    { name: 'Knowledge Base', href: '/dashboard/knowledge-base', icon: BookOpen },
+    { name: 'Blockchain', href: '/dashboard/blockchain', icon: LucideLink },
 ];
 
 export default function Sidebar() {
