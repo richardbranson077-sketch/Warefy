@@ -16,11 +16,11 @@ import {
     Layers,
     Globe,
     Clock,
-    Server,
+    Package as Database,
     Network,
     Activity,
     Settings,
-    GitBranch
+    Zap as Workflow
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -31,12 +31,12 @@ export default function LandingPage() {
             description: 'Machine learning models that predict demand, optimize inventory, and automate decision-making across your entire supply chain network.'
         },
         {
-            icon: Server,
+            icon: Database,
             title: 'Unified Data Platform',
             description: 'Centralize data from warehouses, suppliers, carriers, and sales channels into a single source of truth for your operations.'
         },
         {
-            icon: GitBranch,
+            icon: Workflow,
             title: 'Process Automation',
             description: 'Automate procurement, replenishment, routing, and fulfillment workflows to eliminate manual tasks and reduce errors.'
         },
@@ -104,7 +104,7 @@ export default function LandingPage() {
                         </Link>
                         <div className="hidden md:flex items-center space-x-8">
                             <a href="#platform" className="text-slate-600 hover:text-blue-600 transition font-medium">Platform</a>
-                            <Link href="/services" className="text-slate-600 hover:text-blue-600 transition font-medium">Solutions</Link>
+                            <Link href="/services" className="text-slate-600 hover:text-blue-600 transition font-medium">Services</Link>
                             <a href="#integration" className="text-slate-600 hover:text-blue-600 transition font-medium">Integration</a>
                             <Link href="/login" className="text-slate-600 hover:text-slate-900 transition font-medium">Sign In</Link>
                             <Link
@@ -201,7 +201,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-20">
                         <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-6">
-                            <Server className="h-4 w-4 text-blue-600" />
+                            <Database className="h-4 w-4 text-blue-600" />
                             <span className="text-sm text-blue-700 font-bold uppercase tracking-wide">Platform Capabilities</span>
                         </div>
                         <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
@@ -239,7 +239,7 @@ export default function LandingPage() {
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <div>
                             <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-6">
-                                <GitBranch className="h-4 w-4 text-blue-600" />
+                                <Workflow className="h-4 w-4 text-blue-600" />
                                 <span className="text-sm text-blue-700 font-bold uppercase tracking-wide">Supply Chain Solutions</span>
                             </div>
                             <h2 className="text-3xl font-bold text-slate-900 mb-6">Built for Every Supply Chain Function</h2>
@@ -385,7 +385,7 @@ export default function LandingPage() {
                     </div>
                     <div className="flex space-x-8 text-sm font-medium">
                         <a href="#platform" className="hover:text-blue-600 transition">Platform</a>
-                        <Link href="/services" className="hover:text-blue-600 transition">Solutions</Link>
+                        <Link href="/services" className="hover:text-blue-600 transition">Services</Link>
                         <a href="#" className="hover:text-blue-600 transition">Privacy</a>
                         <a href="#" className="hover:text-blue-600 transition">Contact</a>
                     </div>
