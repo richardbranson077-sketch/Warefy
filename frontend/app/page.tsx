@@ -110,15 +110,12 @@ export default function LandingPage() {
                         <span className="text-sm text-blue-700 font-bold tracking-wide">The AI Operating System for Supply Chains</span>
                     </div>
 
-                    <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 mb-6 leading-tight tracking-tight max-w-5xl mx-auto">
-                        Predict demand. Track vehicles. <br className="hidden lg:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                            Optimize logistics automatically.
-                        </span>
+                    <h1 className="text-4xl lg:text-6xl font-extrabold text-slate-900 mb-6 leading-tight tracking-tight max-w-6xl mx-auto">
+                        Warefy helps businesses reduce costs, improve delivery times, and make smarter supply chain decisions with <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">AI-powered insights and real-time visibility.</span>
                     </h1>
 
-                    <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
-                        All in one intelligent platform. Warefy gives you real-time visibility, predictive intelligence, and automated optimization across your entire operation.
+                    <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-4xl mx-auto">
+                        From warehouses to fleets around the world, Warefy connects every part of your supply chain with AI intelligence, predictive analytics, and live operational tracking.
                     </p>
 
                     <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
