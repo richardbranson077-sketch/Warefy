@@ -79,7 +79,7 @@ export default function LandingPage() {
                             </div>
                             <div>
                                 <span className="text-2xl font-bold text-slate-900 tracking-tight">Warefy</span>
-                                <div className="text-[10px] uppercase tracking-widest text-blue-600 font-semibold">Intelligent Logistics</div>
+                                <div className="text-[10px] uppercase tracking-widest text-blue-600 font-semibold">AI That Powers Your Supply Chain</div>
                             </div>
                         </Link>
                         <div className="hidden md:flex items-center space-x-8">

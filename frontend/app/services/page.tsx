@@ -14,13 +14,9 @@ import {
     Map,
     BarChart3,
     Layers,
-    Smartphone,
     Globe,
     Clock,
     AlertTriangle,
-    Database,
-    Server,
-    Lock,
     Search
 } from 'lucide-react';
 
@@ -37,7 +33,7 @@ export default function ServicesPage() {
                             </div>
                             <div>
                                 <span className="text-2xl font-bold text-slate-900 tracking-tight">Warefy</span>
-                                <div className="text-[10px] uppercase tracking-widest text-blue-600 font-semibold">Intelligent Logistics</div>
+                                <div className="text-[10px] uppercase tracking-widest text-blue-600 font-semibold">AI That Powers Your Supply Chain</div>
                             </div>
                         </Link>
                         <div className="hidden md:flex items-center space-x-8">
@@ -312,7 +308,7 @@ export default function ServicesPage() {
                         </div>
                         <div>
                             <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                                <Lock className="h-6 w-6 text-blue-600 mr-3" />
+                                <Shield className="h-6 w-6 text-blue-600 mr-3" />
                                 Enterprise-Level Security
                             </h3>
                             <ul className="space-y-3">
