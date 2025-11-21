@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-    Sparkles,
     TrendingUp,
     BarChart3,
     Package,
@@ -11,80 +10,81 @@ import {
     ArrowRight,
     CheckCircle,
     Star,
-    User,
+    User as Users,
     Shield,
     Zap,
-    Globe,
-    Cpu
+    Brain,
+    Clock as History,
+    AlertTriangle,
+    Globe as Smartphone
 } from 'lucide-react';
 
 export default function LandingPage() {
     const features = [
         {
-            icon: Package,
-            title: 'Immutable Ledger',
-            description: 'Every transaction and movement is recorded on a secure, decentralized ledger, ensuring absolute transparency and trust across your supply chain.'
-        },
-        {
-            icon: Cpu,
-            title: 'Smart Contracts',
-            description: 'Automate payments and compliance with self-executing smart contracts that trigger instantly when delivery conditions are met.'
+            icon: Brain,
+            title: 'AI Command Center',
+            description: 'Interact with your supply chain using natural language. Ask questions, generate reports, and get instant optimization suggestions powered by advanced LLMs.'
         },
         {
             icon: Package,
-            title: 'Asset Tokenization',
-            description: 'Digital twins of your physical inventory allow for fractional ownership, easier financing, and real-time provenance tracking.'
+            title: 'Real-Time Inventory',
+            description: 'Live tracking of stock levels across multiple warehouses. Automated low-stock alerts and predictive reordering prevent stockouts.'
         },
         {
-            icon: Globe,
-            title: 'Global Traceability',
-            description: 'End-to-end visibility from raw material sourcing to final delivery, verified by blockchain for authentic sustainability claims.'
+            icon: Truck,
+            title: 'Fleet & Route Optimization',
+            description: 'Manage your vehicle fleet with precision. AI-driven route planning reduces fuel consumption and improves delivery times.'
         },
         {
-            icon: Shield,
-            title: 'Fraud Prevention',
-            description: 'Cryptographic verification eliminates counterfeit goods and unauthorized modifications to shipping documents.'
+            icon: AlertTriangle,
+            title: 'Anomaly Detection',
+            description: 'Automatically detect irregularities in sales, inventory, or shipments. Proactive alerts help you mitigate risks before they escalate.'
         },
         {
-            icon: Zap,
-            title: 'AI-Driven Optimization',
-            description: 'Machine learning algorithms analyze blockchain data to predict disruptions and optimize routes in real-time.'
+            icon: History,
+            title: 'Sales History & Forecasting',
+            description: 'Deep dive into historical data to predict future trends. Our forecasting engine helps you plan for seasonal spikes and market shifts.'
+        },
+        {
+            icon: Smartphone,
+            title: 'Mobile Driver API',
+            description: 'Seamlessly connect your drivers with the platform. Real-time status updates, proof of delivery, and route navigation.'
         }
     ];
 
     const stats = [
-        { value: '100%', label: 'Data Integrity', icon: Shield },
-        { value: '0.01s', label: 'Transaction Speed', icon: Zap },
-        { value: '24/7', label: 'Network Uptime', icon: Globe },
-        { value: '500+', label: 'Verified Partners', icon: User }
+        { value: '99.9%', label: 'System Uptime', icon: Zap },
+        { value: '35%', label: 'Cost Reduction', icon: TrendingUp },
+        { value: '10k+', label: 'Orders Processed', icon: Package },
+        { value: '24/7', label: 'AI Monitoring', icon: Brain }
     ];
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white selection:bg-cyan-500 selection:text-slate-900">
+        <div className="min-h-screen bg-white text-gray-900 selection:bg-blue-100 selection:text-blue-900">
             {/* Navigation */}
-            <nav className="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+            <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         <Link href="/" className="flex items-center space-x-3 group">
                             <div className="relative w-10 h-10">
-                                <div className="absolute inset-0 bg-cyan-500 blur-lg opacity-20 group-hover:opacity-40 transition duration-500"></div>
-                                <Image src="/logo.png" alt="Warefy" width={40} height={40} className="rounded-lg relative z-10" />
+                                <Image src="/logo.png" alt="Warefy" width={40} height={40} className="rounded-lg relative z-10 shadow-sm" />
                             </div>
                             <div>
-                                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">Warefy</span>
-                                <div className="text-[10px] uppercase tracking-widest text-slate-400">Blockchain Logistics</div>
+                                <span className="text-2xl font-bold text-gray-900 tracking-tight">Warefy</span>
+                                <div className="text-[10px] uppercase tracking-widest text-blue-600 font-semibold">Intelligent Logistics</div>
                             </div>
                         </Link>
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#features" className="text-slate-300 hover:text-cyan-400 transition text-sm font-medium tracking-wide">PROTOCOL</a>
-                            <a href="#benefits" className="text-slate-300 hover:text-cyan-400 transition text-sm font-medium tracking-wide">NETWORK</a>
-                            <a href="#testimonials" className="text-slate-300 hover:text-cyan-400 transition text-sm font-medium tracking-wide">COMMUNITY</a>
-                            <Link href="/login" className="text-slate-300 hover:text-white transition text-sm font-medium tracking-wide">ACCESS NODE</Link>
+                            <a href="#features" className="text-gray-600 hover:text-blue-600 transition text-sm font-medium">Platform</a>
+                            <a href="#solutions" className="text-gray-600 hover:text-blue-600 transition text-sm font-medium">Solutions</a>
+                            <a href="#testimonials" className="text-gray-600 hover:text-blue-600 transition text-sm font-medium">Customers</a>
+                            <Link href="/login" className="text-gray-600 hover:text-gray-900 transition text-sm font-medium">Sign In</Link>
                             <Link
                                 href="/dashboard"
-                                className="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold shadow-[0_0_20px_rgba(8,145,178,0.3)] hover:shadow-[0_0_30px_rgba(8,145,178,0.5)] transition border border-cyan-400/20"
+                                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5"
                             >
-                                LAUNCH DAPP
+                                Get Started
                             </Link>
                         </div>
                     </div>
@@ -92,84 +92,78 @@ export default function LandingPage() {
             </nav>
 
             {/* Hero Section */}
-            <section className="pt-40 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-                {/* Background Elements */}
-                <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px]"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/20 rounded-full blur-[128px]"></div>
-                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
-                </div>
+            <section className="pt-40 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+                <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-white"></div>
 
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <div>
-                            <div className="inline-flex items-center space-x-2 bg-slate-900/50 border border-cyan-500/30 px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
-                                <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_10px_#06b6d4]"></div>
-                                <span className="text-sm text-cyan-400 font-mono tracking-wider">GENESIS BLOCK VERIFIED</span>
+                            <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-100 px-4 py-2 rounded-full mb-8">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
+                                <span className="text-sm text-blue-700 font-medium tracking-wide">AI-POWERED SUPPLY CHAIN</span>
                             </div>
 
-                            <h1 className="text-5xl lg:text-7xl font-bold text-white mb-8 leading-tight tracking-tight">
-                                Decentralized
-                                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
-                                    Supply Chain
+                            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight tracking-tight">
+                                Optimize Logistics with
+                                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                                    Intelligent Data
                                 </span>
                             </h1>
 
-                            <p className="text-xl text-slate-400 mb-10 leading-relaxed max-w-lg border-l-2 border-slate-800 pl-6">
-                                The world's first AI-powered logistics protocol. Secure, transparent, and immutable record-keeping for the modern era of trade.
+                            <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-lg">
+                                Connect your entire supply chain—from inventory to delivery. Use our AI Command Center to predict demand, detect anomalies, and automate operations.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-5 mb-12">
                                 <Link
                                     href="/dashboard"
-                                    className="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-lg font-bold shadow-lg hover:shadow-cyan-500/25 transition text-center flex items-center justify-center group"
+                                    className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-xl shadow-blue-600/20 transition text-center flex items-center justify-center group"
                                 >
-                                    Start Mining Data
+                                    Start Free Trial
                                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                                 <a
                                     href="#features"
-                                    className="px-8 py-4 bg-slate-900 border border-slate-700 hover:border-cyan-500/50 text-slate-300 hover:text-white rounded-lg font-bold transition text-center flex items-center justify-center hover:bg-slate-800"
+                                    className="px-8 py-4 bg-white border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-600 rounded-lg font-bold transition text-center flex items-center justify-center shadow-sm hover:shadow-md"
                                 >
-                                    View Whitepaper
+                                    View Features
                                 </a>
                             </div>
 
-                            <div className="flex items-center space-x-8 text-sm font-mono text-slate-500">
+                            <div className="flex items-center space-x-8 text-sm font-medium text-gray-500">
                                 <div className="flex items-center">
-                                    <Shield className="h-4 w-4 text-cyan-500 mr-2" />
-                                    AUDITED
+                                    <Shield className="h-5 w-5 text-blue-600 mr-2" />
+                                    Enterprise Security
                                 </div>
                                 <div className="flex items-center">
-                                    <Shield className="h-4 w-4 text-purple-500 mr-2" />
-                                    ENCRYPTED
-                                </div>
-                                <div className="flex items-center">
-                                    <Zap className="h-4 w-4 text-yellow-500 mr-2" />
-                                    LIGHTNING FAST
+                                    <Zap className="h-5 w-5 text-yellow-500 mr-2" />
+                                    Real-time Sync
                                 </div>
                             </div>
                         </div>
 
                         <div className="relative group">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
-                            <div className="relative bg-slate-900 rounded-2xl border border-slate-800 p-2 shadow-2xl">
+                            <div className="absolute -inset-4 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-3xl blur-xl opacity-50 group-hover:opacity-70 transition duration-1000"></div>
+                            <div className="relative bg-white rounded-2xl border border-gray-100 p-3 shadow-2xl">
                                 <Image
                                     src="/hero-blockchain.png"
-                                    alt="Blockchain Supply Chain Network"
+                                    alt="Global Logistics Network"
                                     width={800}
                                     height={600}
                                     className="w-full h-auto rounded-xl"
                                     priority
                                 />
                                 {/* Floating Cards */}
-                                <div className="absolute -bottom-6 -left-6 bg-slate-800/90 backdrop-blur-xl border border-slate-700 p-4 rounded-xl shadow-xl flex items-center space-x-4">
-                                    <div className="bg-green-500/20 p-2 rounded-lg">
-                                        <TrendingUp className="h-6 w-6 text-green-400" />
+                                <div className="absolute -bottom-6 -left-6 bg-white/95 backdrop-blur-xl border border-gray-100 p-4 rounded-xl shadow-xl flex items-center space-x-4">
+                                    <div className="bg-green-100 p-2 rounded-lg">
+                                        <TrendingUp className="h-6 w-6 text-green-600" />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-slate-400 uppercase tracking-wider">Network Status</div>
-                                        <div className="text-green-400 font-mono font-bold">OPERATIONAL</div>
+                                        <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Efficiency Score</div>
+                                        <div className="text-green-600 font-bold text-lg">+14.2%</div>
                                     </div>
                                 </div>
                             </div>
@@ -179,16 +173,16 @@ export default function LandingPage() {
             </section>
 
             {/* Stats Section */}
-            <section className="py-12 border-y border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+            <section className="py-12 border-y border-gray-100 bg-gray-50/50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {stats.map((stat, index) => (
                             <div key={index} className="text-center group cursor-default">
-                                <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-800 rounded-xl mb-4 group-hover:bg-cyan-900/30 group-hover:scale-110 transition duration-300 border border-slate-700 group-hover:border-cyan-500/50">
-                                    <stat.icon className="h-6 w-6 text-cyan-500" />
+                                <div className="inline-flex items-center justify-center w-12 h-12 bg-white rounded-xl mb-4 shadow-sm border border-gray-100 group-hover:border-blue-200 transition duration-300">
+                                    <stat.icon className="h-6 w-6 text-blue-600" />
                                 </div>
-                                <div className="text-3xl font-bold text-white mb-1 font-mono tracking-tight">{stat.value}</div>
-                                <div className="text-sm text-slate-500 uppercase tracking-wider">{stat.label}</div>
+                                <div className="text-3xl font-bold text-gray-900 mb-1 tracking-tight">{stat.value}</div>
+                                <div className="text-sm text-gray-500 font-medium uppercase tracking-wide">{stat.label}</div>
                             </div>
                         ))}
                     </div>
@@ -196,14 +190,14 @@ export default function LandingPage() {
             </section>
 
             {/* Features Section */}
-            <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 relative">
+            <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-20">
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                            Protocol <span className="text-cyan-500">Features</span>
+                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
+                            Complete Backend <span className="text-blue-600">Control</span>
                         </h2>
-                        <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-                            The infrastructure layer for the next generation of global trade.
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            Built on a robust Python/FastAPI architecture, Warefy gives you granular control over every aspect of your operations.
                         </p>
                     </div>
 
@@ -211,26 +205,37 @@ export default function LandingPage() {
                         {features.map((feature, index) => (
                             <div
                                 key={index}
-                                className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 hover:bg-slate-800 hover:border-cyan-500/30 transition group duration-300"
+                                className="bg-white border border-gray-100 rounded-2xl p-8 hover:shadow-xl hover:shadow-blue-900/5 transition group duration-300"
                             >
-                                <div className="inline-flex p-3 bg-slate-800 rounded-xl mb-6 group-hover:bg-cyan-900/20 transition border border-slate-700 group-hover:border-cyan-500/50">
-                                    <feature.icon className="h-6 w-6 text-cyan-400 group-hover:text-cyan-300" />
+                                <div className="inline-flex p-3 bg-blue-50 rounded-xl mb-6 group-hover:bg-blue-600 transition duration-300">
+                                    <feature.icon className="h-6 w-6 text-blue-600 group-hover:text-white transition duration-300" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition">
+                                <h3 className="text-xl font-bold text-gray-900 mb-3">
                                     {feature.title}
                                 </h3>
-                                <p className="text-slate-400 leading-relaxed">
+                                <p className="text-gray-600 leading-relaxed">
                                     {feature.description}
                                 </p>
-                                {feature.title === 'Asset Tokenization' && (
-                                    <div className="mt-6 rounded-lg overflow-hidden border border-slate-700 shadow-lg">
+                                {feature.title === 'Real-Time Inventory' && (
+                                    <div className="mt-8 rounded-xl overflow-hidden border border-gray-100 shadow-lg">
+                                        <div className="bg-gray-50 p-3 border-b border-gray-100 flex justify-between items-center">
+                                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Live Feed</span>
+                                            <div className="flex space-x-1">
+                                                <div className="w-2 h-2 rounded-full bg-red-400"></div>
+                                                <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                                                <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                                            </div>
+                                        </div>
                                         <Image
                                             src="/smart-package.png"
-                                            alt="Smart Package Asset"
+                                            alt="AI Tracked Package"
                                             width={400}
                                             height={250}
-                                            className="w-full h-auto hover:scale-105 transition duration-500"
+                                            className="w-full h-auto hover:scale-105 transition duration-700"
                                         />
+                                        <div className="bg-white p-3 text-xs text-center text-gray-500 font-mono">
+                                            ID: PKG-8829 • STATUS: IN_TRANSIT • ETA: 2H
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -240,14 +245,14 @@ export default function LandingPage() {
             </section>
 
             {/* Testimonials */}
-            <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-900/30">
+            <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-20">
-                        <h2 className="text-4xl font-bold text-white mb-4">
-                            Node <span className="text-purple-500">Validators</span>
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                            Trusted by Industry Leaders
                         </h2>
-                        <p className="text-xl text-slate-400">
-                            Trusted by industry leaders running the Warefy protocol
+                        <p className="text-xl text-gray-600">
+                            See how Warefy is transforming supply chains worldwide.
                         </p>
                     </div>
 
@@ -257,38 +262,35 @@ export default function LandingPage() {
                                 name: 'Sarah Johnson',
                                 role: 'Operations Director',
                                 company: 'TechCorp',
-                                content: 'The immutable ledger has completely eliminated disputes with our suppliers. Transparency is now our default state.',
+                                content: 'The AI Command Center is a game changer. I can just ask "How is inventory?" and get a detailed report instantly.',
                                 image: '/avatar-sarah.png'
                             },
                             {
                                 name: 'Michael Chen',
                                 role: 'Logistics Manager',
                                 company: 'GlobalShip',
-                                content: 'Smart contracts have automated 90% of our payment processing. The efficiency gains are exponential.',
+                                content: 'We reduced our fleet fuel consumption by 15% in the first month using the route optimization features.',
                                 image: '/avatar-michael.png'
                             },
                             {
                                 name: 'Emma Wilson',
                                 role: 'CEO',
                                 company: 'FastFreight',
-                                content: 'We\'ve tokenized our entire fleet. Financing is easier, and we have real-time asset tracking like never before.',
+                                content: 'The anomaly detection saved us from a major stockout event during peak season. Highly recommended.',
                                 image: '/avatar-emma.png'
                             }
                         ].map((testimonial, index) => (
-                            <div key={index} className="bg-slate-950 border border-slate-800 rounded-2xl p-8 relative hover:-translate-y-2 transition duration-300 shadow-xl">
-                                <div className="absolute top-0 right-0 p-4 opacity-20">
-                                    <Package className="h-24 w-24 text-slate-700" />
-                                </div>
+                            <div key={index} className="bg-white border border-gray-100 rounded-2xl p-8 relative hover:-translate-y-2 transition duration-300 shadow-lg shadow-gray-200/50">
                                 <div className="flex mb-6">
                                     {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className="h-4 w-4 text-cyan-500 fill-current" />
+                                        <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
                                     ))}
                                 </div>
-                                <p className="text-slate-300 mb-8 leading-relaxed relative z-10">
+                                <p className="text-gray-700 mb-8 leading-relaxed relative z-10 italic">
                                     "{testimonial.content}"
                                 </p>
-                                <div className="flex items-center border-t border-slate-800 pt-6">
-                                    <div className="relative h-12 w-12 rounded-full mr-4 border-2 border-cyan-500/30 p-0.5">
+                                <div className="flex items-center border-t border-gray-100 pt-6">
+                                    <div className="relative h-12 w-12 rounded-full mr-4 ring-2 ring-blue-100 p-0.5">
                                         <Image
                                             src={testimonial.image}
                                             alt={testimonial.name}
@@ -296,11 +298,10 @@ export default function LandingPage() {
                                             height={48}
                                             className="rounded-full object-cover"
                                         />
-                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-slate-950 rounded-full"></div>
                                     </div>
                                     <div>
-                                        <div className="font-bold text-white">{testimonial.name}</div>
-                                        <div className="text-xs text-cyan-400 font-mono">{testimonial.role} @ {testimonial.company}</div>
+                                        <div className="font-bold text-gray-900">{testimonial.name}</div>
+                                        <div className="text-xs text-blue-600 font-semibold">{testimonial.role} @ {testimonial.company}</div>
                                     </div>
                                 </div>
                             </div>
@@ -310,85 +311,78 @@ export default function LandingPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-900 to-blue-900 opacity-50"></div>
-                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20"></div>
+            <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-blue-900">
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-[128px] opacity-20"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500 rounded-full blur-[128px] opacity-20"></div>
 
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <h2 className="text-5xl lg:text-6xl font-bold text-white mb-8 tracking-tight">
-                        Ready to Join the <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">Future of Logistics?</span>
+                        Ready to Modernize Your <br />
+                        <span className="text-blue-200">Supply Chain?</span>
                     </h2>
-                    <p className="text-xl mb-10 text-cyan-100 max-w-2xl mx-auto">
-                        Deploy your first node today and experience the power of decentralized supply chain management.
+                    <p className="text-xl mb-10 text-blue-100 max-w-2xl mx-auto">
+                        Join hundreds of data-driven companies using Warefy to optimize their logistics.
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-6">
                         <Link
                             href="/dashboard"
-                            className="inline-flex items-center px-10 py-5 bg-white text-slate-900 rounded-xl font-bold text-lg shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.5)] transition hover:scale-105"
+                            className="inline-flex items-center px-10 py-5 bg-white text-blue-900 rounded-xl font-bold text-lg shadow-2xl hover:shadow-white/20 transition hover:scale-105"
                         >
-                            Initialize Protocol
+                            Start Free Trial
                             <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
                     </div>
-                    <p className="text-slate-400 mt-8 text-sm font-mono">
-                        BLOCK HEIGHT: 18,249,102 • HASH RATE: 450 TH/s • ACTIVE NODES: 12,405
+                    <p className="text-blue-300 mt-8 text-sm font-medium">
+                        NO CREDIT CARD REQUIRED • 14-DAY FREE TRIAL • CANCEL ANYTIME
                     </p>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="bg-slate-950 text-slate-500 py-16 px-4 sm:px-6 lg:px-8 border-t border-slate-900">
+            <footer className="bg-white text-gray-600 py-16 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-4 gap-12 mb-12">
                         <div className="col-span-1 md:col-span-1">
                             <div className="flex items-center space-x-2 mb-6">
-                                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                                     <span className="text-white font-bold">W</span>
                                 </div>
-                                <span className="text-white font-bold text-xl tracking-tight">Warefy</span>
+                                <span className="text-gray-900 font-bold text-xl tracking-tight">Warefy</span>
                             </div>
                             <p className="text-sm leading-relaxed mb-6">
-                                Decentralized supply chain orchestration for the autonomous economy.
+                                Intelligent supply chain orchestration for the modern economy.
                             </p>
-                            <div className="flex space-x-4">
-                                <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800 hover:border-cyan-500 hover:text-cyan-500 transition cursor-pointer">
-                                    <Globe className="h-4 w-4" />
-                                </div>
-                                <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800 hover:border-cyan-500 hover:text-cyan-500 transition cursor-pointer">
-                                    <Package className="h-4 w-4" />
-                                </div>
-                            </div>
                         </div>
                         <div>
-                            <h4 className="font-bold mb-6 text-white tracking-wider text-xs uppercase">Protocol</h4>
+                            <h4 className="font-bold mb-6 text-gray-900 tracking-wider text-xs uppercase">Product</h4>
                             <ul className="space-y-3 text-sm">
-                                <li><a href="#" className="hover:text-cyan-400 transition">Consensus</a></li>
-                                <li><a href="#" className="hover:text-cyan-400 transition">Tokenomics</a></li>
-                                <li><a href="#" className="hover:text-cyan-400 transition">Governance</a></li>
-                                <li><a href="#" className="hover:text-cyan-400 transition">Developers</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Features</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Integrations</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Pricing</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Changelog</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-bold mb-6 text-white tracking-wider text-xs uppercase">Ecosystem</h4>
+                            <h4 className="font-bold mb-6 text-gray-900 tracking-wider text-xs uppercase">Resources</h4>
                             <ul className="space-y-3 text-sm">
-                                <li><a href="#" className="hover:text-cyan-400 transition">Wallets</a></li>
-                                <li><a href="#" className="hover:text-cyan-400 transition">Explorers</a></li>
-                                <li><a href="#" className="hover:text-cyan-400 transition">DApps</a></li>
-                                <li><a href="#" className="hover:text-cyan-400 transition">Exchanges</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Documentation</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">API Reference</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Community</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Blog</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-bold mb-6 text-white tracking-wider text-xs uppercase">Legal</h4>
+                            <h4 className="font-bold mb-6 text-gray-900 tracking-wider text-xs uppercase">Legal</h4>
                             <ul className="space-y-3 text-sm">
-                                <li><a href="#" className="hover:text-cyan-400 transition">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-cyan-400 transition">Terms of Service</a></li>
-                                <li><a href="#" className="hover:text-cyan-400 transition">Smart Contract Audit</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Privacy Policy</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Terms of Service</a></li>
+                                <li><a href="#" className="hover:text-blue-600 transition">Security</a></li>
                             </ul>
                         </div>
                     </div>
-                    <div className="border-t border-slate-900 pt-8 text-center text-sm font-mono">
-                        <p>© 2025 Warefy Decentralized Foundation. All rights reserved.</p>
+                    <div className="border-t border-gray-100 pt-8 text-center text-sm font-medium">
+                        <p>© 2025 Warefy Inc. All rights reserved.</p>
                     </div>
                 </div>
             </footer>
