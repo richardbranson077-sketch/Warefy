@@ -318,9 +318,7 @@ export default function LandingPage() {
                     <div className="grid md:grid-cols-4 gap-8 mb-8">
                         <div>
                             <div className="flex items-center space-x-2 mb-4">
-                                <div className="bg-blue-600 p-2 rounded-lg">
-                                    <Sparkles className="h-5 w-5 text-white" />
-                                </div>
+                                <Image src="/logo.png" alt="Warefy" width={32} height={32} className="rounded-lg" />
                                 <span className="text-white font-bold text-lg">Warefy</span>
                             </div>
                             <p className="text-sm">
