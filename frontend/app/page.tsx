@@ -107,7 +107,7 @@ export default function LandingPage() {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                         </span>
-                        <span className="text-sm text-blue-700 font-bold tracking-wide uppercase">The AI Operating System for Supply Chains</span>
+                        <span className="text-sm text-blue-700 font-bold tracking-wide">The AI Operating System for Supply Chains</span>
                     </div>
 
                     <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 mb-6 leading-tight tracking-tight max-w-5xl mx-auto">
