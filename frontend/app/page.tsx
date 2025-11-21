@@ -4,113 +4,84 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
     Sparkles,
-    Cpu,
-    Network,
-    Zap,
-    Shield,
     TrendingUp,
     BarChart3,
-    Brain,
-    Layers,
+    Package,
+    Truck,
     ArrowRight,
-    CheckCircle2,
+    CheckCircle,
     Star,
-    ChevronRight,
-    Activity,
-    Target,
-    Gauge
+    User,
+    Shield,
+    Zap
 } from 'lucide-react';
 
 export default function LandingPage() {
     const features = [
         {
-            icon: Brain,
-            title: 'Neural Demand Forecasting',
-            description: 'Advanced deep learning models predict demand patterns with 98% accuracy using transformer architecture.',
-            gradient: 'from-blue-500 via-purple-500 to-pink-500'
+            icon: BarChart3,
+            title: 'Demand Forecasting',
+            description: 'Advanced AI models predict demand patterns to optimize inventory levels and reduce costs.'
         },
         {
-            icon: Network,
-            title: 'Autonomous Supply Network',
-            description: 'Self-optimizing supply chain that adapts in real-time to market changes and disruptions.',
-            gradient: 'from-cyan-500 via-blue-500 to-purple-500'
+            icon: Truck,
+            title: 'Route Optimization',
+            description: 'Smart algorithms find the most efficient delivery routes, saving time and fuel.'
         },
         {
-            icon: Cpu,
-            title: 'Quantum Route Optimization',
-            description: 'Next-gen algorithms reduce delivery time by 40% and fuel costs by 35% simultaneously.',
-            gradient: 'from-green-500 via-emerald-500 to-cyan-500'
+            icon: Package,
+            title: 'Inventory Management',
+            description: 'Real-time tracking and automated reordering keep your stock levels perfect.'
         },
         {
-            icon: Activity,
-            title: 'Predictive Analytics Engine',
-            description: 'AI-powered insights that forecast trends 6 months ahead with real-time data processing.',
-            gradient: 'from-orange-500 via-red-500 to-pink-500'
+            icon: User,
+            title: 'Fleet Management',
+            description: 'Monitor vehicle health, driver performance, and maintenance schedules.'
         },
         {
             icon: Shield,
-            title: 'Intelligent Risk Detection',
-            description: 'Machine learning models identify potential disruptions before they impact operations.',
-            gradient: 'from-purple-500 via-pink-500 to-red-500'
+            title: 'Risk Detection',
+            description: 'Identify potential disruptions before they impact your operations.'
         },
         {
-            icon: Layers,
-            title: 'Multi-Modal Integration',
-            description: 'Seamlessly connects with 500+ platforms through our advanced API infrastructure.',
-            gradient: 'from-yellow-500 via-orange-500 to-red-500'
+            icon: Zap,
+            title: 'AI Recommendations',
+            description: 'Get actionable insights powered by machine learning algorithms.'
         }
     ];
 
     const stats = [
-        { value: '98%', label: 'AI Accuracy', icon: Target, color: 'from-blue-500 to-cyan-500' },
-        { value: '40%', label: 'Faster Delivery', icon: Zap, color: 'from-purple-500 to-pink-500' },
-        { value: '24/7', label: 'Auto-Pilot', icon: Gauge, color: 'from-green-500 to-emerald-500' },
-        { value: '1000+', label: 'Enterprises', icon: TrendingUp, color: 'from-orange-500 to-red-500' }
+        { value: '98%', label: 'Forecast Accuracy', icon: TrendingUp },
+        { value: '40%', label: 'Cost Reduction', icon: BarChart3 },
+        { value: '24/7', label: 'Real-time Monitoring', icon: Shield },
+        { value: '500+', label: 'Happy Customers', icon: User }
     ];
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white overflow-hidden selection:bg-purple-500/30">
-            {/* Background Image */}
-            <div className="fixed inset-0 z-0">
-                <Image
-                    src="/hero-bg.png"
-                    alt="Background"
-                    fill
-                    className="object-cover opacity-40"
-                    priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-gray-950/50 via-gray-950/80 to-gray-950"></div>
-            </div>
-
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
             {/* Navigation */}
-            <nav className="fixed top-0 w-full z-50 backdrop-blur-xl bg-gray-900/50 border-b border-white/10">
+            <nav className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-20">
-                        <Link href="/" className="flex items-center space-x-3 group">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl blur-lg opacity-75 group-hover:opacity-100 transition"></div>
-                                <div className="relative bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-2.5 rounded-xl">
-                                    <Sparkles className="h-6 w-6 text-white" />
-                                </div>
+                    <div className="flex justify-between items-center h-16">
+                        <Link href="/" className="flex items-center space-x-2">
+                            <div className="bg-blue-600 p-2 rounded-lg">
+                                <Sparkles className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                    Warefy
-                                </span>
-                                <div className="text-xs text-gray-400 font-medium">AI Supply Chain</div>
+                                <span className="text-xl font-bold text-gray-900">Warefy</span>
+                                <div className="text-xs text-gray-500">Supply Chain Platform</div>
                             </div>
                         </Link>
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#features" className="text-gray-300 hover:text-white transition">Features</a>
-                            <a href="#technology" className="text-gray-300 hover:text-white transition">Technology</a>
-                            <a href="#testimonials" className="text-gray-300 hover:text-white transition">Success Stories</a>
-                            <Link href="/login" className="text-gray-300 hover:text-white transition font-medium">Sign In</Link>
+                            <a href="#features" className="text-gray-600 hover:text-gray-900 transition">Features</a>
+                            <a href="#benefits" className="text-gray-600 hover:text-gray-900 transition">Benefits</a>
+                            <a href="#testimonials" className="text-gray-600 hover:text-gray-900 transition">Testimonials</a>
+                            <Link href="/login" className="text-gray-600 hover:text-gray-900 transition font-medium">Sign In</Link>
                             <Link
                                 href="/dashboard"
-                                className="group relative px-6 py-2.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-lg font-semibold overflow-hidden"
+                                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm hover:shadow transition"
                             >
-                                <span className="relative z-10">Launch Platform</span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                Get Started
                             </Link>
                         </div>
                     </div>
@@ -118,80 +89,81 @@ export default function LandingPage() {
             </nav>
 
             {/* Hero Section */}
-            <section className="relative z-10 pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+            <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <div className="inline-flex items-center space-x-2 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full mb-8 hover:bg-white/10 transition cursor-default">
-                            <div className="flex items-center space-x-1">
-                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                <span className="text-sm text-gray-300">Powered by Advanced AI</span>
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-200 px-4 py-2 rounded-full mb-6">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <span className="text-sm text-blue-700 font-medium">AI-Powered Platform</span>
                             </div>
-                            <ChevronRight className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent font-semibold">
-                                Next-Gen Platform
-                            </span>
-                        </div>
 
-                        <h1 className="text-6xl lg:text-8xl font-bold mb-8 leading-tight tracking-tight">
-                            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                Autonomous Supply Chain
-                            </span>
-                            <br />
-                            <span className="text-white text-5xl lg:text-7xl">Powered by Neural AI</span>
-                        </h1>
+                            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                                Smart Supply Chain
+                                <span className="text-blue-600"> Management</span>
+                            </h1>
 
-                        <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
-                            Transform your operations with cutting-edge artificial intelligence.
-                            Our neural networks predict, optimize, and automate your entire supply chain ecosystem.
-                        </p>
+                            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                                Optimize your operations with AI-driven insights. Reduce costs, improve efficiency, and stay ahead of the competition.
+                            </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
-                            <Link
-                                href="/dashboard"
-                                className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl font-semibold text-lg overflow-hidden shadow-2xl shadow-purple-500/50 hover:scale-105 transition-transform duration-300"
-                            >
-                                <span className="relative z-10 flex items-center justify-center">
+                            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                                <Link
+                                    href="/dashboard"
+                                    className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition text-center"
+                                >
                                     Start Free Trial
-                                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition" />
-                                </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
-                            </Link>
-                            <a
-                                href="#technology"
-                                className="px-8 py-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl font-semibold text-lg hover:bg-white/10 transition hover:scale-105 duration-300"
-                            >
-                                Explore Technology
-                            </a>
+                                    <ArrowRight className="inline-block ml-2 h-5 w-5" />
+                                </Link>
+                                <a
+                                    href="#features"
+                                    className="px-8 py-4 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 rounded-lg font-semibold hover:shadow-md transition text-center"
+                                >
+                                    Learn More
+                                </a>
+                            </div>
+
+                            <div className="flex items-center space-x-6 text-sm text-gray-600">
+                                <div className="flex items-center">
+                                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                                    No credit card required
+                                </div>
+                                <div className="flex items-center">
+                                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                                    14-day free trial
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Dashboard Preview */}
-                        <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/20 border border-white/10 group">
-                            <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent z-10"></div>
-                            <Image
-                                src="/dashboard-preview.png"
-                                alt="Dashboard Preview"
-                                width={1920}
-                                height={1080}
-                                className="w-full h-auto transform group-hover:scale-105 transition-transform duration-700"
-                            />
+                        <div className="relative">
+                            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8">
+                                <Image
+                                    src="/dashboard-preview.png"
+                                    alt="Dashboard Preview"
+                                    width={600}
+                                    height={400}
+                                    className="w-full h-auto rounded-lg"
+                                />
+                            </div>
+                            <div className="absolute -bottom-6 -left-6 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg">
+                                <div className="text-sm font-medium">Trusted by 500+ companies</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Stats Grid */}
-            <section className="relative z-10 py-10 border-y border-white/5 bg-white/5 backdrop-blur-sm">
+            {/* Stats Section */}
+            <section className="py-16 bg-white border-y border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {stats.map((stat, index) => (
-                            <div key={index} className="text-center group cursor-default">
-                                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${stat.color} bg-opacity-10 mb-3 group-hover:scale-110 transition-transform`}>
-                                    <stat.icon className="h-6 w-6 text-white" />
+                            <div key={index} className="text-center">
+                                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4">
+                                    <stat.icon className="h-6 w-6 text-blue-600" />
                                 </div>
-                                <div className={`text-4xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
-                                    {stat.value}
-                                </div>
-                                <div className="text-sm text-gray-400 font-medium uppercase tracking-wider">{stat.label}</div>
+                                <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
+                                <div className="text-sm text-gray-600">{stat.label}</div>
                             </div>
                         ))}
                     </div>
@@ -199,20 +171,14 @@ export default function LandingPage() {
             </section>
 
             {/* Features Section */}
-            <section id="features" className="relative z-10 py-32 px-4 sm:px-6 lg:px-8">
+            <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-20">
-                        <div className="inline-flex items-center space-x-2 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full mb-6">
-                            <Cpu className="h-4 w-4 text-purple-400" />
-                            <span className="text-sm text-gray-300">Advanced Capabilities</span>
-                        </div>
-                        <h2 className="text-5xl font-bold mb-6">
-                            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                                Next-Generation Features
-                            </span>
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                            Everything You Need to Optimize Your Supply Chain
                         </h2>
-                        <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-                            Powered by state-of-the-art AI models and quantum-inspired algorithms
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            Comprehensive tools to manage every aspect of your logistics operation
                         </p>
                     </div>
 
@@ -220,94 +186,63 @@ export default function LandingPage() {
                         {features.map((feature, index) => (
                             <div
                                 key={index}
-                                className="group relative"
+                                className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg transition group"
                             >
-                                <div className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} rounded-3xl blur-xl opacity-0 group-hover:opacity-20 transition duration-500`}></div>
-                                <div className="relative bg-gray-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-gray-800/50 transition h-full hover:-translate-y-1 duration-300">
-                                    <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${feature.gradient} mb-6 shadow-lg`}>
-                                        <feature.icon className="h-8 w-8 text-white" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-white mb-4">
-                                        {feature.title}
-                                    </h3>
-                                    <p className="text-gray-400 leading-relaxed text-lg">
-                                        {feature.description}
-                                    </p>
+                                <div className="inline-flex p-3 bg-blue-50 rounded-lg mb-6 group-hover:bg-blue-100 transition">
+                                    <feature.icon className="h-6 w-6 text-blue-600" />
                                 </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                                    {feature.title}
+                                </h3>
+                                <p className="text-gray-600 leading-relaxed">
+                                    {feature.description}
+                                </p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Technology Section */}
-            <section id="technology" className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
+            {/* Benefits Section */}
+            <section id="benefits" className="py-20 bg-blue-50 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-3xl"></div>
-                        <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl p-12 lg:p-20 overflow-hidden">
-                            <div className="grid lg:grid-cols-2 gap-16 items-center">
-                                <div>
-                                    <div className="inline-flex items-center space-x-2 bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-full mb-6">
-                                        <Brain className="h-4 w-4 text-blue-400" />
-                                        <span className="text-sm text-gray-300">AI Technology Stack</span>
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                                Why Choose Warefy?
+                            </h2>
+                            <p className="text-lg text-gray-600 mb-8">
+                                Our platform combines cutting-edge AI technology with intuitive design to deliver measurable results for your business.
+                            </p>
+                            <div className="space-y-4">
+                                {[
+                                    'Real-time visibility across your entire supply chain',
+                                    'Automated decision-making based on AI insights',
+                                    'Seamless integration with existing systems',
+                                    'Reduce operational costs by up to 40%',
+                                    'Improve customer satisfaction with faster delivery',
+                                    '24/7 support from our expert team'
+                                ].map((benefit, index) => (
+                                    <div key={index} className="flex items-start">
+                                        <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                                        <span className="text-gray-700">{benefit}</span>
                                     </div>
-                                    <h2 className="text-4xl lg:text-5xl font-bold mb-8">
-                                        <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                                            Built on Advanced AI
-                                        </span>
-                                    </h2>
-                                    <p className="text-lg text-gray-300 mb-10 leading-relaxed">
-                                        Our platform leverages cutting-edge machine learning, neural networks,
-                                        and quantum-inspired algorithms to deliver unprecedented performance.
-                                    </p>
-                                    <div className="space-y-5">
-                                        {[
-                                            'Deep Learning Transformer Models',
-                                            'Real-Time Neural Processing',
-                                            'Quantum-Inspired Optimization',
-                                            'Autonomous Decision Making',
-                                            'Predictive Analytics Engine',
-                                            'Multi-Agent Reinforcement Learning'
-                                        ].map((tech, index) => (
-                                            <div key={index} className="flex items-center space-x-4 group">
-                                                <div className="flex-shrink-0 p-1 bg-green-500/10 rounded-full group-hover:bg-green-500/20 transition">
-                                                    <CheckCircle2 className="h-6 w-6 text-green-400" />
-                                                </div>
-                                                <span className="text-gray-200 text-lg">{tech}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+                                    <span className="text-gray-700">Average Cost Savings</span>
+                                    <span className="text-2xl font-bold text-green-600">42%</span>
                                 </div>
-                                <div className="relative">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur-2xl opacity-20"></div>
-                                    <div className="relative bg-gray-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-10 shadow-2xl">
-                                        <div className="space-y-8">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-gray-300 text-lg">Neural Network Accuracy</span>
-                                                <span className="text-green-400 font-bold text-xl">98.7%</span>
-                                            </div>
-                                            <div className="h-3 bg-white/10 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full animate-pulse" style={{ width: '98.7%' }}></div>
-                                            </div>
-
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-gray-300 text-lg">Processing Speed</span>
-                                                <span className="text-blue-400 font-bold text-xl">10ms</span>
-                                            </div>
-                                            <div className="h-3 bg-white/10 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full animate-pulse delay-75" style={{ width: '95%' }}></div>
-                                            </div>
-
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-gray-300 text-lg">Cost Reduction</span>
-                                                <span className="text-purple-400 font-bold text-xl">42%</span>
-                                            </div>
-                                            <div className="h-3 bg-white/10 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse delay-150" style={{ width: '85%' }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+                                    <span className="text-gray-700">Delivery Time Reduction</span>
+                                    <span className="text-2xl font-bold text-blue-600">38%</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-700">Customer Satisfaction</span>
+                                    <span className="text-2xl font-bold text-purple-600">95%</span>
                                 </div>
                             </div>
                         </div>
@@ -316,45 +251,39 @@ export default function LandingPage() {
             </section>
 
             {/* Testimonials */}
-            <section id="testimonials" className="relative z-10 py-32 px-4 sm:px-6 lg:px-8">
+            <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-20">
-                        <h2 className="text-5xl font-bold mb-6">
-                            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                                Trusted by Industry Leaders
-                            </span>
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                            Loved by Supply Chain Professionals
                         </h2>
-                        <p className="text-xl text-gray-400">
-                            See how AI is transforming supply chains worldwide
+                        <p className="text-xl text-gray-600">
+                            See what our customers have to say
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
-                            { name: 'Alex Thompson', role: 'Chief Supply Chain Officer', company: 'TechCorp Global', content: 'Warefy\'s AI reduced our operational costs by 45% in just 3 months. The neural forecasting is incredibly accurate.' },
-                            { name: 'Maria Garcia', role: 'VP of Operations', company: 'LogiTech Solutions', content: 'The autonomous optimization saved us millions. It\'s like having a team of data scientists working 24/7.' },
-                            { name: 'James Chen', role: 'CEO', company: 'FastShip Logistics', content: 'Best AI platform we\'ve implemented. ROI was visible within weeks. The technology is truly next-generation.' }
+                            { name: 'Sarah Johnson', role: 'Operations Director', company: 'TechCorp', content: 'Warefy transformed our supply chain operations. We reduced costs by 45% in just 3 months.' },
+                            { name: 'Michael Chen', role: 'Logistics Manager', company: 'GlobalShip', content: 'The AI recommendations are incredibly accurate. It\'s like having a team of data scientists working 24/7.' },
+                            { name: 'Emma Wilson', role: 'CEO', company: 'FastFreight', content: 'Best investment we\'ve made. The ROI was visible within weeks.' }
                         ].map((testimonial, index) => (
-                            <div key={index} className="relative group">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                                <div className="relative bg-gray-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-10 hover:bg-gray-800/50 transition h-full">
-                                    <div className="flex mb-6">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                                        ))}
+                            <div key={index} className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-md transition">
+                                <div className="flex mb-4">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                                    ))}
+                                </div>
+                                <p className="text-gray-700 mb-6 leading-relaxed">
+                                    "{testimonial.content}"
+                                </p>
+                                <div className="flex items-center">
+                                    <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-4">
+                                        {testimonial.name.charAt(0)}
                                     </div>
-                                    <p className="text-gray-300 mb-8 leading-relaxed text-lg italic">
-                                        "{testimonial.content}"
-                                    </p>
-                                    <div className="flex items-center mt-auto">
-                                        <div className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl mr-4 shadow-lg">
-                                            {testimonial.name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-white text-lg">{testimonial.name}</div>
-                                            <div className="text-sm text-blue-400 font-medium">{testimonial.role}</div>
-                                            <div className="text-xs text-gray-500">{testimonial.company}</div>
-                                        </div>
+                                    <div>
+                                        <div className="font-bold text-gray-900">{testimonial.name}</div>
+                                        <div className="text-sm text-gray-600">{testimonial.role}, {testimonial.company}</div>
                                     </div>
                                 </div>
                             </div>
@@ -364,78 +293,69 @@ export default function LandingPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-5xl mx-auto text-center">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-3xl opacity-30"></div>
-                        <div className="relative bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-16 lg:p-24">
-                            <h2 className="text-5xl lg:text-6xl font-bold mb-8">
-                                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                    Ready to Transform Your Supply Chain?
-                                </span>
-                            </h2>
-                            <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-                                Join 1000+ enterprises using AI to revolutionize their operations.
-                                Start your journey to autonomous logistics today.
-                            </p>
-                            <Link
-                                href="/dashboard"
-                                className="inline-flex items-center px-12 py-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl font-bold text-xl shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/75 transition hover:scale-105 duration-300"
-                            >
-                                Launch AI Platform
-                                <ArrowRight className="ml-3 h-6 w-6" />
-                            </Link>
-                            <p className="text-gray-400 mt-8 text-sm font-medium tracking-wide">
-                                Free 14-day trial • No credit card required • Full AI access
-                            </p>
-                        </div>
-                    </div>
+            <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-blue-700">
+                <div className="max-w-4xl mx-auto text-center text-white">
+                    <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                        Ready to Transform Your Supply Chain?
+                    </h2>
+                    <p className="text-xl mb-8 text-blue-100">
+                        Join hundreds of companies using Warefy to optimize their operations
+                    </p>
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center px-10 py-4 bg-white text-blue-600 rounded-lg font-bold text-lg shadow-xl hover:shadow-2xl transition"
+                    >
+                        Start Free Trial
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                    <p className="text-blue-100 mt-6 text-sm">
+                        No credit card required • 14-day free trial • Cancel anytime
+                    </p>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="relative z-10 border-t border-white/10 py-16 px-4 sm:px-6 lg:px-8 bg-black/40 backdrop-blur-lg">
+            <footer className="bg-gray-900 text-gray-400 py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-4 gap-12 mb-12">
-                        <div className="col-span-1 md:col-span-1">
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-2.5 rounded-xl">
-                                    <Sparkles className="h-6 w-6 text-white" />
+                    <div className="grid md:grid-cols-4 gap-8 mb-8">
+                        <div>
+                            <div className="flex items-center space-x-2 mb-4">
+                                <div className="bg-blue-600 p-2 rounded-lg">
+                                    <Sparkles className="h-5 w-5 text-white" />
                                 </div>
-                                <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Warefy</span>
+                                <span className="text-white font-bold text-lg">Warefy</span>
                             </div>
-                            <p className="text-sm text-gray-400 leading-relaxed">
-                                Next-generation AI supply chain platform.
-                                Empowering the future of logistics with neural networks and quantum optimization.
+                            <p className="text-sm">
+                                AI-powered supply chain management platform
                             </p>
                         </div>
                         <div>
-                            <h4 className="font-bold mb-6 text-white text-lg">Platform</h4>
-                            <ul className="space-y-4 text-sm text-gray-400">
-                                <li><a href="#features" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">Features</a></li>
-                                <li><a href="#technology" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">Technology</a></li>
-                                <li><a href="/dashboard" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">Dashboard</a></li>
+                            <h4 className="font-bold mb-4 text-white">Platform</h4>
+                            <ul className="space-y-2 text-sm">
+                                <li><a href="#features" className="hover:text-white transition">Features</a></li>
+                                <li><a href="#benefits" className="hover:text-white transition">Benefits</a></li>
+                                <li><a href="/dashboard" className="hover:text-white transition">Dashboard</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-bold mb-6 text-white text-lg">Company</h4>
-                            <ul className="space-y-4 text-sm text-gray-400">
-                                <li><a href="#" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">About</a></li>
-                                <li><a href="#testimonials" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">Success Stories</a></li>
-                                <li><a href="#" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">Contact</a></li>
+                            <h4 className="font-bold mb-4 text-white">Company</h4>
+                            <ul className="space-y-2 text-sm">
+                                <li><a href="#" className="hover:text-white transition">About</a></li>
+                                <li><a href="#testimonials" className="hover:text-white transition">Testimonials</a></li>
+                                <li><a href="#" className="hover:text-white transition">Contact</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-bold mb-6 text-white text-lg">Legal</h4>
-                            <ul className="space-y-4 text-sm text-gray-400">
-                                <li><a href="#" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">Privacy</a></li>
-                                <li><a href="#" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">Terms</a></li>
-                                <li><a href="#" className="hover:text-white transition hover:translate-x-1 inline-block duration-200">Security</a></li>
+                            <h4 className="font-bold mb-4 text-white">Legal</h4>
+                            <ul className="space-y-2 text-sm">
+                                <li><a href="#" className="hover:text-white transition">Privacy</a></li>
+                                <li><a href="#" className="hover:text-white transition">Terms</a></li>
+                                <li><a href="#" className="hover:text-white transition">Security</a></li>
                             </ul>
                         </div>
                     </div>
-                    <div className="border-t border-white/10 pt-8 text-center text-sm text-gray-500">
-                        © 2025 Warefy. All rights reserved. Powered by Advanced AI.
+                    <div className="border-t border-gray-800 pt-8 text-center text-sm">
+                        © 2025 Warefy. All rights reserved.
                     </div>
                 </div>
             </footer>

@@ -25,18 +25,18 @@ export default function DashboardLayout({
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white">
+        <div className="min-h-screen bg-gray-50">
             <Navbar />
             <div className="flex pt-16">
                 <Sidebar />
-                <main className="flex-1 md:ml-64 min-h-[calc(100vh-4rem)] p-6">
+                <main className="flex-1 md:ml-64 min-h-[calc(100vh-4rem)] p-6 bg-gray-50">
                     {children}
                 </main>
             </div>
