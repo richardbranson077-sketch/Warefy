@@ -23,6 +23,14 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     password: Optional[str] = None
 
+class UserResponse(UserBase):
+    id: int
+    is_active: bool
+    is_2fa_enabled: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
