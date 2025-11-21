@@ -102,20 +102,6 @@ export default function LoginPage() {
                             <p className="text-gray-600">Sign in to access your dashboard</p>
                         </div>
 
-                        {/* Demo Credentials Banner */}
-                        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div className="flex items-start">
-                                <Shield className="h-5 w-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="text-sm font-semibold text-blue-900 mb-1">Demo Access</p>
-                                    <p className="text-sm text-blue-700">
-                                        Username: <code className="bg-blue-100 px-2 py-0.5 rounded font-mono">admin</code> |
-                                        Password: <code className="bg-blue-100 px-2 py-0.5 rounded font-mono">admin123</code>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
                         {error && (
                             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                                 {error}
@@ -125,16 +111,16 @@ export default function LoginPage() {
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Email Address
+                                    Username or Email
                                 </label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     <input
-                                        type="email"
+                                        type="text"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="w-full bg-gray-50 border border-gray-300 rounded-lg py-3 pl-10 pr-4 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                        placeholder="admin@warefy.com"
+                                        placeholder="admin"
                                         required
                                     />
                                 </div>
