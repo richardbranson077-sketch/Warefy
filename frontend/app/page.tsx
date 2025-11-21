@@ -345,6 +345,75 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* Testimonials Section */}
+            <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-50">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                            Trusted by Supply Chain Leaders
+                        </h2>
+                        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                            See how companies are transforming their operations with Warefy
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {[
+                            {
+                                name: 'Sarah Chen',
+                                role: 'VP of Supply Chain Operations',
+                                company: 'TechFlow Logistics',
+                                avatar: '/avatar-sarah.png',
+                                feedback: 'Warefy has completely transformed how we manage our multi-warehouse operations. The AI-powered demand forecasting alone has reduced our inventory costs by 35%.'
+                            },
+                            {
+                                name: 'Michael Rodriguez',
+                                role: 'Director of Operations',
+                                company: 'Global Retail Co.',
+                                avatar: '/avatar-michael.png',
+                                feedback: 'The real-time visibility across our entire supply chain network is game-changing. We can now predict and prevent disruptions before they impact our customers.'
+                            },
+                            {
+                                name: 'Emma Thompson',
+                                role: 'Chief Logistics Officer',
+                                company: 'Manufacturing Solutions Inc.',
+                                avatar: '/avatar-emma.png',
+                                feedback: 'Integration with our existing ERP was seamless. Within weeks, we had full visibility and automation across procurement, warehousing, and distribution.'
+                            }
+                        ].map((testimonial, i) => (
+                            <div key={i} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
+                                <div className="flex items-center mb-6">
+                                    <div className="relative w-14 h-14 mr-4">
+                                        <Image
+                                            src={testimonial.avatar}
+                                            alt={testimonial.name}
+                                            width={56}
+                                            height={56}
+                                            className="rounded-full object-cover"
+                                        />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-slate-900">{testimonial.name}</h4>
+                                        <p className="text-sm text-slate-600">{testimonial.role}</p>
+                                        <p className="text-xs text-blue-600 font-semibold">{testimonial.company}</p>
+                                    </div>
+                                </div>
+                                <p className="text-slate-700 leading-relaxed italic">
+                                    "{testimonial.feedback}"
+                                </p>
+                                <div className="mt-6 flex text-yellow-400">
+                                    {[...Array(5)].map((_, j) => (
+                                        <svg key={j} className="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                        </svg>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* Final CTA Section */}
             <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-indigo-700 text-white text-center">
                 <div className="max-w-4xl mx-auto">
