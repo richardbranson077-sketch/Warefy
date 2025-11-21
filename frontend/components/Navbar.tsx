@@ -3,13 +3,18 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bell, User, LogOut, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { auth } from '../lib/api';
+
+interface User {
+    username: string;
+    email?: string;
+}
 
 export default function Navbar() {
     const router = useRouter();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
         const fetchUser = async () => {

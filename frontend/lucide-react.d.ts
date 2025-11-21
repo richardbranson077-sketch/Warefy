@@ -1,0 +1,64 @@
+declare module 'lucide-react' {
+    import { FC, SVGProps } from 'react';
+    export interface IconProps extends SVGProps<SVGSVGElement> {
+        size?: string | number;
+        absoluteStrokeWidth?: boolean;
+    }
+    export type Icon = FC<IconProps>;
+
+    export const Activity: Icon;
+    export const AlertCircle: Icon;
+    export const AlertOctagon: Icon;
+    export const AlertTriangle: Icon;
+    export const ArrowDownRight: Icon;
+    export const ArrowRight: Icon;
+    export const ArrowUpRight: Icon;
+    export const BarChart3: Icon;
+    export const Battery: Icon;
+    export const Bell: Icon;
+    export const Box: Icon;
+    export const BrainCircuit: Icon;
+    export const Calendar: Icon;
+    export const Check: Icon;
+    export const CheckCircle: Icon;
+    export const ChevronDown: Icon;
+    export const ChevronRight: Icon;
+    export const ChevronUp: Icon;
+    export const Clock: Icon;
+    export const Cpu: Icon;
+    export const CreditCard: Icon;
+    export const DollarSign: Icon;
+    export const Filter: Icon;
+    export const Fuel: Icon;
+    export const Globe: Icon;
+    export const Layers: Icon;
+    export const Network: Icon;
+    export const Brain: Icon;
+    export const CheckCircle2: Icon;
+    export const Star: Icon;
+    export const Target: Icon;
+    export const Gauge: Icon;
+    export const LayoutDashboard: Icon;
+    export const LogOut: Icon;
+    export const Map: Icon;
+    export const MapPin: Icon;
+    export const Menu: Icon;
+    export const Moon: Icon;
+    export const Navigation: Icon;
+    export const Package: Icon;
+    export const Plus: Icon;
+    export const Radio: Icon;
+    export const RefreshCw: Icon;
+    export const Save: Icon;
+    export const Search: Icon;
+    export const Settings: Icon;
+    export const Shield: Icon;
+    export const Sparkles: Icon;
+    export const TrendingUp: Icon;
+    export const Truck: Icon;
+    export const User: Icon;
+    export const Wrench: Icon;
+    export const X: Icon;
+    export const XCircle: Icon;
+    export const Zap: Icon;
+}
