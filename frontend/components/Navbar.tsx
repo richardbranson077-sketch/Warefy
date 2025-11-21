@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Bell, User, LogOut, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -39,9 +40,7 @@ export default function Navbar() {
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="bg-blue-600 p-2 rounded-lg">
-                                <Sparkles className="h-5 w-5 text-white" />
-                            </div>
+                            <Image src="/logo.png" alt="Warefy" width={40} height={40} className="rounded-lg" />
                             <div>
                                 <span className="text-xl font-bold text-gray-900">
                                     Warefy
