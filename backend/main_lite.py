@@ -37,7 +37,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-from backend.routers import ai_command, users, notifications, orders, reports, integrations, warehouses_lite as warehouses
+from backend.routers import ai_command, auth, users, notifications, orders, reports, integrations, warehouses_lite as warehouses
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -47,6 +47,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(notifications.router)
 app.include_router(orders.router)
 app.include_router(reports.router)
@@ -61,32 +62,7 @@ def health_check():
     return {"status": "healthy", "service": "warefy-backend"}
 
 
-@app.post("/api/auth/login", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """Login and get access token"""
-    user = db.query(User).filter(User.username == form_data.username).first()
-    
-    if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user"
-        )
-    
-    # Create access token
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username, "role": user.role},
-        expires_delta=access_token_expires
-    )
-    
-    return {"access_token": access_token, "token_type": "bearer"}
+
 
 @app.get("/api/auth/me", response_model=UserResponse)
 def get_current_user_info(current_user: User = Depends(get_current_active_user)):

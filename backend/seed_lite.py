@@ -11,9 +11,7 @@ sys.path.append('/Users/hendrixjohn/warefy')
 
 from backend.database_lite import init_db, SessionLocal
 from backend.models_lite import User, Warehouse, Inventory, Vehicle, Driver, SalesHistory, Anomaly
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from backend.auth_lite import get_password_hash
 
 def seed_database():
     print("🌱 Seeding database with sample data...\n")
@@ -28,7 +26,7 @@ def seed_database():
         admin = User(
             email="admin@warefy.com",
             username="admin",
-            hashed_password=pwd_context.hash("admin123"),
+            hashed_password=get_password_hash("admin123"),
             full_name="Admin User",
             role="admin"
         )
@@ -38,7 +36,7 @@ def seed_database():
         manager = User(
             email="manager@warefy.com",
             username="manager",
-            hashed_password=pwd_context.hash("manager123"),
+            hashed_password=get_password_hash("manager123"),
             full_name="Manager User",
             role="manager"
         )
