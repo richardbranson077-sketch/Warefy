@@ -37,9 +37,9 @@ export default function ServicesPage() {
                             </div>
                         </Link>
                         <div className="hidden md:flex items-center space-x-8">
-                            <Link href="/#features" className="text-slate-600 hover:text-blue-600 transition font-medium">Features</Link>
                             <Link href="/services" className="text-blue-600 font-bold transition">Services</Link>
-                            <Link href="/#industries" className="text-slate-600 hover:text-blue-600 transition font-medium">Industries</Link>
+                            <Link href="/#platform" className="text-slate-600 hover:text-blue-600 transition font-medium">Platform</Link>
+                            <Link href="/#integration" className="text-slate-600 hover:text-blue-600 transition font-medium">Integration</Link>
                             <Link href="/login" className="text-slate-600 hover:text-slate-900 transition font-medium">Sign In</Link>
                             <Link
                                 href="/dashboard"
