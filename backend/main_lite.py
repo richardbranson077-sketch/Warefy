@@ -54,6 +54,13 @@ app.include_router(integrations.router)
 app.include_router(warehouses.router)
 app.include_router(users.router)
 
+# Health check endpoint for Render
+@app.get("/health")
+def health_check():
+    """Health check endpoint for monitoring"""
+    return {"status": "healthy", "service": "warefy-backend"}
+
+
 @app.post("/api/auth/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Login and get access token"""
