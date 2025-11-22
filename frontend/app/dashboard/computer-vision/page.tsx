@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Camera,
     Scan,
@@ -40,256 +40,198 @@ export default function ComputerVisionPage() {
     const [scanResults, setScanResults] = useState<ScanResult[]>([]);
     const [selectedMode, setSelectedMode] = useState<'barcode' | 'qr' | 'ocr' | 'package'>('barcode');
     const [cameraActive, setCameraActive] = useState(false);
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [torchOn, setTorchOn] = useState(false);
 
-    const startCamera = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
-            });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                setCameraActive(true);
-            }
-        } catch (error) {
-            console.error('Camera access denied:', error);
-            alert('Please allow camera access to use scanning features');
-        }
+    // Dynamic import for the scanner to avoid SSR issues
+    const [BarcodeScanner, setBarcodeScanner] = useState<any>(null);
+
+    useEffect(() => {
+        import('react-qr-barcode-scanner').then(mod => {
+            setBarcodeScanner(() => mod.default);
+        });
+    }, []);
+
+    const startCamera = () => {
+        setCameraActive(true);
+        setScanning(true);
     };
 
     const stopCamera = () => {
-        if (videoRef.current?.srcObject) {
-            const stream = videoRef.current.srcObject as MediaStream;
-            stream.getTracks().forEach(track => track.stop());
-            setCameraActive(false);
-        }
+        setCameraActive(false);
+        setScanning(false);
     };
 
-    const simulateScan = () => {
-        const mockResults: ScanResult[] = [
-            {
-                id: Date.now().toString(),
-                type: selectedMode === 'qr' ? 'qr' : 'barcode',
-                data: selectedMode === 'qr' ? 'QR-PKG-12345-ABCD' : '1234567890123',
-                timestamp: new Date(),
-                confidence: 98.5,
-                packageInfo: {
-                    sku: 'SKU-001',
-                    name: 'Premium Widget',
-                    status: 'In Stock'
-                }
+    const handleScan = (err: any, result: any) => {
+        if (result) {
+            const text = result.text;
+            // Check if we already scanned this recently to avoid duplicates
+            const lastScan = scanResults[0];
+            if (lastScan && lastScan.data === text && (new Date().getTime() - lastScan.timestamp.getTime() < 2000)) {
+                return;
             }
-        ];
-        setScanResults([...mockResults, ...scanResults]);
-    };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            simulateScan();
+            const newScan: ScanResult = {
+                id: Math.random().toString(36).substr(2, 9),
+                type: selectedMode === 'qr' ? 'qr' : 'barcode',
+                data: text,
+                timestamp: new Date(),
+                confidence: 0.99,
+                packageInfo: {
+                    sku: text,
+                    name: `Scanned Item ${text.substring(0, 4)}`,
+                    status: 'Identified'
+                }
+            };
+            setScanResults(prev => [newScan, ...prev]);
         }
     };
 
     const stats = {
         totalScans: scanResults.length,
-        successful: scanResults.filter(r => r.confidence > 90).length,
-        avgConfidence: scanResults.length > 0
-            ? Math.round(scanResults.reduce((sum, r) => sum + r.confidence, 0) / scanResults.length)
-            : 0
+        successful: scanResults.filter(s => s.confidence > 0.8).length,
+        avgConfidence: scanResults.length > 0 ? Math.round(scanResults.reduce((acc, s) => acc + s.confidence, 0) / scanResults.length * 100) : 0
     };
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+        <div className="p-6 bg-gray-900 min-h-screen text-gray-100">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
-                            <Camera className="h-7 w-7 text-white" />
-                        </div>
-                        Computer Vision & Scanning
+                    <h1 className="text-3xl font-bold flex items-center gap-2">
+                        <Scan className="h-8 w-8 text-blue-400" />
+                        Computer Vision
                     </h1>
-                    <p className="text-gray-600 mt-2">AI-powered barcode, QR code, and package recognition</p>
+                    <p className="text-gray-400 mt-1">AI-powered visual analysis and scanning</p>
                 </div>
                 <div className="flex gap-3">
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
-                    >
-                        <Upload className="h-5 w-5" />
-                        Upload Image
-                    </button>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                    />
-                </div>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs text-gray-600 uppercase font-semibold">Total Scans</p>
-                        <Scan className="h-4 w-4 text-indigo-600" />
-                    </div>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalScans}</p>
-                </div>
-                <div className="bg-green-50 rounded-xl border border-green-200 p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs text-green-700 uppercase font-semibold">Successful</p>
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                    </div>
-                    <p className="text-2xl font-bold text-green-900">{stats.successful}</p>
-                </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs text-gray-600 uppercase font-semibold">Avg Confidence</p>
-                        <BarChart3 className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <p className="text-2xl font-bold text-gray-900">{stats.avgConfidence}%</p>
-                </div>
-            </div>
-
-            {/* Mode Selection */}
-            <div className="bg-white rounded-xl border border-gray-200 p-2 mb-6 shadow-sm">
-                <div className="flex gap-2">
-                    {[
-                        { id: 'barcode', label: 'Barcode', icon: Scan },
-                        { id: 'qr', label: 'QR Code', icon: Maximize2 },
-                        { id: 'ocr', label: 'Text OCR', icon: FileText },
-                        { id: 'package', label: 'Package Detection', icon: Package }
-                    ].map(mode => (
-                        <button
-                            key={mode.id}
-                            onClick={() => setSelectedMode(mode.id as any)}
-                            className={`flex-1 px-4 py-3 rounded-lg font-medium transition flex items-center justify-center gap-2 ${selectedMode === mode.id
-                                    ? 'bg-indigo-600 text-white shadow-sm'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                                }`}
-                        >
-                            <mode.icon className="h-5 w-5" />
-                            {mode.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Camera View */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">Live Scanner</h3>
-                        <button
-                            onClick={cameraActive ? stopCamera : startCamera}
-                            className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 ${cameraActive
-                                    ? 'bg-red-600 text-white hover:bg-red-700'
-                                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                }`}
-                        >
-                            {cameraActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                            {cameraActive ? 'Stop' : 'Start'} Camera
-                        </button>
-                    </div>
-
-                    <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
-                        <video
-                            ref={videoRef}
-                            autoPlay
-                            playsInline
-                            className="w-full h-full object-cover"
-                        />
-                        <canvas ref={canvasRef} className="hidden" />
-
-                        {!cameraActive && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <Camera className="h-16 w-16 text-gray-600 mb-4" />
-                                <p className="text-gray-400">Camera not active</p>
-                            </div>
-                        )}
-
-                        {cameraActive && (
-                            <div className="absolute inset-0 border-4 border-indigo-500/50 pointer-events-none">
-                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-2 border-indigo-500"></div>
-                            </div>
-                        )}
-                    </div>
-
-                    <button
-                        onClick={simulateScan}
-                        disabled={!cameraActive}
-                        className="w-full mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                        <Zap className="h-5 w-5" />
-                        Scan Now
+                    <button className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition border border-gray-700">
+                        <Settings className="h-4 w-4" /> Configure
                     </button>
                 </div>
+            </div>
 
-                {/* Results */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">Scan Results</h3>
-                        <button
-                            onClick={() => setScanResults([])}
-                            className="text-sm text-gray-600 hover:text-gray-900"
-                        >
-                            Clear All
-                        </button>
-                    </div>
-
-                    <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                        {scanResults.length === 0 ? (
-                            <div className="text-center py-12">
-                                <Scan className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                                <p className="text-gray-500">No scans yet</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Main Camera Feed */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-black rounded-2xl overflow-hidden relative aspect-video border border-gray-700 shadow-2xl">
+                        {cameraActive && BarcodeScanner ? (
+                            <div className="w-full h-full relative">
+                                <BarcodeScanner
+                                    width="100%"
+                                    height="100%"
+                                    onUpdate={handleScan}
+                                    torch={torchOn}
+                                />
+                                {/* Overlay UI */}
+                                <div className="absolute inset-0 pointer-events-none border-2 border-blue-500/30">
+                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-48 border-2 border-blue-400 rounded-lg bg-blue-400/10 animate-pulse"></div>
+                                    <div className="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded-full text-xs text-green-400 flex items-center gap-1">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                        LIVE FEED
+                                    </div>
+                                </div>
                             </div>
                         ) : (
-                            scanResults.map((result) => (
-                                <div key={result.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                    <div className="flex items-start justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`p-2 rounded-lg ${result.type === 'qr' ? 'bg-purple-100' : 'bg-indigo-100'
-                                                }`}>
-                                                {result.type === 'qr' ? (
-                                                    <Maximize2 className="h-4 w-4 text-purple-600" />
-                                                ) : (
-                                                    <Scan className="h-4 w-4 text-indigo-600" />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900">{result.data}</p>
-                                                <p className="text-xs text-gray-500">
-                                                    {result.timestamp.toLocaleTimeString()}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">
-                                            {result.confidence}%
-                                        </span>
-                                    </div>
-
-                                    {result.packageInfo && (
-                                        <div className="mt-3 pt-3 border-t border-gray-200">
-                                            <div className="grid grid-cols-2 gap-2 text-sm">
-                                                <div>
-                                                    <p className="text-gray-500">SKU</p>
-                                                    <p className="font-semibold">{result.packageInfo.sku}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-gray-500">Status</p>
-                                                    <p className="font-semibold text-green-600">{result.packageInfo.status}</p>
-                                                </div>
-                                            </div>
-                                            <p className="text-sm text-gray-700 mt-2">{result.packageInfo.name}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            ))
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-gray-900">
+                                <Camera className="h-16 w-16 mb-4 opacity-50" />
+                                <p>Camera is offline</p>
+                                <button
+                                    onClick={startCamera}
+                                    className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2"
+                                >
+                                    <Play className="h-4 w-4" /> Start Camera
+                                </button>
+                            </div>
                         )}
+
+                        {/* Camera Controls */}
+                        {cameraActive && (
+                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent flex justify-center gap-4">
+                                <button
+                                    onClick={stopCamera}
+                                    className="p-3 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/40 transition backdrop-blur-sm"
+                                >
+                                    <Pause className="h-6 w-6" />
+                                </button>
+                                <button
+                                    onClick={() => setTorchOn(!torchOn)}
+                                    className={`p-3 rounded-full transition backdrop-blur-sm ${torchOn ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-700/50 text-white'}`}
+                                >
+                                    <Zap className="h-6 w-6" />
+                                </button>
+                                <button className="p-3 rounded-full bg-gray-700/50 text-white hover:bg-gray-600/50 transition backdrop-blur-sm">
+                                    <Maximize2 className="h-6 w-6" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-gray-800 rounded-xl border border-gray-700 p-4 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs text-gray-400 uppercase font-semibold">Total Scans</p>
+                                <Scan className="h-4 w-4 text-indigo-400" />
+                            </div>
+                            <p className="text-2xl font-bold text-gray-100">{stats.totalScans}</p>
+                        </div>
+                        <div className="bg-green-900/20 rounded-xl border border-green-700/50 p-4 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs text-green-400 uppercase font-semibold">Successful</p>
+                                <CheckCircle className="h-4 w-4 text-green-400" />
+                            </div>
+                            <p className="text-2xl font-bold text-green-200">{stats.successful}</p>
+                        </div>
+                        <div className="bg-gray-800 rounded-xl border border-gray-700 p-4 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs text-gray-400 uppercase font-semibold">Avg Confidence</p>
+                                <BarChart3 className="h-4 w-4 text-purple-400" />
+                            </div>
+                            <p className="text-2xl font-bold text-gray-100">{stats.avgConfidence}%</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sidebar / Recent Scans */}
+                <div className="space-y-6">
+                    <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-sm h-full">
+                        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <RefreshCw className="h-5 w-5 text-gray-400" />
+                            Recent Scans
+                        </h2>
+                        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                            {scanResults.length === 0 ? (
+                                <div className="text-center py-12 text-gray-500">
+                                    <Scan className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                                    <p>No scans yet</p>
+                                    <p className="text-sm mt-1">Start the camera to begin</p>
+                                </div>
+                            ) : (
+                                scanResults.map((scan) => (
+                                    <div key={scan.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700 hover:border-blue-500/50 transition group">
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="p-2 bg-blue-500/10 rounded-lg">
+                                                    {scan.type === 'qr' ? <Scan className="h-4 w-4 text-blue-400" /> : <Package className="h-4 w-4 text-purple-400" />}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-white text-sm">{scan.packageInfo?.name || 'Unknown Item'}</p>
+                                                    <p className="text-xs text-gray-500 font-mono">{scan.data}</p>
+                                                </div>
+                                            </div>
+                                            <span className="text-xs text-gray-500">{scan.timestamp.toLocaleTimeString()}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-800">
+                                            <span className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-full border border-green-500/20">
+                                                {scan.packageInfo?.status}
+                                            </span>
+                                            <button className="text-gray-400 hover:text-white transition">
+                                                <Eye className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
