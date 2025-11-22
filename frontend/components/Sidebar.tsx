@@ -30,6 +30,7 @@ const navigation = [
     { name: 'Anomalies', href: '/dashboard/anomalies', icon: AlertTriangle },
     { name: 'Fleet Management', href: '/dashboard/vehicles', icon: Truck },
     { name: 'Financials', href: '/dashboard/financials', icon: DollarSign },
+    { name: 'Audit Trail', href: '/dashboard/blockchain', icon: Shield },
     // Advanced features
     { name: 'AI Command Center', href: '/dashboard/ai-command', icon: Brain },
     { name: 'Computer Vision', href: '/dashboard/computer-vision', icon: Camera },
@@ -37,7 +38,6 @@ const navigation = [
     { name: 'Collaboration', href: '/dashboard/collaboration', icon: User },
     { name: 'Edge AI', href: '/dashboard/edge-ai', icon: Laptop },
     { name: 'Knowledge Base', href: '/dashboard/knowledge-base', icon: BookOpen },
-    { name: 'Audit Trail', href: '/dashboard/blockchain', icon: Shield },
 ];
 
 export default function Sidebar() {
