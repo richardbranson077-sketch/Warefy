@@ -54,6 +54,7 @@ app.include_router(reports.router)
 app.include_router(integrations.router)
 app.include_router(warehouses.router)
 app.include_router(users.router)
+app.include_router(ai_command.router)
 
 # Health check endpoint for Render
 @app.get("/health")

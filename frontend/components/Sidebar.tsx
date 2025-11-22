@@ -22,6 +22,7 @@ import {
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Gemini Test', href: '/dashboard/gemini-test', icon: Brain },
     { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
     { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
     { name: 'Demand Forecast', href: '/dashboard/demand', icon: TrendingUp },
@@ -67,16 +68,16 @@ export default function Sidebar() {
                 })}
             </div>
 
-            <div className="absolute bottom-0 w-full border-t border-gray-200 p-4 bg-gray-50">
+            <div className="absolute bottom-0 w-full border-t border-gray-200 p-4 bg-gray-50 flex justify-center">
                 <Link
                     href="/dashboard/settings"
-                    className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${pathname === '/dashboard/settings'
+                    className={`p-2 rounded-lg transition-all ${pathname === '/dashboard/settings'
                         ? 'text-blue-700 bg-blue-50 shadow-sm border border-blue-100'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         }`}
+                    title="Settings"
                 >
-                    <Settings className={`mr-3 h-5 w-5 ${pathname === '/dashboard/settings' ? 'text-blue-600' : 'text-gray-400'}`} />
-                    Settings
+                    <Settings className={`h-6 w-6 ${pathname === '/dashboard/settings' ? 'text-blue-600' : 'text-gray-400'}`} />
                 </Link>
             </div>
         </aside>

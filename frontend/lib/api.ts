@@ -29,27 +29,7 @@ if (typeof window !== 'undefined') {
 // Authentication
 export const auth = {
     login: async (username: string, password: string) => {
-        // Demo mode fallback
-        if (username === 'demo@warefy.com' || username === 'demo' || username === 'admin') {
-            if (password === 'demo123' || password === 'admin123') {
-                // Create a demo token
-                const demoToken = btoa(JSON.stringify({
-                    username: username,
-                    role: 'admin',
-                    exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
-                }));
-
-                localStorage.setItem('token', demoToken);
-                localStorage.setItem('username', username);
-
-                return {
-                    access_token: demoToken,
-                    token_type: 'bearer'
-                };
-            }
-        }
-
-        // Try real backend login
+        // 1. Try real backend login first
         try {
             const formData = new FormData();
             formData.append('username', username);
@@ -66,7 +46,29 @@ export const auth = {
 
             return response.data;
         } catch (error) {
-            // If backend login fails, throw error
+            console.log('Backend login failed, checking demo credentials...');
+
+            // 2. Demo mode fallback if backend fails
+            if (username === 'demo@warefy.com' || username === 'demo' || username === 'admin') {
+                if (password === 'demo123' || password === 'admin123') {
+                    // Create a demo token
+                    const demoToken = btoa(JSON.stringify({
+                        username: username,
+                        role: 'admin',
+                        exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+                    }));
+
+                    localStorage.setItem('token', demoToken);
+                    localStorage.setItem('username', username);
+
+                    return {
+                        access_token: demoToken,
+                        token_type: 'bearer'
+                    };
+                }
+            }
+
+            // If neither works, throw error
             throw new Error('Invalid credentials. Use demo/admin123 for demo access.');
         }
     },
