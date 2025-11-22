@@ -45,7 +45,7 @@ export default function Sidebar() {
 
     return (
         <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 overflow-y-auto hidden md:block z-20">
-            <div className="py-4 px-3 space-y-1">
+            <div className="py-4 px-3 space-y-1 pb-20">
                 {navigation.map((item) => {
                     const isActive = pathname === item.href;
                     return (
