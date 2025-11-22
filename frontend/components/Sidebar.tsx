@@ -15,7 +15,7 @@ import {
     User,
     Laptop,
     BookOpen,
-    Link as LucideLink,
+    Shield,
     ShoppingCart,
     DollarSign
 } from 'lucide-react';
@@ -37,7 +37,7 @@ const navigation = [
     { name: 'Collaboration', href: '/dashboard/collaboration', icon: User },
     { name: 'Edge AI', href: '/dashboard/edge-ai', icon: Laptop },
     { name: 'Knowledge Base', href: '/dashboard/knowledge-base', icon: BookOpen },
-    { name: 'Blockchain', href: '/dashboard/blockchain', icon: LucideLink },
+    { name: 'Audit Trail', href: '/dashboard/blockchain', icon: Shield },
 ];
 
 export default function Sidebar() {
