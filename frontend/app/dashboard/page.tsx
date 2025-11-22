@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import Image from 'next/image';
 import {
@@ -249,21 +250,21 @@ export default function DashboardPage() {
 
             {/* Quick Actions */}
             <section className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-6 text-left transition group">
+                <Link href="/dashboard/inventory" className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-6 text-left transition group block">
                     <Package className="h-8 w-8 mb-3 group-hover:scale-110 transition-transform" />
                     <h3 className="font-semibold text-lg mb-1">Add Inventory</h3>
                     <p className="text-sm text-blue-100">Update stock levels</p>
-                </button>
-                <button className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl p-6 text-left transition group">
+                </Link>
+                <Link href="/dashboard/routes" className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl p-6 text-left transition group block">
                     <Truck className="h-8 w-8 mb-3 group-hover:scale-110 transition-transform" />
                     <h3 className="font-semibold text-lg mb-1">Create Route</h3>
                     <p className="text-sm text-purple-100">Optimize delivery path</p>
-                </button>
-                <button className="bg-green-600 hover:bg-green-700 text-white rounded-xl p-6 text-left transition group">
+                </Link>
+                <Link href="/dashboard/ai-reports" className="bg-green-600 hover:bg-green-700 text-white rounded-xl p-6 text-left transition group block">
                     <BarChart3 className="h-8 w-8 mb-3 group-hover:scale-110 transition-transform" />
                     <h3 className="font-semibold text-lg mb-1">View Analytics</h3>
                     <p className="text-sm text-green-100">Detailed insights</p>
-                </button>
+                </Link>
             </section>
         </div>
     );
