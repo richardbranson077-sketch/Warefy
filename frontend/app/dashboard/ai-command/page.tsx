@@ -62,10 +62,8 @@ export default function AICommandCenterPage() {
                         className={`mb-4 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                         <div
-                            className={`max-w-xs rounded-lg p-3 ${{
-                                'bg-blue-600 text-white': msg.role === 'user',
-                                'bg-gray-800 text-gray-100': msg.role === 'ai',
-                            }}`}
+                            className={`max-w-xs rounded-lg p-3 ${msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-100'
+                                }`}
                         >
                             {msg.content}
                         </div>
