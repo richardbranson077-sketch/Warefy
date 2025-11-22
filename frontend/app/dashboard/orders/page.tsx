@@ -27,7 +27,8 @@ import {
     X,
     ChevronDown,
     MoreVertical,
-    RefreshCw
+    RefreshCw,
+    Activity
 } from 'lucide-react';
 
 export default function OrdersPage() {
@@ -41,12 +42,44 @@ export default function OrdersPage() {
     const [sortBy, setSortBy] = useState<'date' | 'amount' | 'customer'>('date');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+    const [liveMode, setLiveMode] = useState(false);
+    const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
         fetchOrders();
     }, []);
 
+    // Live Mode: Poll for updates every 5 seconds
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (liveMode) {
+            interval = setInterval(() => {
+                fetchOrders();
+            }, 5000);
+        }
+        return () => clearInterval(interval);
+    }, [liveMode]);
+
+    // Simulation Mode: Generate random orders every 8 seconds
+    const toggleSimulation = () => {
+        if (simulationInterval) {
+            clearInterval(simulationInterval);
+            setSimulationInterval(null);
+        } else {
+            // Create an initial order immediately
+            createDemoOrder();
+            // Then set up interval
+            const interval = setInterval(() => {
+                createDemoOrder();
+            }, 8000);
+            setSimulationInterval(interval);
+            setLiveMode(true); // Auto-enable live mode to see results
+        }
+    };
+
     const fetchOrders = async () => {
-        setLoading(true);
+        // Don't set loading to true on background refreshes to avoid flickering
+        if (!liveMode) setLoading(true);
         try {
             const data = await orders.getAll();
             setOrderList(data);
@@ -59,17 +92,27 @@ export default function OrdersPage() {
 
     const createDemoOrder = async () => {
         try {
+            const randomItems = [
+                { sku: 'WIDGET-001', price: 49.99 },
+                { sku: 'GADGET-002', price: 199.99 },
+                { sku: 'TOOL-003', price: 29.99 },
+                { sku: 'SENSOR-004', price: 89.50 },
+                { sku: 'PANEL-005', price: 150.00 }
+            ];
+            const item1 = randomItems[Math.floor(Math.random() * randomItems.length)];
+            const item2 = randomItems[Math.floor(Math.random() * randomItems.length)];
+
             await orders.create({
-                customer_name: 'Demo Customer ' + Math.floor(Math.random() * 1000),
-                customer_email: 'demo@example.com',
-                shipping_address: '123 Demo St, Tech City',
+                customer_name: ['Alice Smith', 'Bob Jones', 'Charlie Day', 'Diana Prince', 'Evan Wright'][Math.floor(Math.random() * 5)],
+                customer_email: `customer${Math.floor(Math.random() * 1000)}@example.com`,
+                shipping_address: `${Math.floor(Math.random() * 999)} Innovation Ave`,
                 status: 'pending',
                 items: [
-                    { sku: 'WIDGET-001', quantity: 2, unit_price: 49.99 },
-                    { sku: 'GADGET-002', quantity: 1, unit_price: 199.99 }
+                    { sku: item1.sku, quantity: Math.floor(Math.random() * 3) + 1, unit_price: item1.price },
+                    { sku: item2.sku, quantity: Math.floor(Math.random() * 2) + 1, unit_price: item2.price }
                 ]
             });
-            fetchOrders();
+            if (!liveMode) fetchOrders(); // Only manual fetch if not in live mode
         } catch (error) {
             console.error('Failed to create order:', error);
         }
@@ -174,19 +217,29 @@ export default function OrdersPage() {
                     </h1>
                     <p className="text-gray-400 mt-1">Track and manage customer orders across your supply chain</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 items-center">
+                    <div className="flex items-center gap-2 mr-2 bg-gray-800 px-3 py-2 rounded-lg border border-gray-700">
+                        <div className={`w-2 h-2 rounded-full ${liveMode ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}></div>
+                        <span className="text-sm text-gray-300">Live Updates</span>
+                        <button
+                            onClick={() => setLiveMode(!liveMode)}
+                            className={`ml-2 w-10 h-5 rounded-full transition-colors relative ${liveMode ? 'bg-green-600' : 'bg-gray-600'}`}
+                        >
+                            <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${liveMode ? 'left-6' : 'left-1'}`}></div>
+                        </button>
+                    </div>
+
                     <button
-                        onClick={fetchOrders}
-                        className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition border border-gray-700"
+                        onClick={toggleSimulation}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition border ${simulationInterval
+                            ? 'bg-green-900/30 text-green-400 border-green-500/50 hover:bg-green-900/50'
+                            : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700'
+                            }`}
                     >
-                        <RefreshCw className="h-4 w-4" /> Refresh
+                        <Activity className={`h-4 w-4 ${simulationInterval ? 'animate-pulse' : ''}`} />
+                        {simulationInterval ? 'Simulating Traffic...' : 'Simulate Traffic'}
                     </button>
-                    <button
-                        onClick={exportToCSV}
-                        className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition border border-gray-700"
-                    >
-                        <Download className="h-4 w-4" /> Export
-                    </button>
+
                     <button
                         onClick={createDemoOrder}
                         className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition shadow-lg shadow-purple-900/20"
@@ -266,8 +319,8 @@ export default function OrdersPage() {
                         key={status}
                         onClick={() => setFilter(status)}
                         className={`px-4 py-2 rounded-full text-sm font-medium capitalize transition whitespace-nowrap ${filter === status
-                                ? 'bg-purple-600 text-white'
-                                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 border border-gray-700'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700 border border-gray-700'
                             }`}
                     >
                         {status} {status !== 'all' && `(${orderList.filter(o => o.status === status).length})`}
