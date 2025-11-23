@@ -16,9 +16,10 @@ def call_llm(prompt: str) -> str:
     The function reads the API key from the environment variable ``GEMINI_API_KEY``.
     If the variable is missing, it falls back to the hard‑coded key you provided.
     """
-    api_key = os.getenv("GEMINI_API_KEY") or "AIzaSyASyezy9BuFgygfLpv3aW2BUDQHz2Zw_iI"
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=500, detail="Gemini API key not configured")
+        print("ERROR: GEMINI_API_KEY not found in environment variables")
+        raise HTTPException(status_code=500, detail="Gemini API key not configured in server environment")
     # Retry logic for robustness
     max_retries = 3
     for attempt in range(max_retries):
