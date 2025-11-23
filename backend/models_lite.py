@@ -178,3 +178,116 @@ class MaintenanceLog(Base):
     performed_at = Column(DateTime)
     next_maintenance = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+# ========================================================================
+# NEW MODELS FOR ENTERPRISE INTEGRATIONS
+# ========================================================================
+
+class Shipment(Base):
+    """Multi-carrier shipment tracking"""
+    __tablename__ = "shipments"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"))
+    carrier = Column(String)  # fedex, ups, usps, dhl
+    service_type = Column(String)  # ground, express, overnight
+    tracking_number = Column(String, unique=True, index=True)
+    label_url = Column(String, nullable=True)
+    status = Column(String, default="pending")  # pending, in_transit, delivered, exception
+    cost = Column(Float)
+    estimated_delivery = Column(DateTime, nullable=True)
+    actual_delivery = Column(DateTime, nullable=True)
+    from_address = Column(JSON)
+    to_address = Column(JSON)
+    package_details = Column(JSON)  # weight, dimensions, insurance
+    tracking_events = Column(JSON, default=[])  # Array of tracking updates
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    order = relationship("Order", back_populates="shipments")
+
+class CarrierAccount(Base):
+    """Carrier API credentials"""
+    __tablename__ = "carrier_accounts"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    carrier = Column(String, index=True)  # fedex, ups, usps, dhl
+    account_number = Column(String)
+    api_key = Column(String)
+    api_secret = Column(String, nullable=True)
+    meter_number = Column(String, nullable=True)  # FedEx specific
+    user_id = Column(String, nullable=True)  # UPS specific
+    is_active = Column(Boolean, default=True)
+    is_test_mode = Column(Boolean, default=True)
+    settings = Column(JSON, default={})
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ERPConnection(Base):
+    """ERP system connections"""
+    __tablename__ = "erp_connections"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    erp_type = Column(String, index=True)  # quickbooks, xero, sap, netsuite
+    company_id = Column(String)
+    access_token = Column(String)
+    refresh_token = Column(String, nullable=True)
+    realm_id = Column(String, nullable=True)  # QuickBooks specific
+    tenant_id = Column(String, nullable=True)  # Xero specific
+    is_active = Column(Boolean, default=True)
+    last_sync = Column(DateTime, nullable=True)
+    sync_frequency = Column(String, default="hourly")  # hourly, daily, manual
+    sync_settings = Column(JSON, default={})  # What to sync (invoices, POs, etc.)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ERPSyncLog(Base):
+    """Track ERP sync operations"""
+    __tablename__ = "erp_sync_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    connection_id = Column(Integer, ForeignKey("erp_connections.id"))
+    sync_type = Column(String)  # invoice, purchase_order, inventory, customer
+    direction = Column(String)  # to_erp, from_erp
+    status = Column(String)  # success, failed, partial
+    records_processed = Column(Integer, default=0)
+    records_failed = Column(Integer, default=0)
+    error_details = Column(JSON, nullable=True)
+    started_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+
+class EcommerceConnection(Base):
+    """E-commerce platform connections"""
+    __tablename__ = "ecommerce_connections"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    platform = Column(String, index=True)  # shopify, woocommerce, amazon, ebay
+    store_name = Column(String)
+    store_url = Column(String, nullable=True)
+    api_key = Column(String)
+    api_secret = Column(String, nullable=True)
+    access_token = Column(String, nullable=True)
+    marketplace_id = Column(String, nullable=True)  # Amazon specific
+    is_active = Column(Boolean, default=True)
+    auto_sync_orders = Column(Boolean, default=True)
+    auto_sync_inventory = Column(Boolean, default=True)
+    last_order_sync = Column(DateTime, nullable=True)
+    last_inventory_sync = Column(DateTime, nullable=True)
+    sync_settings = Column(JSON, default={})
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class EcommerceSyncLog(Base):
+    """Track e-commerce sync operations"""
+    __tablename__ = "ecommerce_sync_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    connection_id = Column(Integer, ForeignKey("ecommerce_connections.id"))
+    sync_type = Column(String)  # orders, inventory, products
+    direction = Column(String)  # import, export
+    status = Column(String)  # success, failed, partial
+    records_processed = Column(Integer, default=0)
+    records_failed = Column(Integer, default=0)
+    error_details = Column(JSON, nullable=True)
+    started_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
