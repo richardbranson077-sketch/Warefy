@@ -22,6 +22,7 @@ def call_llm(prompt: str) -> str:
     try:
         genai.configure(api_key=api_key)
         # "gemini-flash-latest" is a generally available model alias
+        # Force Vercel rebuild
         model = genai.GenerativeModel("gemini-flash-latest")
         system_prompt = """You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform.
 Your goal is to assist warehouse managers, logistics coordinators, and executives in optimizing their supply chain.
