@@ -24,8 +24,8 @@ def call_llm(prompt: str) -> str:
     for attempt in range(max_retries):
         try:
             genai.configure(api_key=api_key)
-            # Use standard stable model
-            model = genai.GenerativeModel("gemini-pro")
+            # Use specific stable model version
+            model = genai.GenerativeModel("gemini-1.5-flash")
             
             system_prompt = """You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform.
 Your goal is to assist warehouse managers, logistics coordinators, and executives in optimizing their supply chain.
