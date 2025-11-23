@@ -11,7 +11,7 @@ import {
     File, TrendingUp, AlertTriangle, Download, Brain, Sparkles, Target,
     DollarSign, Package, ShoppingBag, User, Calendar, Filter, RefreshCw,
     Eye, Settings, Share, Mail, Clock, Activity, BarChart3,
-    TrendingDown, ArrowUpRight, ArrowDownRight, Zap
+    TrendingDown, ArrowUpRight, ArrowDownRight, Zap, Printer
 } from 'lucide-react';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -21,10 +21,21 @@ export default function AIReportsPage() {
     const [loading, setLoading] = useState(true);
     const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('7d');
     const [reportType, setReportType] = useState<'overview' | 'sales' | 'inventory' | 'performance'>('overview');
+    const [autoRefresh, setAutoRefresh] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
     useEffect(() => {
         fetchStats();
     }, [timeRange]);
+
+    // Auto-refresh every 30 seconds if enabled
+    useEffect(() => {
+        if (!autoRefresh) return;
+        const interval = setInterval(() => {
+            fetchStats();
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [autoRefresh]);
 
     const fetchStats = async () => {
         try {
@@ -40,10 +51,12 @@ export default function AIReportsPage() {
                 order_growth: 8.3,
                 avg_order_value: data.total_orders > 0 ? data.total_revenue / data.total_orders : 0
             });
+            setLastUpdated(new Date());
         } catch (error) {
             console.error('Failed to fetch reports:', error);
             // Fallback to mock data if API fails (e.g. if backend isn't running)
             setStats(generateMockData());
+            setLastUpdated(new Date());
         } finally {
             setLoading(false);
         }
@@ -112,11 +125,21 @@ export default function AIReportsPage() {
                     <p className="text-gray-600 mt-2">Comprehensive insights powered by machine learning</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                    <button className="px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-2">
-                        <Share2 className="h-5 w-5" />
-                        Share
+                    <button
+                        onClick={() => setAutoRefresh(!autoRefresh)}
+                        className={`px-5 py-2.5 border rounded-lg transition flex items-center gap-2 ${autoRefresh
+                                ? 'bg-green-50 border-green-300 text-green-700'
+                                : 'bg-white border-gray-300 hover:bg-gray-50'
+                            }`}
+                    >
+                        <RefreshCw className={`h-5 w-5 ${autoRefresh ? 'animate-spin' : ''}`} />
+                        {autoRefresh ? 'Auto-Refresh On' : 'Auto-Refresh Off'}
                     </button>
                     <button className="px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-2">
+                        <Share className="h-5 w-5" />
+                        Share
+                    </button>
+                    <button onClick={() => window.print()} className="px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-2">
                         <Printer className="h-5 w-5" />
                         Print
                     </button>
@@ -129,6 +152,19 @@ export default function AIReportsPage() {
 
             {/* Time Range & Report Type */}
             <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="h-4 w-4" />
+                        Last updated: {lastUpdated.toLocaleTimeString()}
+                    </div>
+                    <button
+                        onClick={fetchStats}
+                        className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition flex items-center gap-2"
+                    >
+                        <RefreshCw className="h-4 w-4" />
+                        Refresh Now
+                    </button>
+                </div>
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Time Range</label>
