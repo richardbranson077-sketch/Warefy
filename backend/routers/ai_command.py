@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from backend.database_lite import get_db
 
-from models import Inventory, Route, Anomaly, Warehouse
+from backend.models_lite import Inventory, Route, Anomaly, Warehouse
 
 def get_real_time_context(db: Session) -> str:
     """Fetch real-time metrics from the database to ground the AI."""
