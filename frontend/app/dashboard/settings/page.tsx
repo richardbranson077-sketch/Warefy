@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { User as UserIcon, Moon, Settings, Bell, Shield, Save } from 'lucide-react';
-import { auth, updateUser } from '../../../lib/api';
+import { auth, updateUser } from '@/lib/api';
 
 export default function SettingsPage() {
     const [user, setUser] = useState<any>(null);
