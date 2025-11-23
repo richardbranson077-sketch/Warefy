@@ -19,12 +19,15 @@ def call_llm(prompt: str) -> str:
     api_key = os.getenv("GEMINI_API_KEY") or "AIzaSyASyezy9BuFgygfLpv3aW2BUDQHz2Zw_iI"
     if not api_key:
         raise HTTPException(status_code=500, detail="Gemini API key not configured")
-    try:
-        genai.configure(api_key=api_key)
-        # "gemini-flash-latest" is a generally available model alias
-        # Force Vercel rebuild
-        model = genai.GenerativeModel("gemini-flash-latest")
-        system_prompt = """You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform.
+    # Retry logic for robustness
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            genai.configure(api_key=api_key)
+            # Use specific stable model version
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            
+            system_prompt = """You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform.
 Your goal is to assist warehouse managers, logistics coordinators, and executives in optimizing their supply chain.
 
 **Your Capabilities & Knowledge Base:**
@@ -44,14 +47,21 @@ Your goal is to assist warehouse managers, logistics coordinators, and executive
 - Assume they have access to real‑time data.
 
 User Query: """ + prompt
-        full_prompt = system_prompt + prompt
-        print(f"Sending request to Gemini with prompt length: {len(full_prompt)}")
-        response = model.generate_content(full_prompt)
-        print("Gemini response received successfully.")
-        return response.text
-    except Exception as exc:
-        print(f"ERROR calling Gemini: {exc}")
-        raise HTTPException(status_code=502, detail=f"Gemini request failed: {exc}")
+            full_prompt = system_prompt + prompt
+            print(f"Sending request to Gemini (Attempt {attempt+1}/{max_retries}) with prompt length: {len(full_prompt)}")
+            
+            response = model.generate_content(full_prompt)
+            print("Gemini response received successfully.")
+            return response.text
+            
+        except Exception as exc:
+            print(f"ERROR calling Gemini (Attempt {attempt+1}): {exc}")
+            if attempt == max_retries - 1:
+                # On last attempt, raise the error with detail
+                raise HTTPException(status_code=502, detail=f"Gemini request failed after {max_retries} attempts: {str(exc)}")
+            # Wait briefly before retrying (optional, but good practice)
+            import time
+            time.sleep(1)
 
 # ---------------------------------------------------------------------------
 # FastAPI router
