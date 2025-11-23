@@ -54,9 +54,12 @@ export default function AICommandCenterPage() {
             }
         } catch (err: any) {
             console.error('API Error:', err);
+            // Extract the specific error message from the backend if available
+            const backendError = err.response?.data?.detail || err.message || JSON.stringify(err);
+
             const errorMessage: Message = {
                 role: 'ai',
-                content: `❌ **Connection Error**\n\nI couldn't reach the AI brain.\nError: ${err.message || JSON.stringify(err)}\n\nPlease check if the backend is running.`,
+                content: `❌ **Connection Error**\n\nI couldn't reach the AI brain.\n**Details:** ${backendError}\n\nPlease check if the backend is running.`,
                 timestamp: new Date()
             };
             setMessages(prev => [...prev, errorMessage]);
