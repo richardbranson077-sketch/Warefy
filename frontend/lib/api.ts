@@ -192,8 +192,8 @@ export const aiRecommendations = {
 
 // AI Command Center
 export const ai = {
-    command: async (prompt: string) => {
-        const response = await api.post('/api/ai/command', { prompt });
+    command: async (prompt: string, history: any[] = []) => {
+        const response = await api.post('/api/ai/command', { prompt, history });
         return response.data;
     },
 };

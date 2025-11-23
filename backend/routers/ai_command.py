@@ -9,12 +9,10 @@ from backend.database_lite import get_db
 # ---------------------------------------------------------------------------
 # Helper: call Gemini LLM
 # ---------------------------------------------------------------------------
-
-def call_llm(prompt: str) -> str:
-    """Send the prompt to Google Gemini and return the generated text.
-
-    The function reads the API key from the environment variable ``GEMINI_API_KEY``.
-    If the variable is missing, it falls back to the hard‑coded key you provided.
+# Real LLM call using Google Gemini
+def call_llm(prompt: str, history: list[dict] = []) -> str:
+    """Send prompt to Google Gemini and return the response text.
+    Uses the GEMINI_API_KEY environment variable.
     """
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -28,7 +26,7 @@ def call_llm(prompt: str) -> str:
             # Use model alias explicitly listed in available models
             model = genai.GenerativeModel("gemini-flash-latest")
             
-            system_prompt = """You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform.
+            system_instruction = """You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform.
 Your goal is to assist warehouse managers, logistics coordinators, and executives in optimizing their supply chain.
 
 **Your Capabilities & Knowledge Base:**
@@ -45,13 +43,25 @@ Your goal is to assist warehouse managers, logistics coordinators, and executive
 
 **Current Context:**
 - The user is logged into the Warefy Dashboard.
-- Assume they have access to real‑time data.
+- Assume they have access to real‑time data."""
 
-User Query: """ + prompt
-            full_prompt = system_prompt + prompt
-            print(f"Sending request to Gemini (Attempt {attempt+1}/{max_retries}) with prompt length: {len(full_prompt)}")
+            # Start chat with history
+            chat = model.start_chat(history=history)
             
-            response = model.generate_content(full_prompt)
+            # Send the new message with system instruction prepended contextually if needed, 
+            # but for chat mode, system instruction is best set at model init or just assumed via the persona.
+            # Note: gemini-flash-latest might not support system_instruction arg in GenerativeModel constructor yet in all versions,
+            # so we prepend it to the first message or rely on the model's capability.
+            # For simplicity and robustness, we'll just send the prompt. The history maintains context.
+            # If history is empty, we can prepend the system prompt to the first user message.
+            
+            final_prompt = prompt
+            if not history:
+                final_prompt = system_instruction + "\n\nUser Query: " + prompt
+            
+            print(f"Sending request to Gemini (Attempt {attempt+1}/{max_retries})")
+            
+            response = chat.send_message(final_prompt)
             print("Gemini response received successfully.")
             return response.text
             
@@ -72,6 +82,7 @@ router = APIRouter(prefix="/api/ai", tags=["AI"])
 
 class AICommandRequest(BaseModel):
     prompt: str
+    history: list[dict] = []  # List of {"role": "user"|"model", "parts": ["message"]}
 
 class AICommandResponse(BaseModel):
     response: str
@@ -79,15 +90,16 @@ class AICommandResponse(BaseModel):
 @router.post("/command", response_model=AICommandResponse)
 def run_command(request: AICommandRequest, db: Session = Depends(get_db)):
     """Execute a natural‑language command via Gemini and return the response.
-
     Parameters
     ----------
     request: AICommandRequest
-        The incoming request containing the user prompt.
+        The incoming request containing the user prompt and conversation history.
     db: Session
         Database session (currently unused but kept for future auth/context).
     """
     if not request.prompt:
         raise HTTPException(status_code=400, detail="Prompt cannot be empty")
-    ai_reply = call_llm(request.prompt)
+    
+    # In production, call the LLM with proper authentication & context
+    ai_reply = call_llm(request.prompt, request.history)
     return AICommandResponse(response=ai_reply)

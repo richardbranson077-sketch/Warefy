@@ -39,7 +39,15 @@ export default function AICommandCenterPage() {
 
         try {
             console.log('Calling AI API...');
-            const response = await ai.command(userMsg);
+
+            // Format history for Gemini API
+            // Map 'ai' -> 'model' and ensure structure matches expected backend input
+            const history = messages.map(msg => ({
+                role: msg.role === 'ai' ? 'model' : 'user',
+                parts: [msg.content]
+            }));
+
+            const response = await ai.command(userMsg, history);
             console.log('API Response:', response);
 
             if (response && response.response) {
