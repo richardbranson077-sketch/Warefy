@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Brain, Send, Loader2, Sparkles, User, AlertTriangle, Mic, Box, Truck, FileText } from 'lucide-react';
 import { ai } from '@/lib/api';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
     role: 'user' | 'ai';
@@ -137,7 +139,60 @@ export default function AICommandCenterPage() {
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-gray-800 text-gray-100 border border-gray-700'
                                 }`}>
-                                <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                                <div className="prose prose-invert prose-sm max-w-none leading-relaxed">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            // Style tables
+                                            table: ({ node, ...props }) => (
+                                                <table className="w-full border-collapse border border-gray-600 my-2" {...props} />
+                                            ),
+                                            thead: ({ node, ...props }) => (
+                                                <thead className="bg-gray-700" {...props} />
+                                            ),
+                                            th: ({ node, ...props }) => (
+                                                <th className="border border-gray-600 px-3 py-2 text-left font-semibold" {...props} />
+                                            ),
+                                            td: ({ node, ...props }) => (
+                                                <td className="border border-gray-600 px-3 py-2" {...props} />
+                                            ),
+                                            // Style lists
+                                            ul: ({ node, ...props }) => (
+                                                <ul className="list-disc list-inside my-2 space-y-1" {...props} />
+                                            ),
+                                            ol: ({ node, ...props }) => (
+                                                <ol className="list-decimal list-inside my-2 space-y-1" {...props} />
+                                            ),
+                                            // Style headings
+                                            h1: ({ node, ...props }) => (
+                                                <h1 className="text-2xl font-bold mt-4 mb-2" {...props} />
+                                            ),
+                                            h2: ({ node, ...props }) => (
+                                                <h2 className="text-xl font-bold mt-3 mb-2" {...props} />
+                                            ),
+                                            h3: ({ node, ...props }) => (
+                                                <h3 className="text-lg font-semibold mt-2 mb-1" {...props} />
+                                            ),
+                                            // Style paragraphs
+                                            p: ({ node, ...props }) => (
+                                                <p className="my-2" {...props} />
+                                            ),
+                                            // Style strong/bold
+                                            strong: ({ node, ...props }) => (
+                                                <strong className="font-bold text-purple-300" {...props} />
+                                            ),
+                                            // Style code blocks
+                                            code: ({ node, inline, ...props }: any) =>
+                                                inline ? (
+                                                    <code className="bg-gray-700 px-1.5 py-0.5 rounded text-sm" {...props} />
+                                                ) : (
+                                                    <code className="block bg-gray-900 p-3 rounded my-2 overflow-x-auto" {...props} />
+                                                ),
+                                        }}
+                                    >
+                                        {msg.content}
+                                    </ReactMarkdown>
+                                </div>
                                 <div className="flex items-center gap-2 mt-2 text-[10px] opacity-60 uppercase tracking-wider">
                                     {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </div>
