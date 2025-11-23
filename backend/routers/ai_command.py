@@ -6,11 +6,57 @@ from sqlalchemy.orm import Session
 
 from backend.database_lite import get_db
 
+from models import Inventory, Route, Anomaly, Warehouse
+
+def get_real_time_context(db: Session) -> str:
+    """Fetch real-time metrics from the database to ground the AI."""
+    try:
+        # Inventory Stats
+        total_items = db.query(Inventory).count()
+        low_stock_items = db.query(Inventory).filter(Inventory.quantity <= Inventory.reorder_point).all()
+        low_stock_count = len(low_stock_items)
+        
+        low_stock_details = ""
+        if low_stock_items:
+            details = [f"- {item.sku}: {item.quantity} units (Reorder: {item.reorder_point})" for item in low_stock_items[:5]]
+            low_stock_details = "\n".join(details)
+            if len(low_stock_items) > 5:
+                low_stock_details += f"\n...and {len(low_stock_items) - 5} more."
+
+        # Route Stats
+        total_routes = db.query(Route).count()
+        
+        # Anomaly Stats
+        unresolved_anomalies = db.query(Anomaly).filter(Anomaly.resolved == False).order_by(Anomaly.detected_at.desc()).limit(3).all()
+        anomaly_count = db.query(Anomaly).filter(Anomaly.resolved == False).count()
+        
+        anomaly_details = ""
+        if unresolved_anomalies:
+            details = [f"- {a.anomaly_type}: {a.description} (Severity: {a.severity})" for a in unresolved_anomalies]
+            anomaly_details = "\n".join(details)
+
+        context = f"""
+**REAL-TIME DATA SNAPSHOT (Do not hallucinate, use this data):**
+1. **Inventory:** {total_items} total items. {low_stock_count} LOW STOCK items.
+   *Critical Low Stock:*
+{low_stock_details}
+
+2. **Routes:** {total_routes} active routes scheduled.
+
+3. **Anomalies:** {anomaly_count} unresolved anomalies.
+   *Recent Alerts:*
+{anomaly_details}
+"""
+        return context
+    except Exception as e:
+        print(f"Error fetching context: {e}")
+        return ""
+
 # ---------------------------------------------------------------------------
 # Helper: call Gemini LLM
 # ---------------------------------------------------------------------------
 # Real LLM call using Google Gemini
-def call_llm(prompt: str, history: list[dict] = []) -> str:
+def call_llm(prompt: str, history: list[dict] = [], context: str = "") -> str:
     """Send prompt to Google Gemini and return the response text.
     Uses the GEMINI_API_KEY environment variable.
     """
@@ -26,43 +72,32 @@ def call_llm(prompt: str, history: list[dict] = []) -> str:
             # Use model alias explicitly listed in available models
             model = genai.GenerativeModel("gemini-flash-latest")
             
-            system_instruction = """You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform. 🧠
+            system_instruction = f"""You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform. 🧠
 Your goal is to assist warehouse managers and logistics coordinators with friendly, ultra-concise, and actionable insights.
 
 **Your Persona:**
-- **Friendly & Professional:** Use emojis occasionally to make the interface feel modern and approachable (e.g., 📦, 🚚, ✅, 🚨).
-- **Concise:** Avoid long paragraphs. Use bullet points and tables.
-- **Proactive:** Always suggest the next logical step.
+- **Friendly & Professional:** Use emojis occasionally (e.g., 📦, 🚚, ✅, 🚨).
+- **Concise:** Avoid long paragraphs. Use bullet points.
+- **Data-Driven:** USE THE REAL-TIME DATA PROVIDED BELOW. Do not make up numbers if you have real data.
 
 **Your Capabilities:**
-1. **📦 Inventory:** Track stock, predict shortages (e.g., "SKU-123 is low!").
-2. **🚚 Logistics:** Optimize routes, check driver status.
-3. **🚨 Security:** Monitor anomalies and fraud.
-4. **🔗 Blockchain:** Verify transaction integrity.
+1. **📦 Inventory:** Track stock, predict shortages.
+2. **🚚 Logistics:** Optimize routes.
+3. **🚨 Security:** Monitor anomalies.
 
-**Current Context:**
-- The user is logged into the Warefy Dashboard.
-- Assume they have access to real‑time data.
+**Current Real-Time Context (TRUE DATA):**
+{context}
 
 **Response Format:**
-- Start with a direct answer.
+- Start with a direct answer based on the data.
 - Use **bold** for key metrics.
-- End with a clear "What would you like to do?" question or action buttons (simulated)."""
+- End with a clear "What would you like to do?" question."""
 
             # Start chat with history
             chat = model.start_chat(history=history)
             
-            # Send the new message with system instruction prepended contextually if needed, 
-            # but for chat mode, system instruction is best set at model init or just assumed via the persona.
-            # Note: gemini-flash-latest might not support system_instruction arg in GenerativeModel constructor yet in all versions,
-            # so we prepend it to the first message or rely on the model's capability.
-            # For simplicity and robustness, we'll just send the prompt. The history maintains context.
-            # If history is empty, we can prepend the system prompt to the first user message.
-            
-            final_prompt = prompt
-            if not history:
-                final_prompt = system_instruction + "\n\nUser Query: " + prompt
-            
+            final_prompt = system_instruction + "\n\nUser Query: " + prompt
+
             print(f"Sending request to Gemini (Attempt {attempt+1}/{max_retries})")
             
             response = chat.send_message(final_prompt)
@@ -99,11 +134,14 @@ def run_command(request: AICommandRequest, db: Session = Depends(get_db)):
     request: AICommandRequest
         The incoming request containing the user prompt and conversation history.
     db: Session
-        Database session (currently unused but kept for future auth/context).
+        Database session used to fetch real-time context.
     """
     if not request.prompt:
         raise HTTPException(status_code=400, detail="Prompt cannot be empty")
     
-    # In production, call the LLM with proper authentication & context
-    ai_reply = call_llm(request.prompt, request.history)
+    # Fetch real-time context from DB
+    context = get_real_time_context(db)
+    
+    # Call LLM with context
+    ai_reply = call_llm(request.prompt, request.history, context)
     return AICommandResponse(response=ai_reply)
