@@ -6,17 +6,23 @@ from sqlalchemy.orm import Session
 
 from backend.database_lite import get_db
 
-def call_llm(prompt: str) -> str:
-    """Send prompt to Google Gemini and return the response text.
+# ---------------------------------------------------------------------------
+# Helper: call Gemini LLM
+# ---------------------------------------------------------------------------
 
-    Uses the GEMINI_API_KEY environment variable.
+def call_llm(prompt: str) -> str:
+    """Send the prompt to Google Gemini and return the generated text.
+
+    The function reads the API key from the environment variable ``GEMINI_API_KEY``.
+    If the variable is missing, it falls back to the hard‑coded key you provided.
     """
-    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("GEMINI_API_KEY") or "AIzaSyASyezy9BuFgygfLpv3aW2BUDQHz2Zw_iI"
     if not api_key:
         raise HTTPException(status_code=500, detail="Gemini API key not configured")
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-pro")
+        # "gemini-flash-latest" is a generally available model alias
+        model = genai.GenerativeModel("gemini-flash-latest")
         system_prompt = """You are the Warefy Operations AI, the central intelligence of the Warefy Supply Chain Platform.
 Your goal is to assist warehouse managers, logistics coordinators, and executives in optimizing their supply chain.
 
@@ -45,6 +51,10 @@ User Query: """ + prompt
     except Exception as exc:
         print(f"ERROR calling Gemini: {exc}")
         raise HTTPException(status_code=502, detail=f"Gemini request failed: {exc}")
+
+# ---------------------------------------------------------------------------
+# FastAPI router
+# ---------------------------------------------------------------------------
 
 router = APIRouter(prefix="/api/ai", tags=["AI"])
 

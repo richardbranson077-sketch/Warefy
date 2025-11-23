@@ -22,7 +22,7 @@ import {
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Gemini Test', href: '/dashboard/gemini-test', icon: Brain },
+
     { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
     { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
     { name: 'Demand Forecast', href: '/dashboard/demand', icon: TrendingUp },
