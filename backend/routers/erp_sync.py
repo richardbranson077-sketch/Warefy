@@ -1,0 +1,447 @@
+"""
+ERP Integration Hub Router
+Supports: QuickBooks Online, Xero, SAP Business One, NetSuite
+"""
+
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from pydantic import BaseModel
+from datetime import datetime
+import requests
+import os
+
+from backend.database_lite import get_db
+from backend.models_lite import ERPConnection, ERPSyncLog, Order, Inventory
+from backend.auth import get_current_active_user, User
+
+router = APIRouter(prefix="/api/erp", tags=["ERP Integration"])
+
+# ========================================================================
+# PYDANTIC SCHEMAS
+# ========================================================================
+
+class ERPConnectionCreate(BaseModel):
+    erp_type: str  # quickbooks, xero, sap, netsuite
+    company_id: str
+    access_token: str
+    refresh_token: Optional[str] = None
+    realm_id: Optional[str] = None
+    tenant_id: Optional[str] = None
+    sync_frequency: str = "hourly"
+    sync_settings: dict = {}
+
+class ERPConnectionResponse(BaseModel):
+    id: int
+    erp_type: str
+    company_id: str
+    is_active: bool
+    last_sync: Optional[datetime]
+    sync_frequency: str
+    created_at: datetime
+
+class SyncRequest(BaseModel):
+    connection_id: int
+    sync_types: List[str]  # invoice, purchase_order, inventory, customer
+
+class SyncLogResponse(BaseModel):
+    id: int
+    sync_type: str
+    direction: str
+    status: str
+    records_processed: int
+    records_failed: int
+    started_at: datetime
+    completed_at: Optional[datetime]
+
+# ========================================================================
+# ERP API INTEGRATIONS
+# ========================================================================
+
+class QuickBooksAPI:
+    """QuickBooks Online API integration"""
+    
+    BASE_URL = "https://quickbooks.api.intuit.com/v3/company"
+    
+    @staticmethod
+    def get_invoices(connection: ERPConnection):
+        """Fetch invoices from QuickBooks"""
+        try:
+            url = f"{QuickBooksAPI.BASE_URL}/{connection.realm_id}/query"
+            headers = {"Authorization": f"Bearer {connection.access_token}"}
+            params = {"query": "SELECT * FROM Invoice MAXRESULTS 100"}
+            
+            # In production, make actual API call
+            # response = requests.get(url, headers=headers, params=params)
+            # return response.json()
+            
+            # Simulated response
+            return {
+                "QueryResponse": {
+                    "Invoice": [
+                        {"Id": "1", "TotalAmt": 1500.00, "CustomerRef": {"value": "1"}},
+                        {"Id": "2", "TotalAmt": 2300.00, "CustomerRef": {"value": "2"}}
+                    ]
+                }
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"QuickBooks API error: {str(e)}")
+    
+    @staticmethod
+    def create_invoice(connection: ERPConnection, invoice_data: dict):
+        """Create invoice in QuickBooks"""
+        try:
+            url = f"{QuickBooksAPI.BASE_URL}/{connection.realm_id}/invoice"
+            headers = {
+                "Authorization": f"Bearer {connection.access_token}",
+                "Content-Type": "application/json"
+            }
+            
+            # In production, make actual API call
+            # response = requests.post(url, headers=headers, json=invoice_data)
+            # return response.json()
+            
+            return {"Invoice": {"Id": "123", "SyncToken": "0"}}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"QuickBooks invoice creation failed: {str(e)}")
+    
+    @staticmethod
+    def sync_inventory(connection: ERPConnection, db: Session):
+        """Sync inventory to QuickBooks"""
+        try:
+            # Get all inventory items
+            items = db.query(Inventory).all()
+            
+            synced_count = 0
+            failed_count = 0
+            
+            for item in items:
+                try:
+                    # Create/update item in QuickBooks
+                    item_data = {
+                        "Name": item.product_name,
+                        "Sku": item.sku,
+                        "QtyOnHand": item.quantity,
+                        "InvStartDate": datetime.now().isoformat()
+                    }
+                    
+                    # In production, make actual API call
+                    synced_count += 1
+                except Exception as e:
+                    failed_count += 1
+                    print(f"Failed to sync {item.sku}: {e}")
+            
+            return {"synced": synced_count, "failed": failed_count}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Inventory sync failed: {str(e)}")
+
+class XeroAPI:
+    """Xero API integration"""
+    
+    BASE_URL = "https://api.xero.com/api.xro/2.0"
+    
+    @staticmethod
+    def get_invoices(connection: ERPConnection):
+        """Fetch invoices from Xero"""
+        try:
+            url = f"{XeroAPI.BASE_URL}/Invoices"
+            headers = {
+                "Authorization": f"Bearer {connection.access_token}",
+                "Xero-tenant-id": connection.tenant_id
+            }
+            
+            # Simulated response
+            return {
+                "Invoices": [
+                    {"InvoiceID": "1", "Total": 1500.00, "Status": "PAID"},
+                    {"InvoiceID": "2", "Total": 2300.00, "Status": "DRAFT"}
+                ]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Xero API error: {str(e)}")
+    
+    @staticmethod
+    def sync_contacts(connection: ERPConnection, db: Session):
+        """Sync contacts/customers to Xero"""
+        try:
+            # Get unique customers from orders
+            customers = db.query(Order.customer_name, Order.customer_email).distinct().all()
+            
+            synced_count = 0
+            for customer in customers:
+                contact_data = {
+                    "Name": customer.customer_name,
+                    "EmailAddress": customer.customer_email
+                }
+                # In production, create contact in Xero
+                synced_count += 1
+            
+            return {"synced": synced_count, "failed": 0}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Contact sync failed: {str(e)}")
+
+class SAPAPI:
+    """SAP Business One Service Layer API integration"""
+    
+    @staticmethod
+    def get_purchase_orders(connection: ERPConnection):
+        """Fetch purchase orders from SAP"""
+        try:
+            # SAP Service Layer endpoint
+            url = f"{connection.company_id}/b1s/v1/PurchaseOrders"
+            headers = {"Authorization": f"Bearer {connection.access_token}"}
+            
+            # Simulated response
+            return {
+                "value": [
+                    {"DocEntry": 1, "DocTotal": 5000.00, "CardName": "Supplier A"},
+                    {"DocEntry": 2, "DocTotal": 3500.00, "CardName": "Supplier B"}
+                ]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"SAP API error: {str(e)}")
+
+class NetSuiteAPI:
+    """NetSuite SuiteTalk REST API integration"""
+    
+    @staticmethod
+    def get_sales_orders(connection: ERPConnection):
+        """Fetch sales orders from NetSuite"""
+        try:
+            # NetSuite REST API endpoint
+            url = f"{connection.company_id}/services/rest/record/v1/salesOrder"
+            headers = {"Authorization": f"Bearer {connection.access_token}"}
+            
+            # Simulated response
+            return {
+                "items": [
+                    {"id": "1", "total": 2500.00, "status": "Pending Fulfillment"},
+                    {"id": "2", "total": 1800.00, "status": "Billed"}
+                ]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"NetSuite API error: {str(e)}")
+
+# ========================================================================
+# API ENDPOINTS
+# ========================================================================
+
+@router.post("/connections", response_model=ERPConnectionResponse)
+def create_erp_connection(
+    connection: ERPConnectionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new ERP connection"""
+    
+    # Check if connection already exists
+    existing = db.query(ERPConnection).filter(
+        ERPConnection.erp_type == connection.erp_type
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail=f"{connection.erp_type} connection already exists")
+    
+    db_connection = ERPConnection(**connection.dict())
+    db.add(db_connection)
+    db.commit()
+    db.refresh(db_connection)
+    
+    return db_connection
+
+@router.get("/connections", response_model=List[ERPConnectionResponse])
+def list_erp_connections(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """List all ERP connections"""
+    connections = db.query(ERPConnection).all()
+    return connections
+
+@router.get("/connections/{connection_id}")
+def get_erp_connection(
+    connection_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get ERP connection details"""
+    connection = db.query(ERPConnection).filter(ERPConnection.id == connection_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    return connection
+
+@router.post("/sync")
+def sync_erp_data(
+    request: SyncRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Sync data with ERP system"""
+    
+    # Get connection
+    connection = db.query(ERPConnection).filter(ERPConnection.id == request.connection_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    if not connection.is_active:
+        raise HTTPException(status_code=400, detail="Connection is inactive")
+    
+    # Perform sync for each type
+    results = []
+    
+    for sync_type in request.sync_types:
+        # Create sync log
+        sync_log = ERPSyncLog(
+            connection_id=connection.id,
+            sync_type=sync_type,
+            direction="from_erp",
+            status="in_progress",
+            started_at=datetime.utcnow()
+        )
+        db.add(sync_log)
+        db.commit()
+        db.refresh(sync_log)
+        
+        try:
+            if connection.erp_type == "quickbooks":
+                if sync_type == "invoice":
+                    data = QuickBooksAPI.get_invoices(connection)
+                    records_processed = len(data.get("QueryResponse", {}).get("Invoice", []))
+                elif sync_type == "inventory":
+                    result = QuickBooksAPI.sync_inventory(connection, db)
+                    records_processed = result["synced"]
+                else:
+                    records_processed = 0
+                    
+            elif connection.erp_type == "xero":
+                if sync_type == "invoice":
+                    data = XeroAPI.get_invoices(connection)
+                    records_processed = len(data.get("Invoices", []))
+                elif sync_type == "customer":
+                    result = XeroAPI.sync_contacts(connection, db)
+                    records_processed = result["synced"]
+                else:
+                    records_processed = 0
+                    
+            elif connection.erp_type == "sap":
+                if sync_type == "purchase_order":
+                    data = SAPAPI.get_purchase_orders(connection)
+                    records_processed = len(data.get("value", []))
+                else:
+                    records_processed = 0
+                    
+            elif connection.erp_type == "netsuite":
+                if sync_type == "sales_order":
+                    data = NetSuiteAPI.get_sales_orders(connection)
+                    records_processed = len(data.get("items", []))
+                else:
+                    records_processed = 0
+            else:
+                records_processed = 0
+            
+            # Update sync log
+            sync_log.status = "success"
+            sync_log.records_processed = records_processed
+            sync_log.records_failed = 0
+            sync_log.completed_at = datetime.utcnow()
+            
+            results.append({
+                "sync_type": sync_type,
+                "status": "success",
+                "records_processed": records_processed
+            })
+            
+        except Exception as e:
+            sync_log.status = "failed"
+            sync_log.error_details = {"error": str(e)}
+            sync_log.completed_at = datetime.utcnow()
+            
+            results.append({
+                "sync_type": sync_type,
+                "status": "failed",
+                "error": str(e)
+            })
+        
+        db.commit()
+    
+    # Update last sync time
+    connection.last_sync = datetime.utcnow()
+    db.commit()
+    
+    return {
+        "message": "Sync completed",
+        "connection_id": connection.id,
+        "erp_type": connection.erp_type,
+        "results": results
+    }
+
+@router.get("/sync-logs", response_model=List[SyncLogResponse])
+def get_sync_logs(
+    connection_id: Optional[int] = None,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get ERP sync logs"""
+    query = db.query(ERPSyncLog)
+    
+    if connection_id:
+        query = query.filter(ERPSyncLog.connection_id == connection_id)
+    
+    logs = query.order_by(ERPSyncLog.started_at.desc()).limit(limit).all()
+    return logs
+
+@router.delete("/connections/{connection_id}")
+def delete_erp_connection(
+    connection_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete ERP connection"""
+    connection = db.query(ERPConnection).filter(ERPConnection.id == connection_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    db.delete(connection)
+    db.commit()
+    
+    return {"message": "Connection deleted successfully"}
+
+@router.get("/oauth/quickbooks/url")
+def get_quickbooks_oauth_url(
+    redirect_uri: str = "http://localhost:3000/dashboard/erp/callback"
+):
+    """Get QuickBooks OAuth authorization URL"""
+    client_id = os.getenv("QUICKBOOKS_CLIENT_ID", "YOUR_CLIENT_ID")
+    scope = "com.intuit.quickbooks.accounting"
+    
+    auth_url = (
+        f"https://appcenter.intuit.com/connect/oauth2?"
+        f"client_id={client_id}&"
+        f"redirect_uri={redirect_uri}&"
+        f"response_type=code&"
+        f"scope={scope}&"
+        f"state=security_token"
+    )
+    
+    return {"authorization_url": auth_url}
+
+@router.get("/oauth/xero/url")
+def get_xero_oauth_url(
+    redirect_uri: str = "http://localhost:3000/dashboard/erp/callback"
+):
+    """Get Xero OAuth authorization URL"""
+    client_id = os.getenv("XERO_CLIENT_ID", "YOUR_CLIENT_ID")
+    scope = "accounting.transactions accounting.contacts"
+    
+    auth_url = (
+        f"https://login.xero.com/identity/connect/authorize?"
+        f"response_type=code&"
+        f"client_id={client_id}&"
+        f"redirect_uri={redirect_uri}&"
+        f"scope={scope}&"
+        f"state=security_token"
+    )
+    
+    return {"authorization_url": auth_url}
