@@ -1,74 +1,65 @@
 'use client';
 
-import { Key } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User as UserIcon, Moon, Settings, Bell, Shield, Save } from 'lucide-react';
+import { auth, updateUser } from '../../lib/api';
 
 export default function SettingsPage() {
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-            <div className="flex flex-col items-center gap-4">
-                <Key className="h-24 w-24 text-purple-400" />
-                <h1 className="text-2xl font-bold">Warefy Settings</h1>
-                <p className="text-gray-400">Configure your platform via the admin panel.</p>
-            </div>
-        </div>
-    );
-}
+    const [user, setUser] = useState<any>(null);
+    const [activeTab, setActiveTab] = useState('profile');
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-const [user, setUser] = useState<any>(null);
-const [activeTab, setActiveTab] = useState('profile');
-const [loading, setLoading] = useState(false);
-const [saving, setSaving] = useState(false);
-const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    // Form states
+    const [fullName, setFullName] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [darkMode, setDarkMode] = useState(true); // Default to dark for this theme
+    const [notifications, setNotifications] = useState({
+        email: true,
+        push: true,
+        sms: false
+    });
 
-// Form states
-const [fullName, setFullName] = useState('');
-const [password, setPassword] = useState('');
-const [confirmPassword, setConfirmPassword] = useState('');
-const [darkMode, setDarkMode] = useState(true); // Default to dark for this theme
-const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    sms: false
-});
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const userData = await auth.getCurrentUser();
+                setUser(userData);
+                setFullName(userData.full_name || '');
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        fetchUser();
+    }, []);
 
-useEffect(() => {
-    const fetchUser = async () => {
+    const handleProfileUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        setMessage(null);
+
+        if (password && password !== confirmPassword) {
+            setMessage({ type: 'error', text: 'Passwords do not match' });
+            setSaving(false);
+            return;
+        }
+
         try {
-            const userData = await auth.getCurrentUser();
-            setUser(userData);
-            setFullName(userData.full_name || '');
-        } catch (e) {
-            console.error(e);
+            await updateUser(user.id, {
+                full_name: fullName,
+                ...(password ? { password } : {})
+            });
+            setMessage({ type: 'success', text: 'Profile updated successfully' });
+            setPassword('');
+            setConfirmPassword('');
+        } catch (e: any) {
+            setMessage({ type: 'error', text: e.message || 'Update failed' });
+        } finally {
+            setSaving(false);
         }
     };
-    fetchUser();
-}, []);
-
-const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setMessage(null);
-
-    if (password && password !== confirmPassword) {
-        setMessage({ type: 'error', text: 'Passwords do not match' });
-        setSaving(false);
-        return;
-    }
-
-    try {
-        await updateUser(user.id, {
-            full_name: fullName,
-            ...(password ? { password } : {})
-        });
-        setMessage({ type: 'success', text: 'Profile updated successfully' });
-        setPassword('');
-        setConfirmPassword('');
-    } catch (e: any) {
-        setMessage({ type: 'error', text: e.message || 'Update failed' });
-    } finally {
-        setSaving(false);
-    }
-
 
     return (
         <div className="p-6 bg-gray-900 min-h-screen text-gray-100">
