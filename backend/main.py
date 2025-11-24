@@ -21,7 +21,21 @@ from routers import (
     routes,
     ai_recommendations,
     anomalies,
-    vehicles
+    vehicles,
+    # Enterprise Integration
+    shipping,
+    reorder,
+    erp_sync,
+    ecommerce_sync,
+    # Advanced Features
+    returns,
+    labor,
+    quality,
+    rbac,
+    advanced_reporting,
+    # Analytics & AI
+    benchmarking,
+    forecasting
 )
 
 # Import mobile API
@@ -60,6 +74,7 @@ app.add_middleware(
 )
 
 # Include routers
+# Core routers
 app.include_router(auth.router)
 app.include_router(inventory.router)
 app.include_router(warehouses.router)
@@ -69,6 +84,23 @@ app.include_router(ai_recommendations.router)
 app.include_router(anomalies.router)
 app.include_router(vehicles.router)
 app.include_router(driver_router)
+
+# Enterprise Integration routers
+app.include_router(shipping.router)
+app.include_router(reorder.router)
+app.include_router(erp_sync.router)
+app.include_router(ecommerce_sync.router)
+
+# Advanced Features routers
+app.include_router(returns.router)
+app.include_router(labor.router)
+app.include_router(quality.router)
+app.include_router(rbac.router)
+app.include_router(advanced_reporting.router)
+
+# Analytics & AI routers
+app.include_router(benchmarking.router)
+app.include_router(forecasting.router)
 
 # WebSocket connection manager
 class ConnectionManager:
@@ -145,7 +177,18 @@ def api_info():
             "routes": "/api/routes",
             "ai_recommendations": "/api/ai",
             "anomalies": "/api/anomalies",
-            "mobile_driver": "/api/mobile/driver"
+            "mobile_driver": "/api/mobile/driver",
+            "shipping": "/api/shipping",
+            "reorder": "/api/reorder",
+            "erp_sync": "/api/erp",
+            "ecommerce_sync": "/api/ecommerce",
+            "returns": "/api/returns",
+            "labor": "/api/labor",
+            "quality": "/api/quality",
+            "rbac": "/api/rbac",
+            "reporting": "/api/reporting",
+            "benchmarking": "/api/benchmarking",
+            "forecasting": "/api/forecasting"
         }
     }
 
