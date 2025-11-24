@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
 
-export interface EdgeDevice {
+export interface Anomaly {
     id: number;
-    name: string;
-    status: 'active' | 'inactive';
+    type: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    description: string;
+    status: 'detected' | 'investigating' | 'resolved';
+    detectedAt: string;
+    resolvedAt?: string;
 }
 
-export function useEdgeAI() {
-    const [data, setData] = useState<{ devices: EdgeDevice[]; totalInferences: number; averageLatency: number } | null>(null);
+export function useAnomalies() {
+    const [data, setData] = useState<Anomaly[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -16,10 +20,10 @@ export function useEdgeAI() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/edge-ai');
+            const response = await apiClient.get('/anomalies');
             setData(response.data);
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch Edge AI data');
+            setError(err.message || 'Failed to fetch anomalies');
         } finally {
             setLoading(false);
         }

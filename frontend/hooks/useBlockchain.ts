@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
 
-export interface EdgeDevice {
+export interface Block {
     id: number;
-    name: string;
-    status: 'active' | 'inactive';
+    hash: string;
+    previousHash: string;
+    timestamp: string;
+    data: any;
 }
 
-export function useEdgeAI() {
-    const [data, setData] = useState<{ devices: EdgeDevice[]; totalInferences: number; averageLatency: number } | null>(null);
+export function useBlockchain() {
+    const [data, setData] = useState<{ blocks: Block[]; totalTransactions: number; verifiedTransactions: number } | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -16,10 +18,10 @@ export function useEdgeAI() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/edge-ai');
+            const response = await apiClient.get('/blockchain');
             setData(response.data);
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch Edge AI data');
+            setError(err.message || 'Failed to fetch blockchain data');
         } finally {
             setLoading(false);
         }

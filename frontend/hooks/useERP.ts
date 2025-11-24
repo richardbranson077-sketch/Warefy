@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
 
-export interface EdgeDevice {
+export interface ERPSystem {
     id: number;
     name: string;
-    status: 'active' | 'inactive';
+    status: 'connected' | 'disconnected';
 }
 
-export function useEdgeAI() {
-    const [data, setData] = useState<{ devices: EdgeDevice[]; totalInferences: number; averageLatency: number } | null>(null);
+export function useERP() {
+    const [data, setData] = useState<{ systems: ERPSystem[]; totalSyncs: number; lastSyncTime: string } | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -16,10 +16,10 @@ export function useEdgeAI() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/edge-ai');
+            const response = await apiClient.get('/erp');
             setData(response.data);
         } catch (err: any) {
-            setError(err.message || 'Failed to fetch Edge AI data');
+            setError(err.message || 'Failed to fetch ERP data');
         } finally {
             setLoading(false);
         }
