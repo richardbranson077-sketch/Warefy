@@ -7,7 +7,15 @@ import os
 import time
 from typing import Dict, Any, Optional
 from datetime import datetime
-import psutil
+
+# Make psutil optional
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -90,18 +98,28 @@ async def detailed_health_check(db: Session = Depends(get_db)) -> Dict[str, Any]
             "error": str(e)
         }
     
-    # System metrics
-    try:
+    # System metrics (optional - only if psutil is available)
+    if PSUTIL_AVAILABLE:
+        try:
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage('/')
+            
+            health_data["checks"]["system"] = {
+                "status": "healthy",
+                "cpu_percent": cpu_percent,
+                "memory_percent": memory.percent,
+                "disk_percent": disk.percent
+            }
+        except Exception as e:
+            health_data["checks"]["system"] = {
+                "status": "degraded",
+                "error": str(e)
+            }
+    else:
         health_data["checks"]["system"] = {
-            "status": "healthy",
-            "cpu_percent": psutil.cpu_percent(interval=0.1),
-            "memory_percent": psutil.virtual_memory().percent,
-            "disk_percent": psutil.disk_usage('/').percent
-        }
-    except Exception as e:
-        health_data["checks"]["system"] = {
-            "status": "degraded",
-            "error": str(e)
+            "status": "unavailable",
+            "message": "psutil not installed"
         }
     
     return health_data
