@@ -38,13 +38,19 @@ app = FastAPI(
 )
 
 from backend.routers import ai_command, auth, users, notifications, orders, reports, integrations, warehouses_lite as warehouses
+
+# CORS Configuration - Use environment variable for allowed origins
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,  # Use specific origins, not "*"
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # Specific methods
+    allow_headers=["Content-Type", "Authorization"],  # Specific headers
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
+
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
