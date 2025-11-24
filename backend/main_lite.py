@@ -66,7 +66,8 @@ from backend.routers import (
     orders, 
     reports, 
     integrations, 
-    warehouses_lite as warehouses
+    warehouses_lite as warehouses,
+    websocket  # WebSocket support for real-time features
 )
 
 # CORS Configuration - Use environment variable for allowed origins
@@ -131,6 +132,9 @@ app.include_router(warehouses.router, prefix="/api/v1", tags=["Warehouses"])
 app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 app.include_router(ai_command.router, prefix="/api/v1", tags=["AI"])
 app.include_router(health_router, tags=["Health"])
+app.include_router(websocket.router, tags=["WebSocket"])  # Real-time WebSocket endpoints
+
+logger.info("All routers registered successfully")
 
 
 @app.get("/")
