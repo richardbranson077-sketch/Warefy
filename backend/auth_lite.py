@@ -91,3 +91,38 @@ def require_role(required_roles: list):
             )
         return current_user
     return role_checker
+
+async def get_current_user_from_token(token: str, db: Session) -> User:
+    """
+    Get the current authenticated user from JWT token (async version for WebSockets)
+    
+    Args:
+        token: JWT token string
+        db: Database session
+        
+    Returns:
+        User object if authentication successful
+        
+    Raises:
+        HTTPException: If authentication fails
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    
+    user = db.query(User).filter(User.username == token_data.username).first()
+    if user is None:
+        raise credentials_exception
+    
+    return user
