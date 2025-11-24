@@ -36,8 +36,8 @@ if SENTRY_DSN:
         print("✅ Sentry initialized successfully")
     except ImportError:
         print("⚠️  Sentry SDK not installed. Run: pip install sentry-sdk")
-except Exception as e:
-    print(f"⚠️  Sentry initialization failed: {e}")
+    except Exception as e:
+        print(f"⚠️  Sentry initialization failed: {e}")
 
 
 router = APIRouter(prefix="/health", tags=["Health"])
