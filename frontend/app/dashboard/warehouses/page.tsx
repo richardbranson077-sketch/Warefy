@@ -91,9 +91,7 @@ export default function WarehousesPage() {
                     )}
                 </div>
             )}
-        </div >
-        )
-}
         </>
     );
 }
+
