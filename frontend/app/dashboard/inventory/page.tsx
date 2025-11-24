@@ -25,20 +25,11 @@ import {
     Camera,
     Scan
 } from 'lucide-react';
-import { inventory, warehouses } from '@/lib/api';
-
-interface InventoryItem {
-    id: number;
-    product_name: string;
-    sku: string;
-    category: string;
-    quantity: number;
-    reorder_point: number;
-    unit_price: number;
-    warehouse_id: number;
-    supplier?: string;
-    lastRestocked?: string;
-}
+import { useInventory } from '@/hooks/useInventory';
+import { InventoryItem } from '@/services/inventory.service';
+import { LoadingSpinner } from '@/components/LoadingStates';
+import { ErrorAlert } from '@/components/ErrorStates';
+import { warehouses } from '@/lib/api';
 
 interface Warehouse {
     id: number;
@@ -46,10 +37,10 @@ interface Warehouse {
 }
 
 export default function InventoryPage() {
-    const [items, setItems] = useState<InventoryItem[]>([]);
+    const { data: items, loading, error, refetch, createItem, updateItem, deleteItem } = useInventory();
+
     const [warehouseList, setWarehouseList] = useState<Warehouse[]>([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState('all');
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [sortBy, setSortBy] = useState<'name' | 'quantity' | 'value' | 'stock'>('name');
@@ -66,33 +57,26 @@ export default function InventoryPage() {
 
     // Form state for Add/Edit
     const [formData, setFormData] = useState({
-        product_name: '',
+        productName: '',
         sku: '',
         category: '',
         quantity: 0,
-        reorder_point: 0,
-        unit_price: 0,
-        warehouse_id: 1,
+        reorderPoint: 0,
+        unitPrice: 0,
+        warehouseId: 1,
         supplier: ''
     });
 
     useEffect(() => {
-        fetchData();
+        fetchWarehouses();
     }, []);
 
-    const fetchData = async () => {
+    const fetchWarehouses = async () => {
         try {
-            setLoading(true);
-            const [inventoryData, warehouseData] = await Promise.all([
-                inventory.getAll({}),
-                warehouses.getAll()
-            ]);
-            setItems(inventoryData || []);
+            const warehouseData = await warehouses.getAll();
             setWarehouseList(warehouseData || []);
         } catch (error) {
-            console.error('Error fetching inventory:', error);
-        } finally {
-            setLoading(false);
+            console.error('Error fetching warehouses:', error);
         }
     };
 
@@ -102,9 +86,9 @@ export default function InventoryPage() {
     // Filter and sort items
     const filteredItems = items.filter(item => {
         const matchesSearch =
-            item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.sku.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesWarehouse = selectedWarehouse === 'all' || item.warehouse_id === parseInt(selectedWarehouse);
+        const matchesWarehouse = selectedWarehouse === 'all' || item.warehouseId === parseInt(selectedWarehouse);
         const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
         return matchesSearch && matchesWarehouse && matchesCategory;
     });
@@ -113,17 +97,17 @@ export default function InventoryPage() {
         let comparison = 0;
         switch (sortBy) {
             case 'name':
-                comparison = a.product_name.localeCompare(b.product_name);
+                comparison = a.productName.localeCompare(b.productName);
                 break;
             case 'quantity':
                 comparison = a.quantity - b.quantity;
                 break;
             case 'value':
-                comparison = (a.quantity * a.unit_price) - (b.quantity * b.unit_price);
+                comparison = (a.quantity * a.unitPrice) - (b.quantity * b.unitPrice);
                 break;
             case 'stock':
-                const aStatus = a.quantity <= a.reorder_point ? -1 : 1;
-                const bStatus = b.quantity <= b.reorder_point ? -1 : 1;
+                const aStatus = a.quantity <= a.reorderPoint ? -1 : 1;
+                const bStatus = b.quantity <= b.reorderPoint ? -1 : 1;
                 comparison = aStatus - bStatus;
                 break;
         }
@@ -138,8 +122,8 @@ export default function InventoryPage() {
     );
 
     // Stats
-    const totalValue = filteredItems.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0);
-    const lowStockCount = filteredItems.filter(i => i.quantity <= i.reorder_point).length;
+    const totalValue = filteredItems.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
+    const lowStockCount = filteredItems.filter(i => i.quantity <= i.reorderPoint).length;
     const totalQuantity = filteredItems.reduce((acc, item) => acc + item.quantity, 0);
 
     // Handlers
@@ -160,13 +144,13 @@ export default function InventoryPage() {
     const handleEditItem = (item: InventoryItem) => {
         setSelectedItem(item);
         setFormData({
-            product_name: item.product_name,
+            product_name: item.productName,
             sku: item.sku,
             category: item.category,
             quantity: item.quantity,
-            reorder_point: item.reorder_point,
-            unit_price: item.unit_price,
-            warehouse_id: item.warehouse_id,
+            reorder_point: item.reorderPoint,
+            unit_price: item.unitPrice,
+            warehouse_id: item.warehouseId,
             supplier: item.supplier || ''
         });
         setShowEditModal(true);
@@ -184,7 +168,7 @@ export default function InventoryPage() {
             } else {
                 await inventory.create(formData);
             }
-            await fetchData();
+            await refetch();
             setShowAddModal(false);
             setShowEditModal(false);
         } catch (error) {
@@ -196,7 +180,7 @@ export default function InventoryPage() {
         if (confirm('Are you sure you want to delete this item?')) {
             try {
                 await inventory.delete(id);
-                await fetchData();
+                await refetch();
             } catch (error) {
                 console.error('Error deleting item:', error);
             }
@@ -219,7 +203,7 @@ export default function InventoryPage() {
             try {
                 await Promise.all(selectedItems.map(id => inventory.delete(id)));
                 setSelectedItems([]);
-                await fetchData();
+                await refetch();
             } catch (error) {
                 console.error('Error deleting items:', error);
             }
@@ -230,12 +214,12 @@ export default function InventoryPage() {
         const headers = ['SKU', 'Product Name', 'Category', 'Quantity', 'Unit Price', 'Total Value', 'Warehouse'];
         const csvData = filteredItems.map(item => [
             item.sku,
-            item.product_name,
+            item.productName,
             item.category,
             item.quantity,
-            item.unit_price,
-            (item.quantity * item.unit_price).toFixed(2),
-            warehouseList.find(w => w.id === item.warehouse_id)?.name || ''
+            item.unitPrice,
+            (item.quantity * item.unitPrice).toFixed(2),
+            warehouseList.find(w => w.id === item.warehouseId)?.name || ''
         ]);
 
         const csv = [headers, ...csvData].map(row => row.join(',')).join('\n');
@@ -258,7 +242,7 @@ export default function InventoryPage() {
 
     const getStockStatus = (item: InventoryItem) => {
         if (item.quantity === 0) return { text: 'Out of Stock', color: 'red' };
-        if (item.quantity <= item.reorder_point) return { text: 'Low Stock', color: 'orange' };
+        if (item.quantity <= item.reorderPoint) return { text: 'Low Stock', color: 'orange' };
         return { text: 'In Stock', color: 'green' };
     };
 
@@ -469,16 +453,16 @@ export default function InventoryPage() {
                                                 />
                                             </td>
                                             <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.sku}</td>
-                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.product_name}</td>
+                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.productName}</td>
                                             <td className="px-4 py-3 text-sm text-gray-600">
                                                 <span className="px-2 py-1 bg-gray-100 rounded-lg text-xs">
                                                     {item.category}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 text-sm text-gray-900">{item.quantity.toLocaleString()}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-900">${item.unit_price.toFixed(2)}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-900">${item.unitPrice.toFixed(2)}</td>
                                             <td className="px-4 py-3 text-sm font-semibold text-gray-900">
-                                                ${(item.quantity * item.unit_price).toFixed(2)}
+                                                ${(item.quantity * item.unitPrice).toFixed(2)}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.color === 'green' ? 'bg-green-100 text-green-700' :
@@ -583,7 +567,7 @@ export default function InventoryPage() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
                                     <input
                                         type="text"
-                                        value={formData.product_name}
+                                        value={formData.productName}
                                         onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                     />
@@ -623,7 +607,7 @@ export default function InventoryPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse</label>
                                     <select
-                                        value={formData.warehouse_id}
+                                        value={formData.warehouseId}
                                         onChange={(e) => setFormData({ ...formData, warehouse_id: parseInt(e.target.value) })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                     >
@@ -647,7 +631,7 @@ export default function InventoryPage() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Reorder Point</label>
                                     <input
                                         type="number"
-                                        value={formData.reorder_point}
+                                        value={formData.reorderPoint}
                                         onChange={(e) => setFormData({ ...formData, reorder_point: parseInt(e.target.value) })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                     />
@@ -657,7 +641,7 @@ export default function InventoryPage() {
                                     <input
                                         type="number"
                                         step="0.01"
-                                        value={formData.unit_price}
+                                        value={formData.unitPrice}
                                         onChange={(e) => setFormData({ ...formData, unit_price: parseFloat(e.target.value) })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                     />
@@ -711,7 +695,7 @@ export default function InventoryPage() {
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Product Name</p>
-                                    <p className="text-lg font-semibold text-gray-900">{selectedItem.product_name}</p>
+                                    <p className="text-lg font-semibold text-gray-900">{selectedItem.productName}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">SKU</p>
@@ -724,7 +708,7 @@ export default function InventoryPage() {
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Warehouse</p>
                                     <p className="text-lg text-gray-900">
-                                        {warehouseList.find(w => w.id === selectedItem.warehouse_id)?.name}
+                                        {warehouseList.find(w => w.id === selectedItem.warehouseId)?.name}
                                     </p>
                                 </div>
                                 <div>
@@ -733,16 +717,16 @@ export default function InventoryPage() {
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Reorder Point</p>
-                                    <p className="text-2xl font-bold text-orange-600">{selectedItem.reorder_point.toLocaleString()}</p>
+                                    <p className="text-2xl font-bold text-orange-600">{selectedItem.reorderPoint.toLocaleString()}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Unit Price</p>
-                                    <p className="text-2xl font-bold text-green-600">${selectedItem.unit_price.toFixed(2)}</p>
+                                    <p className="text-2xl font-bold text-green-600">${selectedItem.unitPrice.toFixed(2)}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Total Value</p>
                                     <p className="text-2xl font-bold text-blue-600">
-                                        ${(selectedItem.quantity * selectedItem.unit_price).toFixed(2)}
+                                        ${(selectedItem.quantity * selectedItem.unitPrice).toFixed(2)}
                                     </p>
                                 </div>
                             </div>
@@ -857,8 +841,8 @@ export default function InventoryPage() {
                                 <button
                                     onClick={() => setScannerActive(!scannerActive)}
                                     className={`flex-1 px-4 py-2 rounded-lg transition ${scannerActive
-                                            ? 'bg-red-600 hover:bg-red-700 text-white'
-                                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                        ? 'bg-red-600 hover:bg-red-700 text-white'
+                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
                                         }`}
                                 >
                                     {scannerActive ? 'Stop Scanner' : 'Start Scanner'}
