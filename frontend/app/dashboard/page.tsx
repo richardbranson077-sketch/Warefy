@@ -30,7 +30,29 @@ export default function DashboardPage() {
     const [timeRange, setTimeRange] = useState('7d');
     const [darkMode, setDarkMode] = useState(false);
 
-    const { data: stats, loading, error } = useDashboard();
+    const { data, loading, error } = useDashboard();
+
+    // Fallback values when data is loading or null
+    const stats = data || {
+        totalOrders: 0,
+        pendingOrders: 0,
+        completedOrders: 0,
+        totalRevenue: 0,
+        lowStockItems: 0,
+        totalInventoryValue: 0,
+        activeShipments: 0,
+        warehouseUtilization: 0,
+        recentOrders: [],
+        inventoryAlerts: [],
+        revenueData: [],
+        ordersByStatus: {
+            pending: 0,
+            processing: 0,
+            shipped: 0,
+            delivered: 0,
+            cancelled: 0
+        }
+    };
 
     const recentActivities = [
         { id: 1, message: 'New order #1249 received', time: '2 min ago', icon: Package, color: 'blue' },
@@ -46,12 +68,16 @@ export default function DashboardPage() {
         { name: 'Basic Unit D', sales: 654, change: 15.7, trend: 'up' }
     ];
 
-    const salesHistory = [
-        { date: '2025-10-01', sales: 200 },
-        { date: '2025-10-08', sales: 340 },
-        { date: '2025-10-15', sales: 280 },
-        { date: '2025-10-22', sales: 410 },
-        { date: '2025-10-29', sales: 370 }
+    // Use real data from API or fallback to empty array
+    const salesHistory = stats.revenueData.length > 0 ? stats.revenueData.map(item => ({
+        date: item.date,
+        sales: item.revenue
+    })) : [
+        { date: '2025-10-01', sales: 0 },
+        { date: '2025-10-08', sales: 0 },
+        { date: '2025-10-15', sales: 0 },
+        { date: '2025-10-22', sales: 0 },
+        { date: '2025-10-29', sales: 0 }
     ];
 
     const activeRoutes = [
@@ -102,9 +128,9 @@ export default function DashboardPage() {
                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 shadow-sm hover:shadow-md transition backdrop-blur-lg bg-opacity-70">
                             <div className="flex items-center justify-between">
                                 <Package className="h-6 w-6 text-blue-600" />
-                                <span className="text-sm font-medium text-blue-800">Total Inventory</span>
+                                <span className="text-sm font-medium text-blue-800">Total Inventory Value</span>
                             </div>
-                            <p className="mt-2 text-2xl font-bold text-blue-900">{stats.totalInventory.toLocaleString()}</p>
+                            <p className="mt-2 text-2xl font-bold text-blue-900">${(stats.totalInventoryValue / 1000).toFixed(0)}K</p>
                         </div>
                         <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 shadow-sm hover:shadow-md transition backdrop-blur-lg bg-opacity-70">
                             <div className="flex items-center justify-between">
@@ -116,16 +142,16 @@ export default function DashboardPage() {
                         <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 shadow-sm hover:shadow-md transition backdrop-blur-lg bg-opacity-70">
                             <div className="flex items-center justify-between">
                                 <DollarSign className="h-6 w-6 text-green-600" />
-                                <span className="text-sm font-medium text-green-800">Revenue</span>
+                                <span className="text-sm font-medium text-green-800">Total Revenue</span>
                             </div>
-                            <p className="mt-2 text-2xl font-bold text-green-900">${(stats.revenue / 1000).toFixed(0)}K</p>
+                            <p className="mt-2 text-2xl font-bold text-green-900">${(stats.totalRevenue / 1000).toFixed(0)}K</p>
                         </div>
                         <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 shadow-sm hover:shadow-md transition backdrop-blur-lg bg-opacity-70">
                             <div className="flex items-center justify-between">
                                 <Truck className="h-6 w-6 text-orange-600" />
-                                <span className="text-sm font-medium text-orange-800">Delivery Rate</span>
+                                <span className="text-sm font-medium text-orange-800">Active Shipments</span>
                             </div>
-                            <p className="mt-2 text-2xl font-bold text-orange-900">{stats.deliveryRate}%</p>
+                            <p className="mt-2 text-2xl font-bold text-orange-900">{stats.activeShipments}</p>
                         </div>
                     </section>
 
@@ -134,8 +160,8 @@ export default function DashboardPage() {
                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-blue-700 text-sm font-medium mb-1">Active Routes</p>
-                                    <p className="text-3xl font-bold text-blue-900">{stats.activeRoutes}</p>
+                                    <p className="text-blue-700 text-sm font-medium mb-1">Warehouse Utilization</p>
+                                    <p className="text-3xl font-bold text-blue-900">{stats.warehouseUtilization}%</p>
                                 </div>
                                 <Activity className="h-12 w-12 text-blue-600 opacity-40" />
                             </div>
