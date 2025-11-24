@@ -44,3 +44,6 @@ export function SkeletonTable({ rows = 5 }: { rows?: number }) {
         </div>
     );
 }
+
+// Default export for backward compatibility
+export default LoadingSpinner;

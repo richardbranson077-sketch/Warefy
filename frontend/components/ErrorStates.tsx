@@ -65,3 +65,6 @@ export function EmptyState({ title, description, action, icon }: EmptyStateProps
         </div>
     );
 }
+
+// Default export for backward compatibility
+export default ErrorAlert;

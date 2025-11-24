@@ -345,6 +345,17 @@ export const integrations = {
     }
 };
 
+// Error message utility
+export function getErrorMessage(error: any): string {
+    if (error.response?.data?.detail) {
+        return error.response.data.detail;
+    }
+    if (error.message) {
+        return error.message;
+    }
+    return 'An unexpected error occurred';
+}
+
 // Named export for new hooks
 export const apiClient = api;
 
