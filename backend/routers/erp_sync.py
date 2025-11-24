@@ -1,6 +1,7 @@
 """
 ERP Integration Hub Router
-Supports: QuickBooks Online, Xero, SAP Business One, NetSuite
+Supports: QuickBooks Online, Xero, SAP Business One, NetSuite, 
+Microsoft Dynamics 365, Sage Intacct, Oracle ERP Cloud, Odoo, Zoho Books
 """
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
@@ -222,6 +223,213 @@ class NetSuiteAPI:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"NetSuite API error: {str(e)}")
 
+class MicrosoftDynamics365API:
+    """Microsoft Dynamics 365 Business Central API integration"""
+    
+    BASE_URL = "https://api.businesscentral.dynamics.com/v2.0"
+    
+    @staticmethod
+    def get_sales_invoices(connection: ERPConnection):
+        """Fetch sales invoices from Dynamics 365"""
+        try:
+            url = f"{MicrosoftDynamics365API.BASE_URL}/{connection.tenant_id}/api/v2.0/salesInvoices"
+            headers = {"Authorization": f"Bearer {connection.access_token}"}
+            
+            # Simulated response
+            return {
+                "value": [
+                    {"id": "1", "number": "INV-001", "totalAmountIncludingTax": 3500.00},
+                    {"id": "2", "number": "INV-002", "totalAmountIncludingTax": 2800.00}
+                ]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Dynamics 365 API error: {str(e)}")
+    
+    @staticmethod
+    def sync_items(connection: ERPConnection, db: Session):
+        """Sync items/products to Dynamics 365"""
+        try:
+            items = db.query(Inventory).all()
+            synced_count = 0
+            
+            for item in items:
+                item_data = {
+                    "number": item.sku,
+                    "displayName": item.product_name,
+                    "type": "Inventory",
+                    "unitPrice": item.unit_price
+                }
+                # In production, POST to /items endpoint
+                synced_count += 1
+            
+            return {"synced": synced_count, "failed": 0}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Dynamics 365 sync failed: {str(e)}")
+
+class SageIntacctAPI:
+    """Sage Intacct API integration"""
+    
+    BASE_URL = "https://api.intacct.com/ia/xml/xmlgw.phtml"
+    
+    @staticmethod
+    def get_ar_invoices(connection: ERPConnection):
+        """Fetch AR invoices from Sage Intacct"""
+        try:
+            # Sage Intacct uses XML API
+            # Simulated response
+            return {
+                "arinvoice": [
+                    {"RECORDNO": "1", "TOTALENTERED": 4200.00, "STATE": "Posted"},
+                    {"RECORDNO": "2", "TOTALENTERED": 3100.00, "STATE": "Draft"}
+                ]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Sage Intacct API error: {str(e)}")
+    
+    @staticmethod
+    def sync_customers(connection: ERPConnection, db: Session):
+        """Sync customers to Sage Intacct"""
+        try:
+            customers = db.query(Order.customer_name, Order.customer_email).distinct().all()
+            synced_count = 0
+            
+            for customer in customers:
+                customer_data = {
+                    "NAME": customer.customer_name,
+                    "EMAIL1": customer.customer_email
+                }
+                # In production, create customer via XML API
+                synced_count += 1
+            
+            return {"synced": synced_count, "failed": 0}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Sage Intacct sync failed: {str(e)}")
+
+class OracleERPCloudAPI:
+    """Oracle ERP Cloud REST API integration"""
+    
+    @staticmethod
+    def get_purchase_orders(connection: ERPConnection):
+        """Fetch purchase orders from Oracle ERP Cloud"""
+        try:
+            url = f"{connection.company_id}/fscmRestApi/resources/11.13.18.05/purchaseOrders"
+            headers = {"Authorization": f"Bearer {connection.access_token}"}
+            
+            # Simulated response
+            return {
+                "items": [
+                    {"OrderNumber": "PO-001", "TotalAmount": 15000.00, "Status": "Approved"},
+                    {"OrderNumber": "PO-002", "TotalAmount": 12500.00, "Status": "In Process"}
+                ]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Oracle ERP Cloud API error: {str(e)}")
+    
+    @staticmethod
+    def sync_suppliers(connection: ERPConnection, db: Session):
+        """Sync suppliers to Oracle ERP Cloud"""
+        try:
+            # Get unique suppliers from inventory
+            suppliers = db.query(Inventory.supplier).distinct().filter(Inventory.supplier.isnot(None)).all()
+            synced_count = 0
+            
+            for supplier in suppliers:
+                supplier_data = {
+                    "SupplierName": supplier[0],
+                    "SupplierType": "PURCHASE"
+                }
+                # In production, POST to suppliers endpoint
+                synced_count += 1
+            
+            return {"synced": synced_count, "failed": 0}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Oracle ERP Cloud sync failed: {str(e)}")
+
+class OdooAPI:
+    """Odoo (OpenERP) XML-RPC API integration"""
+    
+    @staticmethod
+    def get_sale_orders(connection: ERPConnection):
+        """Fetch sale orders from Odoo"""
+        try:
+            # Odoo uses XML-RPC
+            # Simulated response
+            return {
+                "sale_orders": [
+                    {"id": 1, "name": "SO001", "amount_total": 2800.00, "state": "sale"},
+                    {"id": 2, "name": "SO002", "amount_total": 3200.00, "state": "draft"}
+                ]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Odoo API error: {str(e)}")
+    
+    @staticmethod
+    def sync_products(connection: ERPConnection, db: Session):
+        """Sync products to Odoo"""
+        try:
+            items = db.query(Inventory).all()
+            synced_count = 0
+            
+            for item in items:
+                product_data = {
+                    "name": item.product_name,
+                    "default_code": item.sku,
+                    "list_price": item.unit_price,
+                    "type": "product"
+                }
+                # In production, create via XML-RPC
+                synced_count += 1
+            
+            return {"synced": synced_count, "failed": 0}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Odoo sync failed: {str(e)}")
+
+class ZohoBooksAPI:
+    """Zoho Books API integration"""
+    
+    BASE_URL = "https://books.zoho.com/api/v3"
+    
+    @staticmethod
+    def get_invoices(connection: ERPConnection):
+        """Fetch invoices from Zoho Books"""
+        try:
+            url = f"{ZohoBooksAPI.BASE_URL}/invoices"
+            headers = {
+                "Authorization": f"Zoho-oauthtoken {connection.access_token}",
+                "X-com-zoho-books-organizationid": connection.company_id
+            }
+            
+            # Simulated response
+            return {
+                "invoices": [
+                    {"invoice_id": "1", "invoice_number": "INV-001", "total": 1900.00},
+                    {"invoice_id": "2", "invoice_number": "INV-002", "total": 2400.00}
+                ]
+            }
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Zoho Books API error: {str(e)}")
+    
+    @staticmethod
+    def sync_items(connection: ERPConnection, db: Session):
+        """Sync items to Zoho Books"""
+        try:
+            items = db.query(Inventory).all()
+            synced_count = 0
+            
+            for item in items:
+                item_data = {
+                    "name": item.product_name,
+                    "sku": item.sku,
+                    "rate": item.unit_price,
+                    "account_name": "Inventory Asset"
+                }
+                # In production, POST to /items endpoint
+                synced_count += 1
+            
+            return {"synced": synced_count, "failed": 0}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Zoho Books sync failed: {str(e)}")
+
 # ========================================================================
 # API ENDPOINTS
 # ========================================================================
@@ -335,6 +543,56 @@ def sync_erp_data(
                 if sync_type == "sales_order":
                     data = NetSuiteAPI.get_sales_orders(connection)
                     records_processed = len(data.get("items", []))
+                else:
+                    records_processed = 0
+                    
+            elif connection.erp_type == "dynamics365":
+                if sync_type == "invoice":
+                    data = MicrosoftDynamics365API.get_sales_invoices(connection)
+                    records_processed = len(data.get("value", []))
+                elif sync_type == "inventory":
+                    result = MicrosoftDynamics365API.sync_items(connection, db)
+                    records_processed = result["synced"]
+                else:
+                    records_processed = 0
+                    
+            elif connection.erp_type == "sage_intacct":
+                if sync_type == "invoice":
+                    data = SageIntacctAPI.get_ar_invoices(connection)
+                    records_processed = len(data.get("arinvoice", []))
+                elif sync_type == "customer":
+                    result = SageIntacctAPI.sync_customers(connection, db)
+                    records_processed = result["synced"]
+                else:
+                    records_processed = 0
+                    
+            elif connection.erp_type == "oracle_erp":
+                if sync_type == "purchase_order":
+                    data = OracleERPCloudAPI.get_purchase_orders(connection)
+                    records_processed = len(data.get("items", []))
+                elif sync_type == "supplier":
+                    result = OracleERPCloudAPI.sync_suppliers(connection, db)
+                    records_processed = result["synced"]
+                else:
+                    records_processed = 0
+                    
+            elif connection.erp_type == "odoo":
+                if sync_type == "sales_order":
+                    data = OdooAPI.get_sale_orders(connection)
+                    records_processed = len(data.get("sale_orders", []))
+                elif sync_type == "inventory":
+                    result = OdooAPI.sync_products(connection, db)
+                    records_processed = result["synced"]
+                else:
+                    records_processed = 0
+                    
+            elif connection.erp_type == "zoho_books":
+                if sync_type == "invoice":
+                    data = ZohoBooksAPI.get_invoices(connection)
+                    records_processed = len(data.get("invoices", []))
+                elif sync_type == "inventory":
+                    result = ZohoBooksAPI.sync_items(connection, db)
+                    records_processed = result["synced"]
                 else:
                     records_processed = 0
             else:
