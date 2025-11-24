@@ -21,7 +21,9 @@ import {
     ChevronDown,
     CheckCircle,
     XCircle,
-    Layers
+    Layers,
+    Camera,
+    Scan
 } from 'lucide-react';
 import { inventory, warehouses } from '@/lib/api';
 
@@ -59,6 +61,8 @@ export default function InventoryPage() {
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [showScanner, setShowScanner] = useState(false);
+    const [scannerActive, setScannerActive] = useState(false);
 
     // Form state for Add/Edit
     const [formData, setFormData] = useState({
@@ -197,6 +201,17 @@ export default function InventoryPage() {
                 console.error('Error deleting item:', error);
             }
         }
+    };
+
+    const handleScanCode = () => {
+        setShowScanner(true);
+        setScannerActive(true);
+    };
+
+    const handleScanResult = (scannedCode: string) => {
+        setFormData({ ...formData, sku: scannedCode });
+        setShowScanner(false);
+        setScannerActive(false);
     };
 
     const handleBulkDelete = async () => {
@@ -467,8 +482,8 @@ export default function InventoryPage() {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.color === 'green' ? 'bg-green-100 text-green-700' :
-                                                        status.color === 'orange' ? 'bg-orange-100 text-orange-700' :
-                                                            'bg-red-100 text-red-700'
+                                                    status.color === 'orange' ? 'bg-orange-100 text-orange-700' :
+                                                        'bg-red-100 text-red-700'
                                                     }`}>
                                                     {status.text}
                                                 </span>
@@ -525,8 +540,8 @@ export default function InventoryPage() {
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
                                     className={`px-3 py-1 border rounded-lg text-sm transition ${currentPage === page
-                                            ? 'bg-blue-600 text-white border-blue-600'
-                                            : 'border-gray-300 hover:bg-gray-50'
+                                        ? 'bg-blue-600 text-white border-blue-600'
+                                        : 'border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     {page}
@@ -575,12 +590,24 @@ export default function InventoryPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                                    <input
-                                        type="text"
-                                        value={formData.sku}
-                                        onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    />
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={formData.sku}
+                                            onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="Enter or scan SKU"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleScanCode}
+                                            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2"
+                                            title="Scan Barcode/QR Code"
+                                        >
+                                            <Scan className="h-4 w-4" />
+                                            Scan
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -725,6 +752,134 @@ export default function InventoryPage() {
                                     <p className="text-lg text-gray-900">{selectedItem.supplier}</p>
                                 </div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Barcode/QR Scanner Modal */}
+            {showScanner && (
+                <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl max-w-2xl w-full">
+                        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                <Camera className="h-6 w-6 text-blue-600" />
+                                Scan Barcode or QR Code
+                            </h2>
+                            <button
+                                onClick={() => {
+                                    setShowScanner(false);
+                                    setScannerActive(false);
+                                }}
+                                className="p-1 hover:bg-gray-100 rounded transition"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {/* Scanner View */}
+                            <div className="bg-gray-900 rounded-lg aspect-video flex items-center justify-center mb-4 relative overflow-hidden">
+                                {scannerActive ? (
+                                    <div className="relative w-full h-full">
+                                        {/* Camera placeholder - In production, use react-qr-barcode-scanner */}
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="text-center">
+                                                <Camera className="h-16 w-16 text-white mx-auto mb-4 animate-pulse" />
+                                                <p className="text-white text-lg">Camera View</p>
+                                                <p className="text-gray-400 text-sm mt-2">Position barcode within frame</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Scan frame overlay */}
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="w-64 h-64 border-4 border-blue-500 rounded-lg relative">
+                                                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-400"></div>
+                                                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-400"></div>
+                                                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-400"></div>
+                                                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-400"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center">
+                                        <Scan className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                                        <p className="text-gray-400">Click "Start Scanner" to begin</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Supported Formats */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <p className="text-sm font-medium text-blue-900 mb-2">Supported Formats:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {['QR Code', 'EAN-13', 'EAN-8', 'UPC-A', 'UPC-E', 'Code 128', 'Code 39', 'ITF', 'Codabar'].map((format) => (
+                                        <span key={format} className="px-2 py-1 bg-white border border-blue-300 rounded text-xs text-blue-700">
+                                            {format}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Manual Input Option */}
+                            <div className="border-t border-gray-200 pt-4">
+                                <p className="text-sm text-gray-600 mb-2">Or enter code manually:</p>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter barcode/SKU manually"
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const value = (e.target as HTMLInputElement).value;
+                                                if (value) {
+                                                    handleScanResult(value);
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            const input = document.querySelector('input[placeholder="Enter barcode/SKU manually"]') as HTMLInputElement;
+                                            if (input && input.value) {
+                                                handleScanResult(input.value);
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+                                    >
+                                        Use Code
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Test Scan Button (simulates scanning) */}
+                            <div className="mt-4 flex gap-2">
+                                <button
+                                    onClick={() => setScannerActive(!scannerActive)}
+                                    className={`flex-1 px-4 py-2 rounded-lg transition ${scannerActive
+                                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                        }`}
+                                >
+                                    {scannerActive ? 'Stop Scanner' : 'Start Scanner'}
+                                </button>
+                                {scannerActive && (
+                                    <button
+                                        onClick={() => handleScanResult(`SKU-${Math.random().toString(36).substr(2, 9).toUpperCase()}`)}
+                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+                                    >
+                                        Simulate Scan
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Instructions */}
+                            <div className="mt-4 bg-gray-50 rounded-lg p-3">
+                                <p className="text-xs text-gray-600">
+                                    <strong>Note:</strong> For production use, this will activate your device camera.
+                                    Ensure good lighting and hold the barcode steady within the frame for best results.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
