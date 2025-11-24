@@ -83,13 +83,14 @@ const sections = [
     { id: 'other', label: 'Other' },
 ];
 
+
 export default function Sidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 hidden md:block z-20 flex flex-col">
-            {/* Scrollable navigation */}
-            <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 pb-4">
+        <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 hidden md:block z-20">
+            {/* Fully scrollable navigation including settings */}
+            <div className="h-full overflow-y-auto py-4 px-3 space-y-6">
                 {sections.map((section) => {
                     const sectionItems = navigation.filter(item => item.section === section.id);
                     if (sectionItems.length === 0) return null;
@@ -126,21 +127,24 @@ export default function Sidebar() {
                         </div>
                     );
                 })}
-            </div>
 
-            {/* Fixed settings at bottom */}
-            <div className="border-t border-gray-200 p-3 bg-gray-50">
-                <Link
-                    href="/dashboard/settings"
-                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all ${pathname === '/dashboard/settings'
-                            ? 'text-blue-700 bg-blue-50 shadow-sm border border-blue-100'
-                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                        }`}
-                >
-                    <Settings className={`mr-3 h-4 w-4 ${pathname === '/dashboard/settings' ? 'text-blue-600' : 'text-gray-400'
-                        }`} />
-                    Settings
-                </Link>
+                {/* Settings at bottom of scrollable area */}
+                <div className="pt-4 border-t border-gray-200">
+                    <h3 className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        System
+                    </h3>
+                    <Link
+                        href="/dashboard/settings"
+                        className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all ${pathname === '/dashboard/settings'
+                                ? 'text-blue-700 bg-blue-50 shadow-sm border border-blue-100'
+                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                            }`}
+                    >
+                        <Settings className={`mr-3 h-4 w-4 ${pathname === '/dashboard/settings' ? 'text-blue-600' : 'text-gray-400'
+                            }`} />
+                        Settings
+                    </Link>
+                </div>
             </div>
         </aside>
     );
