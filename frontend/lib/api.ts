@@ -345,4 +345,7 @@ export const integrations = {
     }
 };
 
+// Named export for new hooks
+export const apiClient = api;
+
 export default api;
