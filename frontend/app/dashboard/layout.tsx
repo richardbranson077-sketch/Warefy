@@ -12,6 +12,7 @@ export default function DashboardLayout({
 }) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
         // Check for auth token
@@ -33,13 +34,21 @@ export default function DashboardLayout({
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Navbar />
+            <Navbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
             <div className="flex pt-16">
-                <Sidebar />
+                <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
                 <main className="flex-1 md:ml-64 min-h-[calc(100vh-4rem)] p-6 bg-gray-50">
                     {children}
                 </main>
             </div>
+
+            {/* Mobile overlay */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
         </div>
     );
 }

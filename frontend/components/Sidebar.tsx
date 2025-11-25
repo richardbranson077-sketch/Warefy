@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -28,7 +30,8 @@ import {
     Lock,
     BarChart3,
     Target,
-    TrendingUpIcon
+    TrendingUpIcon,
+    X
 } from 'lucide-react';
 
 const navigation = [
@@ -83,12 +86,26 @@ const sections = [
     { id: 'other', label: 'Other' },
 ];
 
+interface SidebarProps {
+    isOpen?: boolean;
+    onClose?: () => void;
+}
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     const pathname = usePathname();
 
     return (
-        <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 hidden md:block z-20">
+        <aside className={`fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 z-20 transition-transform duration-200 ease-in-out md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            {/* Mobile Close Button */}
+            <div className="md:hidden absolute right-2 top-2 z-30">
+                <button
+                    onClick={onClose}
+                    className="p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                >
+                    <X className="h-5 w-5" />
+                </button>
+            </div>
+
             {/* Fully scrollable navigation including settings */}
             <div className="h-full overflow-y-auto py-4 px-3 space-y-6">
                 {sections.map((section) => {
@@ -109,9 +126,14 @@ export default function Sidebar() {
                                         <Link
                                             key={item.name}
                                             href={item.href}
+                                            onClick={() => {
+                                                if (window.innerWidth < 768 && onClose) {
+                                                    onClose();
+                                                }
+                                            }}
                                             className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group relative ${isActive
-                                                    ? 'text-blue-700 bg-blue-50 shadow-sm border border-blue-100'
-                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                ? 'text-blue-700 bg-blue-50 shadow-sm border border-blue-100'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                                 }`}
                                         >
                                             {isActive && (
@@ -129,15 +151,20 @@ export default function Sidebar() {
                 })}
 
                 {/* Settings at bottom of scrollable area */}
-                <div className="pt-4 border-t border-gray-200">
+                <div className="pt-4 border-t border-gray-200 pb-20 md:pb-4">
                     <h3 className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         System
                     </h3>
                     <Link
                         href="/dashboard/settings"
+                        onClick={() => {
+                            if (window.innerWidth < 768 && onClose) {
+                                onClose();
+                            }
+                        }}
                         className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all ${pathname === '/dashboard/settings'
-                                ? 'text-blue-700 bg-blue-50 shadow-sm border border-blue-100'
-                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                            ? 'text-blue-700 bg-blue-50 shadow-sm border border-blue-100'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                             }`}
                     >
                         <Settings className={`mr-3 h-4 w-4 ${pathname === '/dashboard/settings' ? 'text-blue-600' : 'text-gray-400'

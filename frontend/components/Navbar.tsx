@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Bell, User, LogOut, Sparkles } from 'lucide-react';
+import { Bell, User, LogOut, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { auth } from '../lib/api';
 
@@ -12,7 +12,11 @@ interface User {
     email?: string;
 }
 
-export default function Navbar() {
+interface NavbarProps {
+    onMenuClick?: () => void;
+}
+
+export default function Navbar({ onMenuClick }: NavbarProps) {
     const router = useRouter();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [user, setUser] = useState<User | null>(null);
@@ -39,6 +43,12 @@ export default function Navbar() {
             <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
+                        <button
+                            onClick={onMenuClick}
+                            className="p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden mr-2"
+                        >
+                            <Menu className="h-6 w-6" />
+                        </button>
                         <Link href="/" className="flex items-center space-x-2">
                             <Image src="/logo.png" alt="Warefy" width={40} height={40} className="rounded-lg" />
                             <div>
