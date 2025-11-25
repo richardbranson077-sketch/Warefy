@@ -155,6 +155,7 @@ class Order(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     items = relationship("OrderItem", back_populates="order")
+    shipments = relationship("Shipment", back_populates="order")
 
 class OrderItem(Base):
     __tablename__ = "order_items"
