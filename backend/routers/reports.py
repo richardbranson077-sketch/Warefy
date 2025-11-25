@@ -8,7 +8,7 @@ from ..database_lite import get_db
 from ..models_lite import Order, OrderItem, Inventory, User
 from ..auth_lite import get_current_active_user
 
-router = APIRouter(prefix="/api/reports", tags=["Reports"])
+router = APIRouter(prefix="/reports", tags=["Reports"])
 
 @router.get("/dashboard")
 def get_dashboard_stats(
