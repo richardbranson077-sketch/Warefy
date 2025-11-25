@@ -18,6 +18,8 @@ services:
         generateValue: true
       - key: OPENAI_API_KEY
         sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://warefy.vercel.app,https://warefy-git-main-fastrocketdelivery.vercel.app,http://localhost:3000
     healthCheckPath: /health
 
   # PostgreSQL Database
