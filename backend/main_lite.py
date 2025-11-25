@@ -157,10 +157,27 @@ app.include_router(integrations.router, prefix="/api/v1", tags=["Integrations"])
 app.include_router(warehouses.router, prefix="/api/v1", tags=["Warehouses"])
 app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 app.include_router(ai_command.router, prefix="/api/v1", tags=["AI"])
+
+# New routers with mock data (Coming Soon features)
+from backend.routers import (
+    financials, ai_chat, computer_vision, edge_ai,
+    blockchain, collaboration, knowledge_base, settings
+)
+
+app.include_router(financials.router, prefix="/api/v1", tags=["Financials"])
+app.include_router(ai_chat.router, prefix="/api/v1", tags=["AI Chat"])
+app.include_router(computer_vision.router, prefix="/api/v1", tags=["Computer Vision"])
+app.include_router(edge_ai.router, prefix="/api/v1", tags=["Edge AI"])
+app.include_router(blockchain.router, prefix="/api/v1", tags=["Blockchain"])
+app.include_router(collaboration.router, prefix="/api/v1", tags=["Collaboration"])
+app.include_router(knowledge_base.router, prefix="/api/v1", tags=["Knowledge Base"])
+app.include_router(settings.router, prefix="/api/v1", tags=["Settings"])
+
+# Health and WebSocket routers
 app.include_router(health_router, tags=["Health"])
 app.include_router(websocket.router, tags=["WebSocket"])  # Real-time WebSocket endpoints
 
-logger.info("All routers registered successfully")
+logger.info("All routers registered successfully (including 8 new Coming Soon features)")
 
 
 @app.get("/")
