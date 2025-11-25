@@ -2,6 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Force cache invalidation
+ARG CACHEBUST=1
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \

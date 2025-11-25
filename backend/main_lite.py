@@ -46,6 +46,31 @@ logger = get_logger(__name__)
 # Initialize database on startup
 logger.info("Initializing database...")
 init_db()
+
+# Seed database if empty
+from backend.models_lite import User
+from backend.auth_lite import get_password_hash
+db = SessionLocal()
+try:
+    user_count = db.query(User).count()
+    if user_count == 0:
+        logger.info("Database is empty, seeding with default admin user...")
+        admin = User(
+            email="admin@warefy.com",
+            username="admin",
+            hashed_password=get_password_hash("admin123"),
+            full_name="Admin User",
+            role="admin",
+            is_active=True
+        )
+        db.add(admin)
+        db.commit()
+        logger.info("✅ Admin user created: admin/admin123")
+    else:
+        logger.info(f"Database already has {user_count} users")
+finally:
+    db.close()
+
 logger.info("Database initialized successfully")
 
 app = FastAPI(
