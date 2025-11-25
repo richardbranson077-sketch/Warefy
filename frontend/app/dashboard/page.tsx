@@ -69,7 +69,7 @@ export default function DashboardPage() {
     ];
 
     // Use real data from API or fallback to empty array
-    const salesHistory = stats.revenueData.length > 0 ? stats.revenueData.map(item => ({
+    const salesHistory = (stats.revenueData?.length ?? 0) > 0 ? stats.revenueData.map(item => ({
         date: item.date,
         sales: item.revenue
     })) : [

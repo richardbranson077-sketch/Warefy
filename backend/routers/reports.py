@@ -55,10 +55,22 @@ def get_dashboard_stats(
     formatted_status_dist = [{"name": s.status, "value": s.count} for s in status_dist]
 
     return {
-        "total_revenue": total_revenue,
-        "total_orders": total_orders,
-        "low_stock_count": low_stock_count,
-        "sales_trend": formatted_trend,
-        "top_items": formatted_top_items,
-        "order_status_distribution": formatted_status_dist
+        "totalRevenue": total_revenue,
+        "totalOrders": total_orders,
+        "pendingOrders": 0,
+        "completedOrders": 0,
+        "lowStockItems": low_stock_count,
+        "totalInventoryValue": 0,
+        "activeShipments": 0,
+        "warehouseUtilization": 0,
+        "recentOrders": [],
+        "inventoryAlerts": [],
+        "revenueData": formatted_trend,
+        "ordersByStatus": {
+            "pending": 0,
+            "processing": 0,
+            "shipped": 0,
+            "delivered": 0,
+            "cancelled": 0
+        }
     }
