@@ -3,11 +3,13 @@ Pydantic schemas for request/response validation in Warefy API.
 """
 
 from pydantic import BaseModel, EmailStr, Field
+from backend.base_schema import CamelCaseModel
+
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 # ============= User Schemas =============
-class UserBase(BaseModel):
+class UserBase(CamelCaseModel):
     email: EmailStr
     username: str
     full_name: Optional[str] = None
@@ -40,7 +42,7 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 # ============= Warehouse Schemas =============
-class WarehouseBase(BaseModel):
+class WarehouseBase(CamelCaseModel):
     name: str
     code: str
     address: Optional[str] = None
@@ -64,7 +66,7 @@ class WarehouseResponse(WarehouseBase):
         from_attributes = True
 
 # ============= Inventory Schemas =============
-class InventoryBase(BaseModel):
+class InventoryBase(CamelCaseModel):
     sku: str
     product_name: str
     category: Optional[str] = None
@@ -90,7 +92,7 @@ class InventoryResponse(InventoryBase):
         from_attributes = True
 
 # ============= Vehicle Schemas =============
-class VehicleBase(BaseModel):
+class VehicleBase(CamelCaseModel):
     vehicle_number: str
     vehicle_type: str
     capacity: float
@@ -130,7 +132,7 @@ class RouteCreate(BaseModel):
     end_lon: float
     waypoints: List[Waypoint]
 
-class RouteResponse(BaseModel):
+class RouteResponse(CamelCaseModel):
     id: int
     route_name: str
     driver_id: int
@@ -151,7 +153,7 @@ class DemandForecastRequest(BaseModel):
     forecast_days: int = Field(default=30, ge=1, le=365)
     model_type: str = Field(default="prophet", pattern="^(prophet|lstm|xgboost)$")
 
-class DemandForecastResponse(BaseModel):
+class DemandForecastResponse(CamelCaseModel):
     sku: str
     warehouse_id: Optional[int] = None
     forecast_days: int
@@ -166,7 +168,7 @@ class RouteOptimizationRequest(BaseModel):
     delivery_points: List[Dict[str, Any]]  # [{lat, lon, priority, time_window}]
     optimization_method: str = Field(default="ortools", pattern="^(ortools|genetic)$")
 
-class RouteOptimizationResponse(BaseModel):
+class RouteOptimizationResponse(CamelCaseModel):
     vehicle_id: int
     optimized_route: List[int]  # Indices of delivery points in optimal order
     total_distance: float
@@ -174,7 +176,7 @@ class RouteOptimizationResponse(BaseModel):
     route_geometry: Optional[List[Dict[str, float]]] = None
 
 # ============= Anomaly Schemas =============
-class AnomalyResponse(BaseModel):
+class AnomalyResponse(CamelCaseModel):
     id: int
     anomaly_type: str
     severity: str
@@ -192,7 +194,7 @@ class AnomalyResponse(BaseModel):
 class MaintenancePredictionRequest(BaseModel):
     vehicle_id: int
 
-class MaintenancePredictionResponse(BaseModel):
+class MaintenancePredictionResponse(CamelCaseModel):
     vehicle_id: int
     failure_risk_score: float
     recommended_maintenance_date: Optional[datetime] = None
@@ -207,7 +209,7 @@ class AIRecommendationRequest(BaseModel):
     additional_context: Optional[Dict[str, Any]] = None
 
 # ============= Order Schemas =============
-class OrderItemBase(BaseModel):
+class OrderItemBase(CamelCaseModel):
     sku: str
     quantity: int
     unit_price: float
@@ -222,7 +224,7 @@ class OrderItemResponse(OrderItemBase):
     class Config:
         from_attributes = True
 
-class OrderBase(BaseModel):
+class OrderBase(CamelCaseModel):
     customer_name: str
     customer_email: Optional[str] = None
     shipping_address: Optional[str] = None
@@ -246,7 +248,7 @@ class OrderResponse(OrderBase):
         from_attributes = True
 
 # ============= Integration Schemas =============
-class IntegrationBase(BaseModel):
+class IntegrationBase(CamelCaseModel):
     name: str
     api_key: str
     api_secret: Optional[str] = None
@@ -266,7 +268,7 @@ class IntegrationResponse(IntegrationBase):
         from_attributes = True
 
 # ============= Warehouse Schemas =============
-class WarehouseBase(BaseModel):
+class WarehouseBase(CamelCaseModel):
     name: str
     address: str
     latitude: float
@@ -287,7 +289,7 @@ class WarehouseResponse(WarehouseBase):
     class Config:
         from_attributes = True
 
-class AIRecommendationResponse(BaseModel):
+class AIRecommendationResponse(CamelCaseModel):
     recommendations: List[Dict[str, Any]]
     reasoning: str
     confidence_score: float
@@ -299,7 +301,7 @@ class SimulationRequest(BaseModel):
     parameters: Dict[str, Any]
     duration_days: int = Field(default=7, ge=1, le=90)
 
-class SimulationResponse(BaseModel):
+class SimulationResponse(CamelCaseModel):
     scenario_type: str
     impact_analysis: Dict[str, Any]
     recommendations: List[str]
