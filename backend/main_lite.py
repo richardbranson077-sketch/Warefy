@@ -12,7 +12,7 @@ import sys
 import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from backend.database_lite import get_db, init_db
+from backend.database_lite import get_db, init_db, SessionLocal
 from backend.models_lite import User, Warehouse, Inventory, SalesHistory, Anomaly
 from backend.schemas import (
     InventoryResponse, WarehouseResponse, AnomalyResponse
