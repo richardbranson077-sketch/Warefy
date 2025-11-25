@@ -82,7 +82,7 @@ export const auth = {
 // Inventory
 export const inventory = {
     getAll: async (params: any) => {
-        const response = await api.get('/api/inventory', { params });
+        const response = await api.get('/api/v1/inventory', { params });
         return response.data;
     },
 
@@ -92,7 +92,7 @@ export const inventory = {
     },
 
     create: async (data: any) => {
-        const response = await api.post('/api/inventory', data);
+        const response = await api.post('/api/v1/inventory', data);
         return response.data;
     },
 
@@ -107,7 +107,7 @@ export const inventory = {
     },
 
     getByWarehouse: async (warehouseId: number) => {
-        const response = await api.get('/api/inventory', {
+        const response = await api.get('/api/v1/inventory', {
             params: { warehouse_id: warehouseId },
         });
         return response.data;
@@ -117,7 +117,7 @@ export const inventory = {
 // Warehouses
 export const warehouses = {
     getAll: async () => {
-        const response = await api.get('/api/warehouses');
+        const response = await api.get('/api/v1/warehouses');
         return response.data;
     },
 
@@ -127,7 +127,7 @@ export const warehouses = {
     },
 
     create: async (data: any) => {
-        const resp = await api.post('/api/warehouses', data);
+        const resp = await api.post('/api/v1/warehouses', data);
         return resp.data;
     },
 
@@ -140,7 +140,7 @@ export const warehouses = {
 // Demand Forecasting
 export const demand = {
     getForecast: async (sku: string, params: any) => {
-        const response = await api.post('/api/demand/forecast', { sku, ...params });
+        const response = await api.post('/api/v1/demand/forecast', { sku, ...params });
         return response.data;
     },
 
@@ -153,17 +153,17 @@ export const demand = {
 // Routes
 export const routes = {
     optimize: async (data: any) => {
-        const response = await api.post('/api/routes/optimize', data);
+        const response = await api.post('/api/v1/routes/optimize', data);
         return response.data;
     },
 
     getOptimized: async (params: any) => {
-        const response = await api.get('/api/routes/optimized', { params });
+        const response = await api.get('/api/v1/routes/optimized', { params });
         return response.data;
     },
 
     create: async (data) => {
-        const response = await api.post('/api/routes/create', data);
+        const response = await api.post('/api/v1/routes/create', data);
         return response.data;
     },
 
@@ -176,7 +176,7 @@ export const routes = {
 // AI Recommendations
 export const aiRecommendations = {
     get: async (data) => {
-        const response = await api.post('/api/ai/recommendations', data);
+        const response = await api.post('/api/v1/ai/recommendations', data);
         return response.data;
     },
 };
@@ -184,7 +184,7 @@ export const aiRecommendations = {
 // AI Command Center
 export const ai = {
     command: async (prompt: string, history: any[] = []) => {
-        const response = await api.post('/api/ai/command', { prompt, history });
+        const response = await api.post('/api/v1/ai/command', { prompt, history });
         return response.data;
     },
 };
@@ -192,7 +192,7 @@ export const ai = {
 // Anomalies
 export const anomalies = {
     detect: async (data: any) => {
-        const response = await api.post('/api/anomalies/detect', data);
+        const response = await api.post('/api/v1/anomalies/detect', data);
         return response.data;
     },
 
@@ -202,14 +202,14 @@ export const anomalies = {
     },
 
     getRecent: async (driverId: number, status: string) => {
-        const response = await api.get('/api/anomalies/recent', {
+        const response = await api.get('/api/v1/anomalies/recent', {
             params: { driver_id: driverId, status },
         });
         return response.data;
     },
 
     resolve: async (data: any) => {
-        const response = await api.put('/api/anomalies/resolve', data);
+        const response = await api.put('/api/v1/anomalies/resolve', data);
         return response.data;
     },
 };
@@ -217,7 +217,7 @@ export const anomalies = {
 // Vehicles
 export const vehicles = {
     getAll: async (params: any) => {
-        const response = await api.get('/api/vehicles', { params });
+        const response = await api.get('/api/v1/vehicles', { params });
         return response.data;
     },
 
@@ -227,7 +227,7 @@ export const vehicles = {
     },
 
     create: async (data: any) => {
-        const response = await api.post('/api/vehicles', data);
+        const response = await api.post('/api/v1/vehicles', data);
         return response.data;
     },
 };
@@ -264,7 +264,7 @@ export const sendPush = async (payload: {
     device_token?: string;
     topic?: string;
 }) => {
-    const resp = await api.post('/api/notifications/push', payload);
+    const resp = await api.post('/api/v1/notifications/push', payload);
     return resp.data;
 };
 
@@ -274,7 +274,7 @@ export const sendEmail = async (payload: {
     body: string;
     html?: string;
 }) => {
-    const resp = await api.post('/api/notifications/email', payload);
+    const resp = await api.post('/api/v1/notifications/email', payload);
     return resp.data;
 };
 
@@ -282,7 +282,7 @@ export const sendSMS = async (payload: {
     to: string;
     message: string;
 }) => {
-    const resp = await api.post('/api/notifications/sms', payload);
+    const resp = await api.post('/api/v1/notifications/sms', payload);
     return resp.data;
 };
 
@@ -291,7 +291,7 @@ export const sendSMS = async (payload: {
 // ------------------------------------------------------------------
 export const orders = {
     getAll: async (params?: any) => {
-        const resp = await api.get('/api/orders', { params });
+        const resp = await api.get('/api/v1/orders', { params });
         return resp.data;
     },
     getById: async (id: number) => {
@@ -299,7 +299,7 @@ export const orders = {
         return resp.data;
     },
     create: async (data: any) => {
-        const resp = await api.post('/api/orders', data);
+        const resp = await api.post('/api/v1/orders', data);
         return resp.data;
     },
     update: async (id: number, data: any) => {
@@ -323,11 +323,11 @@ export const reports = {
 // ------------------------------------------------------------------
 export const integrations = {
     getAll: async () => {
-        const resp = await api.get('/api/integrations/');
+        const resp = await api.get('/api/v1/integrations/');
         return resp.data;
     },
     create: async (data: any) => {
-        const resp = await api.post('/api/integrations/', data);
+        const resp = await api.post('/api/v1/integrations/', data);
         return resp.data;
     },
     delete: async (id: number) => {
