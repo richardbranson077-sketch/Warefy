@@ -47,6 +47,8 @@ def get_db():
         db.close()
 
 def init_db():
-    """Initialize database tables"""
+    """Initialize database tables (drop existing tables to apply schema changes)"""
+    # Drop all tables to ensure schema is up‑to‑date (safe for development / demo)
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    print("✅ Database tables created successfully!")
+    print("✅ Database tables (re)created successfully!")
