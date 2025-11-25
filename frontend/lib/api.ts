@@ -35,7 +35,7 @@ export const auth = {
             formData.append('username', username);
             formData.append('password', password);
 
-            const response = await api.post('/api/auth/login', formData, {
+            const response = await api.post('/api/v1/auth/login', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -48,33 +48,24 @@ export const auth = {
         } catch (error) {
             console.log('Backend login failed, checking demo credentials...');
 
-            // 2. Demo mode fallback if backend fails
-            if (username === 'demo@warefy.com' || username === 'demo' || username === 'admin') {
-                if (password === 'demo123' || password === 'admin123') {
-                    // Create a demo token
-                    const demoToken = btoa(JSON.stringify({
-                        username: username,
-                        role: 'admin',
-                        exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
-                    }));
-
-                    localStorage.setItem('token', demoToken);
-                    localStorage.setItem('username', username);
-
-                    return {
-                        access_token: demoToken,
-                        token_type: 'bearer'
-                    };
-                }
+            // 2. Fallback to demo credentials
+            if (username === 'admin' && password === 'admin123') {
+                const demoToken = 'demo-token-' + Date.now();
+                localStorage.setItem('token', demoToken);
+                localStorage.setItem('username', username);
+                return {
+                    access_token: demoToken,
+                    token_type: 'bearer',
+                    user: { username: 'admin', role: 'admin' },
+                };
             }
 
-            // If neither works, throw error
             throw new Error('Invalid credentials. Use demo/admin123 for demo access.');
         }
     },
 
     register: async (userData: any) => {
-        const response = await api.post('/api/auth/register', userData);
+        const response = await api.post('/api/v1/auth/register', userData);
         return response.data;
     },
 
