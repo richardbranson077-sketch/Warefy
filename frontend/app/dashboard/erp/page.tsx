@@ -3,7 +3,7 @@
 import { useERP } from '@/hooks/useERP';
 import { LoadingSpinner } from '@/components/LoadingStates';
 import { ErrorAlert } from '@/components/ErrorStates';
-import { Database, Sync, CheckCircle, RefreshCw } from 'lucide-react';
+import { Database, CheckCircle, RefreshCw } from 'lucide-react';
 
 export default function ERPPage() {
     const { data: erpData, loading, error, refetch } = useERP();
@@ -44,7 +44,7 @@ export default function ERPPage() {
                         <div className="bg-gray-800 rounded-xl border border-gray-700 p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <p className="text-sm text-gray-400">Total Syncs</p>
-                                <Sync className="h-5 w-5 text-blue-400" />
+                                <RefreshCw className="h-5 w-5 text-blue-400" />
                             </div>
                             <p className="text-2xl font-bold">{stats.totalSyncs}</p>
                         </div>
