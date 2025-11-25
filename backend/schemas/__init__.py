@@ -26,7 +26,7 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     id: int
     is_active: bool
-    is_2fa_enabled: bool
+    is_2fa_enabled: Optional[bool] = False
     created_at: datetime
     
     class Config:
