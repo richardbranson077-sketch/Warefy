@@ -54,7 +54,7 @@ export const reportsService = {
      * Generate new report
      */
     generate: async (data: CreateReport) => {
-        const response = await apiClient.post<Report>('/reports/generate', data);
+        const response = await apiClient.post<Report>('/api/v1/reports/generate', data);
         return response.data;
     },
 
@@ -69,7 +69,7 @@ export const reportsService = {
      * Get report templates
      */
     getTemplates: async () => {
-        const response = await apiClient.get<ReportTemplate[]>('/reports/templates');
+        const response = await apiClient.get<ReportTemplate[]>('/api/v1/reports/templates');
         return response.data;
     },
 

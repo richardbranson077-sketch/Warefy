@@ -48,7 +48,7 @@ export const dashboardService = {
      * Get dashboard metrics and statistics
      */
     getMetrics: async (): Promise<DashboardMetrics> => {
-        const response = await apiClient.get<DashboardMetrics>('/reports/dashboard');
+        const response = await apiClient.get<DashboardMetrics>('/api/v1/reports/dashboard');
         return response.data;
     },
 
@@ -56,7 +56,7 @@ export const dashboardService = {
      * Get real-time statistics
      */
     getRealTimeStats: async () => {
-        const response = await apiClient.get('/reports/realtime-stats');
+        const response = await apiClient.get('/api/v1/reports/realtime-stats');
         return response.data;
     },
 
@@ -64,7 +64,7 @@ export const dashboardService = {
      * Get performance metrics
      */
     getPerformanceMetrics: async (period: 'day' | 'week' | 'month' | 'year' = 'month') => {
-        const response = await apiClient.get('/reports/performance', {
+        const response = await apiClient.get('/api/v1/reports/performance', {
             params: { period }
         });
         return response.data;

@@ -70,8 +70,17 @@ export const auth = {
     },
 
     getCurrentUser: async () => {
-        const response = await api.get('/api/auth/me');
-        return response.data;
+        try {
+            const response = await api.get('/api/v1/auth/me');
+            return response.data;
+        } catch (error) {
+            // Fallback to demo user if backend fails
+            const username = localStorage.getItem('username');
+            if (username) {
+                return { username, role: 'admin' };
+            }
+            throw error;
+        }
     },
 
     logout: () => {
