@@ -17,6 +17,7 @@ class User(Base):
     full_name = Column(String)
     role = Column(String, default="manager")  # admin, manager, driver
     is_active = Column(Boolean, default=True)
+    is_2fa_enabled = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Warehouse(Base):
