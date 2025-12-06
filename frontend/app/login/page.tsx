@@ -187,13 +187,16 @@ export default function LoginPage() {
                             </p>
                         </div>
 
-                        <div className="mt-6 flex items-center justify-center space-x-4 text-xs text-gray-500">
-                            <div className="flex items-center">
-                                <span className="mr-1">🔒</span>
-                                Secure Login
+                        <div className="mt-6 flex flex-col items-center justify-center space-y-2 text-xs text-gray-500">
+                            <div className="flex items-center space-x-4">
+                                <div className="flex items-center">
+                                    <span className="mr-1">🔒</span>
+                                    Secure Login
+                                </div>
+                                <span>•</span>
+                                <div>256-bit Encryption</div>
                             </div>
-                            <span>•</span>
-                            <div>256-bit Encryption</div>
+                            <div className="text-gray-400 font-mono">v1.1 (HTTPS Fix)</div>
                         </div>
                     </div>
 
