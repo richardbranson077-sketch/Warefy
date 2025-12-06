@@ -20,14 +20,27 @@ const api = axios.create({
 
 // CRITICAL: Force HTTPS on every request (runs at request-time, not build-time)
 api.interceptors.request.use((config) => {
+    console.log('🔍 INTERCEPTOR: Before -', {
+        url: config.url,
+        baseURL: config.baseURL,
+        fullURL: config.baseURL + (config.url || '')
+    });
+
     if (config.baseURL && config.baseURL.startsWith('http://')) {
         config.baseURL = config.baseURL.replace('http://', 'https://');
-        console.log('⚠️ Fixed HTTP to HTTPS:', config.baseURL);
+        console.log('⚠️ Fixed HTTP to HTTPS in baseURL:', config.baseURL);
     }
     if (config.url && config.url.startsWith('http://')) {
         config.url = config.url.replace('http://', 'https://');
         console.log('⚠️ Fixed HTTP to HTTPS in URL:', config.url);
     }
+
+    console.log('✅ INTERCEPTOR: After -', {
+        url: config.url,
+        baseURL: config.baseURL,
+        fullURL: config.baseURL + (config.url || '')
+    });
+
     return config;
 });
 
