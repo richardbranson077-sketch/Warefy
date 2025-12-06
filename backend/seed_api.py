@@ -12,13 +12,26 @@ import random
 router = APIRouter(prefix="/seed", tags=["Database Seeding"])
 
 @router.get("/all")
-async def seed_database(db: Session = Depends(get_db)):
+async def seed_database(force: bool = False, db: Session = Depends(get_db)):
     """Seed the database with enterprise-scale sample data"""
     
     # Check if already seeded
     existing_orders = db.query(Order).count()
-    if existing_orders > 0:
-        return {"message": f"Database already has {existing_orders} orders. Skipping seed."}
+    
+    if force:
+        # Clear all existing data
+        try:
+            db.query(Order).delete()
+            db.query(Inventory).delete()
+            db.query(Warehouse).delete()
+            # Don't delete admin user
+            db.commit()
+            print(f"🗑️ Cleared {existing_orders} existing orders")
+        except Exception as e:
+            db.rollback()
+            print(f"⚠️ Error clearing data: {e}")
+    elif existing_orders > 0:
+        return {"message": f"Database already has {existing_orders} orders. Use ?force=true to reseed."}
     
     # Seed Users
     admin = db.query(User).filter(User.username == "admin").first()
