@@ -5,21 +5,13 @@
 
 import axios from 'axios';
 
-// robust URL detection
-let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// ALWAYS use HTTPS except on localhost
+const API_URL = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000'
+    : 'https://warefy-production.up.railway.app';
 
-// Force HTTPS on Vercel (Client-side)
-if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-    url = 'https://warefy-production.up.railway.app';
-}
-// Force HTTPS in Production (Server-side / Build-time)
-else if (process.env.NODE_ENV === 'production') {
-    url = 'https://warefy-production.up.railway.app';
-}
-
-const API_URL = url;
-
-console.log('API Config Loaded:', `Env: ${process.env.NODE_ENV}, URL: ${API_URL}`);
+console.log('🔧 API URL:', API_URL, '| Host:', typeof window !== 'undefined' ? window.location.hostname : 'SSR');
 
 // Create axios instance
 const api = axios.create({
