@@ -198,7 +198,7 @@ app.include_router(quality_router)
 # app.include_router(inventory_router) # Replaced by real router
 # app.include_router(anomalies_router) # Replaced by real router
 app.include_router(forecasting_router)
-app.include_router(orders_stats_router)
+# app.include_router(orders_stats_router) # Replaced by real router
 # app.include_router(ai_reports_router)  # Replaced by real router
 app.include_router(edge_ai_router)
 # app.include_router(ai_recommendations_router)  # Replaced by real router
