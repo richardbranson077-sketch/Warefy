@@ -14,7 +14,7 @@ export interface Recommendation {
 export const recommendationsService = {
     // Get all active recommendations
     getAll: async (): Promise<Recommendation[]> => {
-        const response = await api.get('/api/v1/recommendations/');
+        const response = await api.get('/api/v1/recommendations');
         return response.data;
     },
 
