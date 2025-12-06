@@ -11,7 +11,7 @@ import random
 
 router = APIRouter(prefix="/seed", tags=["Database Seeding"])
 
-@router.post("/all")
+@router.get("/all")
 async def seed_database(db: Session = Depends(get_db)):
     """Seed the database with enterprise-scale sample data"""
     
