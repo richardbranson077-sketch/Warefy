@@ -163,14 +163,14 @@ async def log_requests(request: Request, call_next):
 
 
 # Include routers with /api/v1/ prefix
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(notifications.router, prefix="/api/v1", tags=["Notifications"])
+app.include_router(auth.router)  # Prefix defined in router: /api/v1/auth
+app.include_router(notifications.router) # Prefix defined in router: /api/v1/notifications
 app.include_router(orders.router, tags=["Orders"])  # Already has /api/v1/orders prefix
-app.include_router(reports.router, prefix="/api/v1", tags=["Reports"])
-app.include_router(integrations.router, prefix="/api/v1", tags=["Integrations"])
+app.include_router(reports.router) # Prefix defined in router: /api/v1/reports
+app.include_router(integrations.router) # Prefix defined in router: /api/v1/integrations
 app.include_router(warehouses.router, tags=["Warehouses"])  # Prefix defined in router
-app.include_router(users.router, prefix="/api/v1", tags=["Users"])
-app.include_router(ai_command.router, prefix="/api/v1", tags=["AI"])
+app.include_router(users.router) # Prefix defined in router: /api/v1/users
+app.include_router(ai_command.router) # Prefix defined in router: /api/v1/ai-command
 app.include_router(routes.router, tags=["Routes"])  # Already has /api/v1/routes prefix
 app.include_router(vehicles.router, tags=["Vehicles"])  # Already has /api/v1/vehicles prefix
 app.include_router(advanced_reporting.router)
