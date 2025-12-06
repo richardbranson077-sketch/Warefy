@@ -196,7 +196,7 @@ export default function ReturnsPage() {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={fetchReturns}
+                                onClick={refetch}
                                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
                             >
                                 <RefreshCw className="h-4 w-4" />

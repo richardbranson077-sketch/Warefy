@@ -69,4 +69,17 @@ export const dashboardService = {
         });
         return response.data;
     },
+
+    /**
+     * Get live activity feed
+     */
+    getLiveFeed: async (limit: number = 10) => {
+        const response = await apiClient.get(`/api/v1/reports/live-feed?limit=${limit}`);
+        return response.data;
+    },
+
+    getTopProducts: async (limit: number = 5, periodDays: number = 30) => {
+        const response = await apiClient.get(`/api/v1/reports/top-products?limit=${limit}&period_days=${periodDays}`);
+        return response.data;
+    }
 };

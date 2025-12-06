@@ -16,7 +16,7 @@ export function useEdgeAI() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/edge-ai');
+            const response = await apiClient.get('/api/v1/edge-ai/models');
             setData(response.data);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch Edge AI data');

@@ -9,7 +9,7 @@ from ..database_lite import get_db
 from ..models_lite import Order, OrderItem, User
 from ..schemas import OrderCreate, OrderUpdate, OrderResponse
 
-router = APIRouter(prefix="/api/orders", tags=["Order Management"])
+router = APIRouter(prefix="/api/v1/orders", tags=["Order Management"])
 
 @router.get("/", response_model=List[OrderResponse])
 def list_orders(
@@ -22,6 +22,34 @@ def list_orders(
     if status:
         query = query.filter(Order.status == status)
     return query.order_by(Order.created_at.desc()).limit(limit).all()
+
+@router.get("/stats")
+def get_order_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Get order statistics"""
+    orders = db.query(Order).all()
+    
+    total_orders = len(orders)
+    pending = len([o for o in orders if o.status == "pending"])
+    processing = len([o for o in orders if o.status == "processing"])
+    shipped = len([o for o in orders if o.status == "shipped"])
+    delivered = len([o for o in orders if o.status == "delivered"])
+    cancelled = len([o for o in orders if o.status == "cancelled"])
+    
+    total_revenue = sum(o.total_amount for o in orders if o.total_amount)
+    
+    return {
+        "total": total_orders,
+        "pending": pending,
+        "processing": processing,
+        "shipped": shipped,
+        "delivered": delivered,
+        "cancelled": cancelled,
+        "totalRevenue": total_revenue,
+        "avgOrderValue": total_revenue / total_orders if total_orders > 0 else 0
+    }
 
 @router.get("/{order_id}", response_model=OrderResponse)
 def get_order(

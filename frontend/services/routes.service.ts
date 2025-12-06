@@ -1,92 +1,190 @@
-/**
- * Routes Service
- * Handles API calls for route optimization
- */
+import { apiClient } from '@/lib/api';
 
-import apiClient from '@/lib/api';
+export interface Waypoint {
+    address: string;
+    lat?: number;
+    lng?: number;
+    stop_duration_minutes?: number;
+}
 
 export interface Route {
-    id: number;
+    id: string;
     name: string;
-    vehicleId: number;
-    driverId?: number;
-    stops: RouteStop[];
-    totalDistance: number;
-    totalDuration: number;
-    status: 'planned' | 'in_progress' | 'completed';
+    origin: Waypoint;
+    destination: Waypoint;
+    waypoints: Waypoint[];
+    optimization_mode: string;
+    vehicle_type: string;
+    status: string;
+    created_at: string;
+    assigned_driver?: {
+        id: string;
+        name: string;
+        assigned_at: string;
+    };
+    total_distance_km: number;
+    total_duration_minutes: number;
+    estimated_cost: number;
     optimized: boolean;
-    createdAt: string;
 }
 
-export interface RouteStop {
-    id: number;
-    sequence: number;
-    warehouseId?: number;
-    address: string;
-    lat: number;
-    lng: number;
-    type: 'pickup' | 'delivery';
-    estimatedArrival?: string;
-    actualArrival?: string;
-    completed: boolean;
-}
-
-export interface OptimizeRouteRequest {
-    vehicleId: number;
-    startLocation: { lat: number; lng: number };
-    stops: Array<{
-        address: string;
-        lat: number;
-        lng: number;
-        type: 'pickup' | 'delivery';
+export interface OptimizationResult {
+    route_id: string;
+    optimized_sequence: number[];
+    optimized_stops?: Waypoint[];
+    total_distance_km: number;
+    total_duration_minutes: number;
+    fuel_cost_usd: number;
+    toll_cost_usd: number;
+    total_cost_usd: number;
+    insights: string[];
+    recommendations: string[];
+    alternative_routes: Array<{
+        description: string;
+        distance_km: number;
+        duration_minutes: number;
+        cost_usd: number;
     }>;
+    model: string;
+    optimized_at: string;
+}
+
+export interface RouteAnalytics {
+    summary: {
+        total_routes: number;
+        completed_routes: number;
+        in_progress_routes: number;
+        avg_distance_km: number;
+        avg_duration_minutes: number;
+        avg_cost_usd: number;
+    };
+    daily_routes: Array<{ date: string; completed: number; planned: number }>;
+    distance_trend: Array<{ date: string; total_km: number; avg_km_per_route: number }>;
+    cost_trend: Array<{ date: string; total_cost: number; fuel_cost: number; toll_cost: number }>;
+    driver_stats: Array<{
+        driver_name: string;
+        routes_completed: number;
+        avg_duration_minutes: number;
+        on_time_percentage: number;
+    }>;
+    optimization_impact: {
+        routes_optimized: number;
+        avg_distance_saved_km: number;
+        avg_time_saved_minutes: number;
+        avg_cost_saved_usd: number;
+        total_savings_usd: number;
+    };
 }
 
 export const routesService = {
     /**
+     * Create a new route
+     */
+    createRoute: async (data: {
+        name: string;
+        origin: Waypoint;
+        destination: Waypoint;
+        waypoints?: Waypoint[];
+        optimization_mode?: string;
+        vehicle_type?: string;
+    }) => {
+        const response = await apiClient.post('/api/v1/routes/create', data);
+        return response.data;
+    },
+
+    /**
+     * Optimize route with AI
+     */
+    optimizeRoute: async (data: {
+        route_id?: string;
+        origin: Waypoint;
+        destination: Waypoint;
+        waypoints?: Waypoint[];
+        optimization_mode?: string;
+        avoid_tolls?: boolean;
+        avoid_highways?: boolean;
+    }) => {
+        const response = await apiClient.post<OptimizationResult>('/api/v1/routes/optimize', data);
+        return response.data;
+    },
+
+    /**
      * Get all routes
      */
-    getAll: async (params?: { status?: string; vehicleId?: number }) => {
-        const response = await apiClient.get<Route[]>('/routes', { params });
+    getRoutes: async (status?: string) => {
+        const params = status ? `?status=${status}` : '';
+        const response = await apiClient.get<Route[]>(`/api/v1/routes/${params}`);
         return response.data;
     },
 
     /**
-     * Get route by ID
+     * Get specific route
      */
-    getById: async (id: number) => {
-        const response = await apiClient.get<Route>(`/routes/${id}`);
+    getRoute: async (routeId: string) => {
+        const response = await apiClient.get<Route>(`/api/v1/routes/${routeId}`);
         return response.data;
     },
 
     /**
-     * Optimize route
+     * Assign driver to route
      */
-    optimize: async (data: OptimizeRouteRequest) => {
-        const response = await apiClient.post<Route>('/routes/optimize', data);
+    assignDriver: async (routeId: string, driverId: string, driverName: string) => {
+        const response = await apiClient.put(`/api/v1/routes/${routeId}/assign`, {
+            driver_id: driverId,
+            driver_name: driverName
+        });
         return response.data;
     },
 
     /**
-     * Create route
+     * Update route status
      */
-    create: async (data: Partial<Route>) => {
-        const response = await apiClient.post<Route>('/routes/create', data);
-        return response.data;
-    },
-
-    /**
-     * Update route
-     */
-    update: async (id: number, data: Partial<Route>) => {
-        const response = await apiClient.put<Route>(`/routes/${id}`, data);
+    updateStatus: async (routeId: string, status: string) => {
+        const response = await apiClient.put(`/api/v1/routes/${routeId}/status?status=${status}`);
         return response.data;
     },
 
     /**
      * Delete route
      */
-    delete: async (id: number) => {
-        await apiClient.delete(`/routes/${id}`);
+    deleteRoute: async (routeId: string) => {
+        await apiClient.delete(`/api/v1/routes/${routeId}`);
     },
+
+    /**
+     * Get route analytics
+     */
+    getAnalytics: async () => {
+        const response = await apiClient.get<RouteAnalytics>('/api/v1/routes/analytics/performance');
+        return response.data;
+    },
+
+    /**
+     * Simulate route with traffic
+     */
+    simulateRoute: async (data: {
+        origin: Waypoint;
+        destination: Waypoint;
+        waypoints?: Waypoint[];
+        traffic_condition?: string;
+    }, trafficCondition: string = 'normal') => {
+        const response = await apiClient.post(`/api/v1/routes/simulate?traffic_condition=${trafficCondition}`, data);
+        return response.data;
+    },
+
+    /**
+     * Get live tracking for a route
+     */
+    getLiveTracking: async (routeId: string) => {
+        const response = await apiClient.get(`/api/v1/routes/${routeId}/tracking`);
+        return response.data;
+    },
+
+    /**
+     * Get live tracking for all active routes
+     */
+    getAllLiveTracking: async () => {
+        const response = await apiClient.get('/api/v1/routes/tracking/all');
+        return response.data;
+    }
 };

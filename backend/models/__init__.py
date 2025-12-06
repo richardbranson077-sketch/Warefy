@@ -156,7 +156,7 @@ class Anomaly(Base):
     detected_at = Column(DateTime, default=datetime.utcnow, index=True)
     resolved = Column(Boolean, default=False)
     resolved_at = Column(DateTime)
-    metadata = Column(JSON)  # Additional context data
+    meta_data = Column(JSON)  # Additional context data (renamed from metadata to avoid SQLAlchemy reserved name)
 
 class MaintenanceLog(Base):
     """Vehicle maintenance history and predictions"""

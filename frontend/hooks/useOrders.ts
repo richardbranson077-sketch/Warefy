@@ -53,7 +53,7 @@ export function useOrders(options: UseOrdersOptions = {}) {
     const createOrder = async (order: CreateOrder) => {
         try {
             const newOrder = await ordersService.create(order);
-            setData([newOrder, ...data]);
+            setData(prev => [newOrder, ...prev]);
             await fetchStats(); // Refresh stats
             return newOrder;
         } catch (err: any) {

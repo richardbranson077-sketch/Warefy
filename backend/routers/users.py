@@ -1,15 +1,17 @@
 '''User management router – admin only'''
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
+import shutil
+import os
 
 from ..auth_lite import get_current_active_user, require_role, get_password_hash
 from ..database_lite import get_db
 from ..models_lite import User
 from ..schemas import UserResponse, UserUpdate
 
-router = APIRouter(prefix="/api/users", tags=["User Management"])
+router = APIRouter(prefix="/api/v1/users", tags=["User Management"])
 
 # List all users – admin only
 @router.get("/", response_model=List[UserResponse])
@@ -33,7 +35,62 @@ def get_user(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-# Update user – admin only (or self for limited fields)
+# Get self profile
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
+# Update self profile
+@router.put("/me", response_model=UserResponse)
+def update_me(
+    payload: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    user = current_user
+    
+    if payload.full_name is not None:
+        user.full_name = payload.full_name
+    if payload.phone is not None:
+        user.phone = payload.phone
+    if payload.bio is not None:
+        user.bio = payload.bio
+    if payload.location is not None:
+        user.location = payload.location
+    if payload.password is not None:
+        user.hashed_password = get_password_hash(payload.password)
+        
+    db.commit()
+    db.refresh(user)
+    return user
+
+# Upload avatar
+@router.post("/me/avatar", response_model=UserResponse)
+async def upload_avatar(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    # Create uploads directory if not exists
+    UPLOAD_DIR = "frontend/public/uploads/avatars"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    
+    # Save file
+    file_extension = file.filename.split(".")[-1]
+    filename = f"user_{current_user.id}_avatar.{file_extension}"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    # Update user avatar_url
+    # URL should be relative to public folder
+    avatar_url = f"/uploads/avatars/{filename}"
+    current_user.avatar_url = avatar_url
+    
+    db.commit()
+    db.refresh(current_user)
+    return current_user
 @router.patch("/{user_id}", response_model=UserResponse)
 def update_user(
     user_id: int,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { useOrders } from '@/hooks/useOrders';
 import { Order } from '@/services/orders.service';
 import LoadingSpinner from '@/components/LoadingStates';
@@ -81,6 +82,8 @@ export default function OrdersPage() {
     };
 
     const createDemoOrder = async () => {
+        console.log('Creating demo order...');
+        const toastId = toast.loading('Creating order...');
         try {
             const randomItems = [
                 { sku: 'WIDGET-001', price: 49.99 },
@@ -93,18 +96,27 @@ export default function OrdersPage() {
             const item2 = randomItems[Math.floor(Math.random() * randomItems.length)];
 
             await createOrder({
-                customerName: ['Alice Smith', 'Bob Jones', 'Charlie Day', 'Diana Prince', 'Evan Wright'][Math.floor(Math.random() * 5)],
-                customerEmail: `customer${Math.floor(Math.random() * 1000)}@example.com`,
-                shippingAddress: `${Math.floor(Math.random() * 999)} Innovation Ave`,
-                warehouseId: 1,
+                customer_name: ['Alice Smith', 'Bob Jones', 'Charlie Day', 'Diana Prince', 'Evan Wright'][Math.floor(Math.random() * 5)],
+                customer_email: `customer${Math.floor(Math.random() * 1000)}@example.com`,
+                shipping_address: `${Math.floor(Math.random() * 999)} Innovation Ave`,
                 items: [
-                    { sku: item1.sku, quantity: Math.floor(Math.random() * 3) + 1 },
-                    { sku: item2.sku, quantity: Math.floor(Math.random() * 2) + 1 }
+                    {
+                        sku: item1.sku,
+                        quantity: Math.floor(Math.random() * 3) + 1,
+                        unit_price: item1.price
+                    },
+                    {
+                        sku: item2.sku,
+                        quantity: Math.floor(Math.random() * 2) + 1,
+                        unit_price: item2.price
+                    }
                 ]
             });
+            toast.success('Order created successfully!', { id: toastId });
             if (!liveMode) refetch();
         } catch (error) {
             console.error('Failed to create order:', error);
+            toast.error('Failed to create order', { id: toastId });
         }
     };
 
@@ -173,7 +185,7 @@ export default function OrdersPage() {
             o.customerName,
             o.customerEmail,
             new Date(o.createdAt).toLocaleDateString(),
-            o.total_amount.toFixed(2),
+            (o.total_amount || 0).toFixed(2),
             o.status
         ]);
 
@@ -192,8 +204,8 @@ export default function OrdersPage() {
         processing: orderList.filter(o => o.status === 'processing').length,
         shipped: orderList.filter(o => o.status === 'shipped').length,
         delivered: orderList.filter(o => o.status === 'delivered').length,
-        totalRevenue: orderList.reduce((sum, o) => sum + o.total_amount, 0),
-        avgOrderValue: orderList.length > 0 ? orderList.reduce((sum, o) => sum + o.total_amount, 0) / orderList.length : 0
+        totalRevenue: orderList.reduce((sum, o) => sum + (o.total_amount || 0), 0),
+        avgOrderValue: orderList.length > 0 ? orderList.reduce((sum, o) => sum + (o.total_amount || 0), 0) / orderList.length : 0
     };
 
     return (
@@ -431,7 +443,7 @@ export default function OrdersPage() {
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2 font-bold text-white">
                                                         <DollarSign className="h-4 w-4 text-green-400" />
-                                                        {order.total_amount.toFixed(2)}
+                                                        {(order.total_amount || 0).toFixed(2)}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">

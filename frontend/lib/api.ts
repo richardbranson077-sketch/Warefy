@@ -24,20 +24,42 @@ if (typeof window !== 'undefined') {
         }
         return config;
     });
+
+    // Handle 401 Unauthorized globally
+    api.interceptors.response.use(
+        (response) => response,
+        (error) => {
+            if (error.response && error.response.status === 401) {
+                // Clear token and redirect to login
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                if (window.location.pathname !== '/login') {
+                    window.location.href = '/login';
+                }
+            }
+            return Promise.reject(error);
+        }
+    );
 }
 
 // Authentication
 export const auth = {
     login: async (username: string, password: string) => {
+        console.log("API: login called for", username);
         // 1. Try real backend login first
         try {
-            const formData = new FormData();
-            formData.append('username', username);
-            formData.append('password', password);
+            // Use URLSearchParams for application/x-www-form-urlencoded
+            const params = new URLSearchParams();
+            params.append('username', username);
+            params.append('password', password);
 
-            const response = await api.post('/api/v1/auth/login', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+            console.log("API: Sending POST to /api/v1/auth/login");
+            const response = await api.post('/api/v1/auth/login', params, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             });
+            console.log("API: Backend response", response.status, response.data);
 
             if (response.data.access_token) {
                 localStorage.setItem('token', response.data.access_token);
@@ -45,22 +67,10 @@ export const auth = {
             }
 
             return response.data;
-        } catch (error) {
-            console.log('Backend login failed, checking demo credentials...');
-
-            // 2. Fallback to demo credentials
-            if (username === 'admin' && password === 'admin123') {
-                const demoToken = 'demo-token-' + Date.now();
-                localStorage.setItem('token', demoToken);
-                localStorage.setItem('username', username);
-                return {
-                    access_token: demoToken,
-                    token_type: 'bearer',
-                    user: { username: 'admin', role: 'admin' },
-                };
-            }
-
-            throw new Error('Invalid credentials. Use demo/admin123 for demo access.');
+        } catch (error: any) {
+            console.error("API: Backend login failed", error);
+            const message = error.response?.data?.detail || error.message || 'Login failed';
+            throw new Error(message);
         }
     },
 
@@ -95,8 +105,14 @@ export const inventory = {
         return response.data;
     },
 
+    getInventory: async (warehouseId?: number) => {
+        const params = warehouseId ? { warehouse_id: warehouseId } : {};
+        const response = await api.get('/api/v1/inventory', { params });
+        return response.data;
+    },
+
     getById: async (id: number) => {
-        const response = await api.get(`/api/inventory/${id}`);
+        const response = await api.get(`/api/v1/inventory/${id}`);
         return response.data;
     },
 
@@ -106,12 +122,12 @@ export const inventory = {
     },
 
     update: async (id: number, data: any) => {
-        const response = await api.put(`/api/inventory/${id}`, data);
+        const response = await api.put(`/api/v1/inventory/${id}`, data);
         return response.data;
     },
 
-    getWarehouseSummary: async (warehouseId) => {
-        const response = await api.get(`/api/inventory/warehouse/${warehouseId}/summary`);
+    getWarehouseSummary: async (warehouseId: number) => {
+        const response = await api.get(`/api/v1/inventory/warehouse/${warehouseId}/summary`);
         return response.data;
     },
 
@@ -131,7 +147,7 @@ export const warehouses = {
     },
 
     getById: async (id: number) => {
-        const response = await api.get(`/api/warehouses/${id}`);
+        const response = await api.get(`/api/v1/warehouses/${id}`);
         return response.data;
     },
 
@@ -141,7 +157,7 @@ export const warehouses = {
     },
 
     updateLayout: async (id: number, layout: any) => {
-        const resp = await api.patch(`/api/warehouses/${id}/layout`, { layout_config: JSON.stringify(layout) });
+        const resp = await api.patch(`/api/v1/warehouses/${id}/layout`, { layout_config: JSON.stringify(layout) });
         return resp.data;
     },
 };
@@ -154,7 +170,7 @@ export const demand = {
     },
 
     getHistorical: async (sku: string) => {
-        const response = await api.get(`/api/demand/historical/${sku}`);
+        const response = await api.get(`/api/v1/demand/historical/${sku}`);
         return response.data;
     },
 };
@@ -171,13 +187,13 @@ export const routes = {
         return response.data;
     },
 
-    create: async (data) => {
+    create: async (data: any) => {
         const response = await api.post('/api/v1/routes/create', data);
         return response.data;
     },
 
-    getById: async (id) => {
-        const response = await api.get(`/api/routes/${id}`);
+    getById: async (id: number) => {
+        const response = await api.get(`/api/v1/routes/${id}`);
         return response.data;
     },
 };
@@ -206,7 +222,7 @@ export const anomalies = {
     },
 
     detectInventory: async (id: number) => {
-        const response = await api.get(`/api/anomalies/detect/inventory/${id}`);
+        const response = await api.get(`/api/v1/anomalies/detect/inventory/${id}`);
         return response.data;
     },
 
@@ -231,7 +247,7 @@ export const vehicles = {
     },
 
     getById: async (id: number) => {
-        const response = await api.get(`/api/vehicles/${id}`);
+        const response = await api.get(`/api/v1/vehicles/${id}`);
         return response.data;
     },
 
@@ -245,22 +261,22 @@ export const vehicles = {
 // Users – admin only
 // ------------------------------------------------------------------
 export const getAllUsers = async () => {
-    const resp = await api.get('/api/users/');
+    const resp = await api.get('/api/v1/users/');
     return resp.data;
 };
 
 export const updateUser = async (userId: number, payload: any) => {
-    const resp = await api.patch(`/api/users/${userId}`, payload);
+    const resp = await api.patch(`/api/v1/users/${userId}`, payload);
     return resp.data;
 };
 
 export const getUserUsage = async (userId: number) => {
-    const resp = await api.get(`/api/users/${userId}/usage`);
+    const resp = await api.get(`/api/v1/users/${userId}/usage`);
     return resp.data;
 };
 
 export const getAuditLogs = async (limit: number = 50) => {
-    const resp = await api.get(`/api/users/audit/logs`, { params: { limit } });
+    const resp = await api.get(`/api/v1/users/audit/logs`, { params: { limit } });
     return resp.data;
 };
 
@@ -304,7 +320,7 @@ export const orders = {
         return resp.data;
     },
     getById: async (id: number) => {
-        const resp = await api.get(`/api/orders/${id}`);
+        const resp = await api.get(`/api/v1/orders/${id}`);
         return resp.data;
     },
     create: async (data: any) => {
@@ -312,7 +328,7 @@ export const orders = {
         return resp.data;
     },
     update: async (id: number, data: any) => {
-        const resp = await api.patch(`/api/orders/${id}`, data);
+        const resp = await api.patch(`/api/v1/orders/${id}`, data);
         return resp.data;
     }
 };
@@ -322,7 +338,7 @@ export const orders = {
 // ------------------------------------------------------------------
 export const reports = {
     getDashboardStats: async () => {
-        const resp = await api.get('/api/reports/dashboard');
+        const resp = await api.get('/api/v1/reports/dashboard');
         return resp.data;
     }
 };
@@ -340,7 +356,7 @@ export const integrations = {
         return resp.data;
     },
     delete: async (id: number) => {
-        const resp = await api.delete(`/api/integrations/${id}`);
+        const resp = await api.delete(`/api/v1/integrations/${id}`);
         return resp.data;
     }
 };

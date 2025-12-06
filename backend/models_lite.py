@@ -18,6 +18,10 @@ class User(Base):
     role = Column(String, default="manager")  # admin, manager, driver
     is_active = Column(Boolean, default=True)
     is_2fa_enabled = Column(Boolean, default=False)
+    avatar_url = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+    bio = Column(Text, nullable=True)
+    location = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Warehouse(Base):
@@ -51,20 +55,42 @@ class Inventory(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     warehouse = relationship("Warehouse", back_populates="inventory_items")
+    logs = relationship("InventoryLog", back_populates="inventory_item")
+
+class InventoryLog(Base):
+    __tablename__ = "inventory_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    inventory_id = Column(Integer, ForeignKey("inventory.id"))
+    change_amount = Column(Integer)
+    reason = Column(String)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    inventory_item = relationship("Inventory", back_populates="logs")
+    user = relationship("User")
 
 class Vehicle(Base):
     __tablename__ = "vehicles"
     
     id = Column(Integer, primary_key=True, index=True)
-    vehicle_id = Column(String, unique=True, index=True)
-    vehicle_type = Column(String)
-    capacity = Column(Float)
+    vehicle_id = Column(String, unique=True, index=True) # This is vehicle_number (e.g. V001)
+    vehicle_type = Column(String) # van, truck, car
+    make = Column(String, nullable=True)
+    model = Column(String, nullable=True)
+    year = Column(Integer, nullable=True)
+    license_plate = Column(String, nullable=True)
+    capacity = Column(Float) # capacity_kg
     fuel_type = Column(String)
-    current_latitude = Column(Float)
-    current_longitude = Column(Float)
+    current_latitude = Column(Float, nullable=True)
+    current_longitude = Column(Float, nullable=True)
+    location_name = Column(String, nullable=True) # e.g. "Warehouse A"
     status = Column(String, default="available")
-    mileage = Column(Integer, default=0)
-    last_maintenance = Column(DateTime)
+    mileage = Column(Integer, default=0) # current_mileage
+    last_maintenance = Column(DateTime) # last_maintenance_date
+    last_maintenance_mileage = Column(Integer, default=0)
+    health_score = Column(Integer, default=100)
+    fuel_efficiency = Column(Float, default=0.0) # fuel_efficiency_kmpl
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Driver(Base):
@@ -93,26 +119,50 @@ class Route(Base):
     __tablename__ = "routes"
     
     id = Column(Integer, primary_key=True, index=True)
-    driver_id = Column(Integer, ForeignKey("drivers.id"))
-    vehicle_id = Column(Integer, ForeignKey("vehicles.id"))
+    route_id = Column(String, unique=True, index=True) # Public ID (e.g. route_123)
+    name = Column(String)
+    driver_id = Column(Integer, ForeignKey("drivers.id"), nullable=True)
+    vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=True)
     status = Column(String, default="planned")
-    waypoints = Column(JSON)  # Store as JSON array
-    total_distance = Column(Float)
-    estimated_time = Column(Integer)
-    start_time = Column(DateTime)
+    origin = Column(JSON) # {address, lat, lng}
+    destination = Column(JSON) # {address, lat, lng}
+    waypoints = Column(JSON)  # [{address, lat, lng}, ...]
+    optimization_mode = Column(String, default="balanced")
+    vehicle_type = Column(String, default="van")
+    total_distance = Column(Float) # km
+    estimated_time = Column(Integer) # minutes
+    estimated_cost = Column(Float) # USD
+    start_time = Column(DateTime, nullable=True)
     end_time = Column(DateTime, nullable=True)
+    optimized = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Anomaly(Base):
     __tablename__ = "anomalies"
 
     id = Column(Integer, primary_key=True, index=True)
-    anomaly_type = Column(String)
-    severity = Column(String)
-    description = Column(Text)
+    anomaly_type = Column(String)  # demand_spike, stockout, route_delay
+    severity = Column(String)  # low, medium, high, critical
+    description = Column(String)
     detected_at = Column(DateTime, default=datetime.utcnow)
+    resolved = Column(Boolean, default=False)
     resolved_at = Column(DateTime, nullable=True)
-    status = Column(String, default="active")
+    entity_type = Column(String)  # product, warehouse, route
+    entity_id = Column(Integer)
+    extra_data = Column(String)  # JSON string with extra details
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(String)  # income, expense
+    amount = Column(Float)
+    category = Column(String)  # Sales, Rent, Payroll, Utilities, etc.
+    description = Column(String)
+    date = Column(DateTime, default=datetime.utcnow)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    
+    user = relationship("User")
 
 # ------------------------------------------------------------------
 # AuditLog – records admin actions (role changes, 2FA toggles, etc.)
@@ -125,6 +175,13 @@ class AuditLog(Base):
     target_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # who was affected
     action = Column(String, nullable=False)  # e.g., "role_change", "2fa_enabled"
     details = Column(Text, nullable=True)   # optional JSON string
+    extra_data = Column(JSON, nullable=True) # Rich context for the action
+    
+    # Blockchain fields
+    hash = Column(String, index=True)
+    previous_hash = Column(String)
+    signature = Column(String, nullable=True)
+    
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     actor = relationship("User", foreign_keys=[user_id])
@@ -293,3 +350,219 @@ class EcommerceSyncLog(Base):
     error_details = Column(JSON, nullable=True)
     started_at = Column(DateTime, default=datetime.utcnow)
     completed_at = Column(DateTime, nullable=True)
+
+class Team(Base):
+    """Team collaboration groups"""
+    __tablename__ = "teams"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    creator = relationship("User", foreign_keys=[created_by])
+    members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
+    messages = relationship("Message", back_populates="team", cascade="all, delete-orphan")
+    tasks = relationship("Task", back_populates="team", cascade="all, delete-orphan")
+    files = relationship("FileShare", back_populates="team", cascade="all, delete-orphan")
+
+class TeamMember(Base):
+    """Team membership"""
+    __tablename__ = "team_members"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    role = Column(String, default="member")  # admin, member
+    joined_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    team = relationship("Team", back_populates="members")
+    user = relationship("User")
+
+class Message(Base):
+    """Team messages"""
+    __tablename__ = "messages"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    attachments = Column(JSON, nullable=True)  # List of file references
+    sentiment = Column(String, nullable=True)  # positive, neutral, negative, urgent
+    created_at = Column(DateTime, default=datetime.utcnow)
+    edited_at = Column(DateTime, nullable=True)
+    
+    # Relationships
+    team = relationship("Team", back_populates="messages")
+    user = relationship("User")
+
+class Notification(Base):
+    """User notifications"""
+    __tablename__ = "notifications"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    type = Column(String, nullable=False)  # message, mention, task_assigned, etc.
+    content = Column(Text, nullable=False)
+    related_id = Column(Integer, nullable=True)  # ID of related message/task
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User")
+
+class Task(Base):
+    """Team tasks"""
+    __tablename__ = "tasks"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    assigned_to = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    status = Column(String, default="todo")  # todo, in_progress, done
+    priority = Column(String, default="medium")  # low, medium, high, urgent
+    due_date = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    team = relationship("Team", back_populates="tasks")
+    assignee = relationship("User", foreign_keys=[assigned_to])
+    creator = relationship("User", foreign_keys=[created_by])
+
+class FileShare(Base):
+    """Shared files"""
+    __tablename__ = "file_shares"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    filename = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)
+    file_size = Column(Integer, nullable=False)  # in bytes
+    mime_type = Column(String, nullable=True)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    team = relationship("Team", back_populates="files")
+    user = relationship("User")
+
+class KnowledgeBaseArticle(Base):
+    """Knowledge Base Articles"""
+    __tablename__ = "knowledge_base_articles"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False, index=True)
+    content = Column(Text, nullable=False)
+    category = Column(String, index=True)
+    tags = Column(JSON, default=[])
+    author_id = Column(Integer, ForeignKey("users.id"))
+    views = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    author = relationship("User")
+
+class UserSettings(Base):
+    __tablename__ = "user_settings"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, index=True)
+    
+    # Appearance
+    theme = Column(String, default="light")  # light, dark, auto
+    language = Column(String, default="en")  # en, es, fr, de, zh
+    timezone = Column(String, default="UTC")
+    date_format = Column(String, default="MM/DD/YYYY")
+    time_format = Column(String, default="12h")  # 12h, 24h
+    
+    # Notifications
+    notifications_email = Column(Boolean, default=True)
+    notifications_push = Column(Boolean, default=True)
+    notifications_sms = Column(Boolean, default=False)
+    notification_frequency = Column(String, default="realtime")  # realtime, hourly, daily
+    
+    # Notification Types
+    notify_low_stock = Column(Boolean, default=True)
+    notify_anomalies = Column(Boolean, default=True)
+    notify_route_delays = Column(Boolean, default=True)
+    notify_system_updates = Column(Boolean, default=False)
+    
+    # Security
+    two_factor_enabled = Column(Boolean, default=False)
+    session_timeout = Column(Integer, default=30)  # minutes
+    
+    # System (Admin only)
+    api_rate_limit = Column(Integer, default=1000)  # requests per hour
+    data_retention_days = Column(Integer, default=90)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship
+    user = relationship("User", backref="settings")
+
+class LoginHistory(Base):
+    __tablename__ = "login_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    ip_address = Column(String)
+    user_agent = Column(String)
+    location = Column(String, nullable=True)  # City, Country
+    device = Column(String, nullable=True)  # Browser/OS info
+    status = Column(String)  # success, failed, blocked
+    login_at = Column(DateTime, default=datetime.utcnow, index=True)
+    
+    user = relationship("User", backref="login_history")
+
+class ActiveSession(Base):
+    __tablename__ = "active_sessions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    session_token = Column(String, unique=True, index=True)
+    ip_address = Column(String)
+    user_agent = Column(String)
+    device = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_active = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    expires_at = Column(DateTime)
+    
+    user = relationship("User", backref="active_sessions")
+
+class APIKey(Base):
+    __tablename__ = "api_keys"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    name = Column(String)  # User-defined name for the key
+    key_prefix = Column(String, index=True)  # First 8 chars for display
+    key_hash = Column(String)  # Hashed full key
+    permissions = Column(JSON, default=[])  # List of allowed permissions
+    last_used = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=True)
+    is_active = Column(Boolean, default=True)
+    
+    user = relationship("User", backref="api_keys")
+
+class SecurityAuditLog(Base):
+    __tablename__ = "security_audit_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    action = Column(String, index=True)  # password_changed, 2fa_enabled, api_key_created, etc.
+    details = Column(JSON, nullable=True)  # Additional context
+    ip_address = Column(String)
+    user_agent = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    
+    user = relationship("User", backref="security_logs")

@@ -16,7 +16,7 @@ from ..database_lite import get_db
 from ..models_lite import User
 from ..schemas import Token, UserCreate, UserResponse
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

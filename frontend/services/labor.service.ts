@@ -1,96 +1,136 @@
 /**
- * Labor Service
- * Handles API calls for labor management and time tracking
+ * Labor Management Service
+ * Handles API calls for shifts, time tracking, and productivity
  */
 
 import apiClient from '@/lib/api';
 
+export interface TimeClockEntry {
+    id: number;
+    user_id: number;
+    clock_in: string;
+    clock_out?: string;
+    break_minutes: number;
+    hours_worked?: number;
+}
+
+export interface ShiftSchedule {
+    user_id: number;
+    shift_date: string;
+    start_time: string;
+    end_time: string;
+    role: string;
+}
+
 export interface Employee {
     id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
+    name: string;
     role: string;
-    department: string;
-    hourlyRate: number;
-    status: 'active' | 'inactive' | 'on_leave';
-    shift?: string;
-    currentStatus?: 'working' | 'break' | 'off_duty';
+    status: 'active' | 'inactive';
+    current_shift?: ShiftSchedule;
 }
 
-export interface TimeEntry {
-    id: number;
-    employeeId: number;
-    type: 'clock_in' | 'clock_out' | 'break_start' | 'break_end';
-    timestamp: string;
-    location?: string;
-    notes?: string;
+export interface ProductivityMetric {
+    user_id: number;
+    date: string;
+    picks_per_hour: number;
+    accuracy_percentage: number;
+    orders_processed: number;
 }
 
-export interface Shift {
-    id: number;
-    employeeId: number;
-    startTime: string;
-    endTime: string;
-    type: 'regular' | 'overtime';
-    status: 'scheduled' | 'completed' | 'missed';
+export interface TeamPerformance {
+    user_id: number;
+    name: string;
+    avg_picks_per_hour: number;
+    avg_accuracy: number;
+    total_orders: number;
+    score: number;
 }
 
-export interface LaborStats {
-    totalEmployees: number;
-    activeNow: number;
-    totalHoursToday: number;
-    overtimeHoursToday: number;
-    laborCostToday: number;
-    productivityScore: number;
+export interface LaborCostAnalytics {
+    period: { start: string; end: string };
+    total_hours: number;
+    hourly_rate: number;
+    total_labor_cost: number;
+    total_orders: number;
+    cost_per_order: number;
 }
 
 export const laborService = {
     /**
-     * Get all employees
+     * Clock in
      */
-    getEmployees: async (params?: { department?: string; status?: string }) => {
-        const response = await apiClient.get<Employee[]>('/labor/employees', { params });
+    clockIn: async () => {
+        const response = await apiClient.post<{ message: string; clock_in_time: string; entry_id: number }>('/api/v1/labor/clock-in');
         return response.data;
     },
 
     /**
-     * Get employee by ID
+     * Clock out
      */
-    getEmployeeById: async (id: number) => {
-        const response = await apiClient.get<Employee>(`/labor/employees/${id}`);
+    clockOut: async (breakMinutes: number = 0) => {
+        const response = await apiClient.post<{ message: string; clock_out_time: string; hours_worked: number }>(
+            `/api/v1/labor/clock-out?break_minutes=${breakMinutes}`
+        );
         return response.data;
     },
 
     /**
-     * Clock in/out
+     * Get timesheet
      */
-    logTime: async (data: { employeeId: number; type: TimeEntry['type']; notes?: string }) => {
-        const response = await apiClient.post<TimeEntry>('/labor/time-entries', data);
+    getTimesheet: async (userId?: number, startDate?: string, endDate?: string) => {
+        const params = new URLSearchParams();
+        if (userId) params.append('user_id', userId.toString());
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+
+        const response = await apiClient.get<{ entries: TimeClockEntry[]; total_hours: number }>(`/api/v1/labor/timesheet?${params.toString()}`);
         return response.data;
     },
 
     /**
-     * Get shifts
+     * Get employees
      */
-    getShifts: async (params?: { start: string; end: string; employeeId?: number }) => {
-        const response = await apiClient.get<Shift[]>('/labor/shifts', { params });
+    getEmployees: async () => {
+        const response = await apiClient.get<Employee[]>('/api/v1/labor/employees');
         return response.data;
     },
 
     /**
-     * Create shift
+     * Create shift schedule
      */
-    createShift: async (data: Partial<Shift>) => {
-        const response = await apiClient.post<Shift>('/labor/shifts', data);
+    createSchedule: async (schedule: ShiftSchedule) => {
+        const response = await apiClient.post('/api/v1/labor/schedule', schedule);
         return response.data;
     },
 
     /**
-     * Get labor statistics
+     * Get schedules
      */
-    getStats: async () => {
-        const response = await apiClient.get<LaborStats>('/labor/stats');
+    getSchedules: async (userId?: number, date?: string) => {
+        const params = new URLSearchParams();
+        if (userId) params.append('user_id', userId.toString());
+        if (date) params.append('date', date);
+
+        const response = await apiClient.get<ShiftSchedule[]>(`/api/v1/labor/schedule?${params.toString()}`);
         return response.data;
     },
+
+    /**
+     * Get team performance
+     */
+    getTeamPerformance: async (days: number = 7) => {
+        const response = await apiClient.get<TeamPerformance[]>(`/api/v1/labor/analytics/team-performance?days=${days}`);
+        return response.data;
+    },
+
+    /**
+     * Get labor cost analytics
+     */
+    getLaborCosts: async (startDate: string, endDate: string) => {
+        const response = await apiClient.get<LaborCostAnalytics>(
+            `/api/v1/labor/analytics/labor-cost?start_date=${startDate}&end_date=${endDate}`
+        );
+        return response.data;
+    }
 };

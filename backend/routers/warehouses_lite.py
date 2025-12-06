@@ -7,9 +7,9 @@ from ..models_lite import Warehouse, User
 from ..auth_lite import get_current_active_user, require_role
 from ..schemas import WarehouseCreate, WarehouseResponse, WarehouseUpdateLayout
 
-router = APIRouter(prefix="/api/warehouses", tags=["Warehouses"])
+router = APIRouter(prefix="/api/v1/warehouses", tags=["Warehouses"])
 
-@router.get("/", response_model=List[WarehouseResponse])
+@router.get("", response_model=List[WarehouseResponse])
 def list_warehouses(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
@@ -27,7 +27,7 @@ def get_warehouse(
         raise HTTPException(status_code=404, detail="Warehouse not found")
     return warehouse
 
-@router.post("/", response_model=WarehouseResponse)
+@router.post("", response_model=WarehouseResponse)
 def create_warehouse(
     payload: WarehouseCreate,
     db: Session = Depends(get_db),

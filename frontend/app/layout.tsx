@@ -8,6 +8,8 @@ export const metadata = {
     description: 'Next-generation supply chain management powered by AI',
 };
 
+import { ThemeProvider } from '@/contexts/ThemeContext';
+
 export default function RootLayout({
     children,
 }: {
@@ -16,7 +18,9 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={inter.className}>
-                {children}
+                <ThemeProvider>
+                    {children}
+                </ThemeProvider>
             </body>
         </html>
     );

@@ -12,6 +12,30 @@ from backend.database_lite import get_db
 from backend.models_lite import User
 from backend.auth_lite import get_current_active_user
 from backend.base_schema import CamelCaseModel
+import os
+import google.generativeai as genai
+import asyncio
+
+async def call_llm(prompt: str, context: str) -> str:
+    """
+    Call Gemini LLM with prompt and context.
+    """
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return "AI analysis unavailable (Missing API Key)"
+        
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("models/gemini-flash-latest")
+        
+        full_prompt = f"{prompt}\n\nContext:\n{context}"
+        
+        # Run in thread to avoid blocking event loop
+        response = await asyncio.to_thread(model.generate_content, full_prompt)
+        return response.text
+    except Exception as e:
+        print(f"Gemini Error: {e}")
+        return "AI analysis failed due to an error."
 
 router = APIRouter(prefix="/ai/chat", tags=["AI Chat"])
 

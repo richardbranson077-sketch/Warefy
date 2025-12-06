@@ -53,7 +53,7 @@ export const returnsService = {
      * Get all returns
      */
     getAll: async (params?: { status?: string }) => {
-        const response = await apiClient.get<ReturnRequest[]>('/returns', { params });
+        const response = await apiClient.get<ReturnRequest[]>('/api/v1/returns', { params });
         return response.data;
     },
 
@@ -61,7 +61,7 @@ export const returnsService = {
      * Get return by ID
      */
     getById: async (id: number) => {
-        const response = await apiClient.get<ReturnRequest>(`/returns/${id}`);
+        const response = await apiClient.get<ReturnRequest>(`/api/v1/returns/${id}`);
         return response.data;
     },
 
@@ -69,7 +69,7 @@ export const returnsService = {
      * Create new return request
      */
     create: async (data: CreateReturn) => {
-        const response = await apiClient.post<ReturnRequest>('/returns', data);
+        const response = await apiClient.post<ReturnRequest>('/api/v1/returns', data);
         return response.data;
     },
 
@@ -77,7 +77,7 @@ export const returnsService = {
      * Update return request
      */
     update: async (id: number, data: UpdateReturn) => {
-        const response = await apiClient.patch<ReturnRequest>(`/returns/${id}`, data);
+        const response = await apiClient.patch<ReturnRequest>(`/api/v1/returns/${id}`, data);
         return response.data;
     },
 
@@ -85,7 +85,7 @@ export const returnsService = {
      * Approve return
      */
     approve: async (id: number) => {
-        const response = await apiClient.post<ReturnRequest>(`/returns/${id}/approve`);
+        const response = await apiClient.post<ReturnRequest>(`/api/v1/returns/${id}/approve`);
         return response.data;
     },
 
@@ -93,7 +93,7 @@ export const returnsService = {
      * Reject return
      */
     reject: async (id: number, reason: string) => {
-        const response = await apiClient.post<ReturnRequest>(`/returns/${id}/reject`, { reason });
+        const response = await apiClient.post<ReturnRequest>(`/api/v1/returns/${id}/reject`, { reason });
         return response.data;
     },
 
@@ -101,7 +101,7 @@ export const returnsService = {
      * Process refund
      */
     processRefund: async (id: number, amount: number) => {
-        const response = await apiClient.post<ReturnRequest>(`/returns/${id}/refund`, { amount });
+        const response = await apiClient.post<ReturnRequest>(`/api/v1/returns/${id}/refund`, { amount });
         return response.data;
     },
 };

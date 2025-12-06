@@ -11,9 +11,10 @@ from datetime import datetime, timedelta
 
 from backend.database_lite import get_db
 from backend.models_lite import Order, Inventory
-from backend.auth import get_current_active_user, User
+from backend.auth_lite import get_current_active_user
+from backend.models_lite import User
 
-router = APIRouter(prefix="/api/benchmarking", tags=["Performance Benchmarking"])
+router = APIRouter(prefix="/api/v1/benchmarking", tags=["Performance Benchmarking"])
 
 # ========================================================================
 # PYDANTIC SCHEMAS

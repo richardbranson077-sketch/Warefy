@@ -1,46 +1,67 @@
-import apiClient from '../lib/api';
+/**
+ * RBAC Service
+ * Handles API calls for role management
+ */
+
+import apiClient from '@/lib/api';
 
 export interface Role {
     id: string;
     name: string;
-    description?: string;
+    description: string;
+    permissions: Record<string, string[]>; // { module: [permissions] }
+    field_restrictions: Record<string, string[]>; // { module: [fields] }
 }
 
-export interface Permission {
-    id: string;
-    action: string;
-    resource: string;
+export interface CreateRoleDTO {
+    name: string;
+    description: string;
+    permissions: Record<string, string[]>;
+    field_restrictions?: Record<string, string[]>;
 }
 
-export interface UserRole {
-    userId: string;
-    roleId: string;
+export interface PermissionData {
+    modules: string[];
+    permissions: string[];
 }
 
-export const getRoles = async (): Promise<Role[]> => {
-    const response = await apiClient.get<Role[]>('/api/v1/rbac/roles');
-    return response.data;
-};
+export const rbacService = {
+    /**
+     * Get all roles
+     */
+    getAllRoles: async () => {
+        const response = await apiClient.get<Role[]>('/api/v1/rbac/roles');
+        return response.data;
+    },
 
-export const createRole = async (role: Partial<Role>): Promise<Role> => {
-    const response = await apiClient.post<Role>('/api/v1/rbac/roles', role);
-    return response.data;
-};
+    /**
+     * Create a new role
+     */
+    createRole: async (data: CreateRoleDTO) => {
+        const response = await apiClient.post<Role>('/api/v1/rbac/roles', data);
+        return response.data;
+    },
 
-export const updateRole = async (id: string, role: Partial<Role>): Promise<Role> => {
-    const response = await apiClient.put<Role>(`/api/v1/rbac/roles/${id}`, role);
-    return response.data;
-};
+    /**
+     * Update a role
+     */
+    updateRole: async (id: string, data: CreateRoleDTO) => {
+        const response = await apiClient.put<Role>(`/api/v1/rbac/roles/${id}`, data);
+        return response.data;
+    },
 
-export const deleteRole = async (id: string): Promise<void> => {
-    await apiClient.delete(`/api/v1/rbac/roles/${id}`);
-};
+    /**
+     * Delete a role
+     */
+    deleteRole: async (id: string) => {
+        await apiClient.delete(`/api/v1/rbac/roles/${id}`);
+    },
 
-export const getPermissions = async (): Promise<Permission[]> => {
-    const response = await apiClient.get<Permission[]>('/api/v1/rbac/permissions');
-    return response.data;
-};
-
-export const assignRoleToUser = async (assignment: UserRole): Promise<void> => {
-    await apiClient.post('/api/v1/rbac/assign', assignment);
+    /**
+     * Get available permissions and modules
+     */
+    getPermissions: async () => {
+        const response = await apiClient.get<PermissionData>('/api/v1/rbac/permissions');
+        return response.data;
+    }
 };

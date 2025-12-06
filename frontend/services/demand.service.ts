@@ -10,12 +10,24 @@ export interface ForecastResult {
     productName: string;
     predictions: Array<{
         date: string;
-        predictedDemand: number;
-        confidence: number;
+        quantity: number;
+        confidence_low?: number;
+        confidence_high?: number;
     }>;
-    model: 'prophet' | 'lstm' | 'xgboost';
-    accuracy?: number;
+    model: 'gemini-ai' | 'gemini' | 'prophet' | 'lstm' | 'statistical';
+    accuracy_estimate?: number;
+    mape?: number;
+    seasonality_score?: number;
     trend?: 'increasing' | 'decreasing' | 'stable';
+    scenario?: {
+        promotion: boolean;
+        price_change: number;
+    };
+    insights?: {
+        seasonality: string;
+        risks: string[];
+        recommendations: string[];
+    };
 }
 
 export interface HistoricalData {
@@ -28,13 +40,25 @@ export interface HistoricalData {
 
 export const demandService = {
     /**
+     * Get list of products with sales data
+     */
+    getProducts: async () => {
+        const response = await apiClient.get('/api/v1/demand/products');
+        return response.data;
+    },
+
+    /**
      * Get forecast for a product
      */
     getForecast: async (sku: string, params?: {
         days?: number;
-        model?: 'prophet' | 'lstm' | 'xgboost';
+        model?: 'gemini' | 'prophet' | 'lstm';
+        scenario?: {
+            promotion: boolean;
+            price_change: number;
+        };
     }) => {
-        const response = await apiClient.post<ForecastResult>('/demand/forecast', {
+        const response = await apiClient.post<ForecastResult>('/api/v1/demand/forecast', {
             sku,
             ...params
         });
@@ -45,7 +69,7 @@ export const demandService = {
      * Get historical demand data
      */
     getHistorical: async (sku: string) => {
-        const response = await apiClient.get<HistoricalData>(`/demand/historical/${sku}`);
+        const response = await apiClient.get<HistoricalData>(`/api/v1/demand/historical/${sku}`);
         return response.data;
     },
 
@@ -53,7 +77,7 @@ export const demandService = {
      * Get forecasts for multiple products
      */
     getBulkForecasts: async (skus: string[], days: number = 30) => {
-        const response = await apiClient.post<ForecastResult[]>('/demand/bulk-forecast', {
+        const response = await apiClient.post<ForecastResult[]>('/api/v1/demand/bulk-forecast', {
             skus,
             days
         });
@@ -64,7 +88,7 @@ export const demandService = {
      * Get demand trends
      */
     getTrends: async () => {
-        const response = await apiClient.get('/demand/trends');
+        const response = await apiClient.get('/api/v1/demand/trends');
         return response.data;
     },
 };

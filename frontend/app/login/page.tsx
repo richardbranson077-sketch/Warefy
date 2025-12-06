@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Lock, Mail, ArrowRight, Loader2, Shield, CheckCircle } from 'lucide-react';
+import { Box, Check, ArrowRight } from 'lucide-react';
 import { auth } from '@/lib/api';
 
 export default function LoginPage() {
@@ -18,13 +18,18 @@ export default function LoginPage() {
         e.preventDefault();
         setLoading(true);
         setError('');
+        console.log("Login Page: Attempting login with", email);
 
         try {
-            await auth.login(email, password);
+            const result = await auth.login(email, password);
+            console.log("Login Page: Login successful", result);
             router.push('/dashboard');
         } catch (err: any) {
-            console.error("Login failed:", err);
-            setError('Invalid credentials. Please try again.');
+            console.error("Login Page: Login failed error object:", err);
+            // Show the actual error message if available
+            // Show the actual error message if available
+            const errorMessage = err.message || 'Login failed. Please check console.';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -34,7 +39,7 @@ export default function LoginPage() {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex">
             {/* Left Side - Branding */}
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-700 p-12 flex-col justify-between relative overflow-hidden">
-                <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px]"></div>
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 bg-[size:20px_20px]"></div>
 
                 <div className="relative z-10">
                     <Link href="/" className="flex items-center space-x-3">
@@ -62,7 +67,7 @@ export default function LoginPage() {
                             'Advanced analytics dashboard'
                         ].map((feature, index) => (
                             <div key={index} className="flex items-center text-white">
-                                <CheckCircle className="h-5 w-5 mr-3 text-blue-200" />
+                                <Check className="h-5 w-5 mr-3 text-blue-200" />
                                 <span>{feature}</span>
                             </div>
                         ))}
@@ -114,7 +119,9 @@ export default function LoginPage() {
                                     Username or Email
                                 </label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Box className="h-5 w-5 text-gray-400" />
+                                    </div>
                                     <input
                                         type="text"
                                         value={email}
@@ -131,7 +138,9 @@ export default function LoginPage() {
                                     Password
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Box className="h-5 w-5 text-gray-400" />
+                                    </div>
                                     <input
                                         type="password"
                                         value={password}
@@ -159,11 +168,11 @@ export default function LoginPage() {
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed group"
                             >
                                 {loading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    <span>Loading...</span>
                                 ) : (
                                     <>
                                         Sign In
-                                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                        <span className="ml-2">→</span>
                                     </>
                                 )}
                             </button>
@@ -180,7 +189,7 @@ export default function LoginPage() {
 
                         <div className="mt-6 flex items-center justify-center space-x-4 text-xs text-gray-500">
                             <div className="flex items-center">
-                                <Shield className="h-4 w-4 mr-1" />
+                                <span className="mr-1">🔒</span>
                                 Secure Login
                             </div>
                             <span>•</span>

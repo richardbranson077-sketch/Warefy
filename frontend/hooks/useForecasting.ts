@@ -17,7 +17,7 @@ export function useForecasting() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/forecasting');
+            const response = await apiClient.get('/api/v1/forecasting');
             setData(response.data);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch forecasts');

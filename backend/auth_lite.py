@@ -52,6 +52,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+from backend.cache import cache
+
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     """Get the current authenticated user from JWT token"""
     credentials_exception = HTTPException(
@@ -68,6 +70,47 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
+    
+    # Check cache first
+    cache_key = f"user:{token_data.username}"
+    cached_user_data = cache.get(cache_key)
+    
+    if cached_user_data:
+        # Reconstruct User object from cached dictionary
+        # Note: This is a simplified reconstruction. For full ORM features, 
+        # we might need to query DB if critical fields are missing.
+        # But for basic auth checks, this is usually sufficient.
+        # However, to be safe and ensure SQLAlchemy session attachment if needed later,
+        # we might still query DB but use cache to skip query if we trust cache fully.
+        # For this implementation, we'll use cache to store the ID and basic info,
+        # but if we need a full ORM object attached to session, we might still need a query.
+        # A common pattern is to cache the user ID and then query by ID (faster than username index sometimes)
+        # OR just query DB if we need the attached object.
+        # Let's stick to DB query for safety in this "Lite" version but use cache to avoid
+        # repeated lookups if we were doing stateless auth. 
+        # Actually, for "get_current_user", we return a User ORM object.
+        # Caching the ORM object directly is tricky.
+        # Let's cache the user ID lookup from username.
+        pass
+
+    # For now, let's keep the DB query to ensure we have a valid ORM object attached to the session
+    # Optimization: We could cache the user record ID to avoid index lookup on username if that's slow,
+    # but username is likely indexed/unique.
+    
+    # REAL CACHING STRATEGY:
+    # We can cache the user dictionary and return a Pydantic model or lightweight object
+    # if the endpoint doesn't strictly need a DB-attached ORM object.
+    # But since many endpoints depend on `current_user` being a DB model (e.g. for relationships),
+    # returning a dict might break things.
+    
+    # Alternative: Cache the result of the query (the User object state)
+    # and use `db.merge()` or similar if we need it attached? No, that's complex.
+    
+    # Let's just cache the EXISTENCE/VALIDITY check for now to avoid overhead?
+    # Actually, the most expensive part is usually the DB round trip.
+    
+    # Let's stick to the safe approach: Query DB. 
+    # But we can cache the "username -> user_id" mapping if we wanted.
     
     user = db.query(User).filter(User.username == token_data.username).first()
     if user is None:

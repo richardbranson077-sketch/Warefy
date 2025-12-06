@@ -25,8 +25,8 @@ import {
     Camera,
     Scan
 } from 'lucide-react';
-import { useInventory } from '@/hooks/useInventory';
-import { InventoryItem } from '@/services/inventory.service';
+import BarcodeScannerComponent from 'react-qr-barcode-scanner';
+import { inventoryService as inventory, InventoryItem } from '@/services/inventory.service';
 import { LoadingSpinner } from '@/components/LoadingStates';
 import { ErrorAlert } from '@/components/ErrorStates';
 import { warehouses } from '@/lib/api';
@@ -37,7 +37,27 @@ interface Warehouse {
 }
 
 export default function InventoryPage() {
-    const { data: items, loading, error, refetch, createItem, updateItem, deleteItem } = useInventory();
+    const [items, setItems] = useState<InventoryItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const refetch = async () => {
+        setLoading(true);
+        try {
+            const data = await inventory.getAll();
+            setItems(data);
+            setError('');
+        } catch (err) {
+            console.error(err);
+            setError('Failed to load inventory');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        refetch();
+    }, []);
 
     const [warehouseList, setWarehouseList] = useState<Warehouse[]>([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState('all');
@@ -54,6 +74,13 @@ export default function InventoryPage() {
     const itemsPerPage = 10;
     const [showScanner, setShowScanner] = useState(false);
     const [scannerActive, setScannerActive] = useState(false);
+
+    // New state for Adjust/History
+    const [showAdjustModal, setShowAdjustModal] = useState(false);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [adjustAmount, setAdjustAmount] = useState(0);
+    const [adjustReason, setAdjustReason] = useState('');
+    const [historyLogs, setHistoryLogs] = useState([]);
 
     // Form state for Add/Edit
     const [formData, setFormData] = useState({
@@ -129,13 +156,13 @@ export default function InventoryPage() {
     // Handlers
     const handleAddItem = () => {
         setFormData({
-            product_name: '',
+            productName: '',
             sku: '',
             category: '',
             quantity: 0,
-            reorder_point: 0,
-            unit_price: 0,
-            warehouse_id: warehouseList[0]?.id || 1,
+            reorderPoint: 0,
+            unitPrice: 0,
+            warehouseId: warehouseList[0]?.id || 1,
             supplier: ''
         });
         setShowAddModal(true);
@@ -144,13 +171,13 @@ export default function InventoryPage() {
     const handleEditItem = (item: InventoryItem) => {
         setSelectedItem(item);
         setFormData({
-            product_name: item.productName,
+            productName: item.productName,
             sku: item.sku,
             category: item.category,
             quantity: item.quantity,
-            reorder_point: item.reorderPoint,
-            unit_price: item.unitPrice,
-            warehouse_id: item.warehouseId,
+            reorderPoint: item.reorderPoint,
+            unitPrice: item.unitPrice,
+            warehouseId: item.warehouseId,
             supplier: item.supplier || ''
         });
         setShowEditModal(true);
@@ -163,10 +190,22 @@ export default function InventoryPage() {
 
     const handleSaveItem = async () => {
         try {
+            // Convert camelCase to snake_case for API
+            const apiData = {
+                product_name: formData.productName,
+                sku: formData.sku,
+                category: formData.category,
+                quantity: formData.quantity,
+                reorder_point: formData.reorderPoint,
+                unit_price: formData.unitPrice,
+                warehouse_id: formData.warehouseId,
+                supplier: formData.supplier
+            };
+
             if (showEditModal && selectedItem) {
-                await inventory.update(selectedItem.id, formData);
+                await inventory.update(selectedItem.id, apiData);
             } else {
-                await inventory.create(formData);
+                await inventory.create(apiData);
             }
             await refetch();
             setShowAddModal(false);
@@ -184,6 +223,36 @@ export default function InventoryPage() {
             } catch (error) {
                 console.error('Error deleting item:', error);
             }
+        }
+    };
+
+    const handleOpenAdjust = (item: InventoryItem) => {
+        setSelectedItem(item);
+        setAdjustAmount(0);
+        setAdjustReason('');
+        setShowAdjustModal(true);
+    };
+
+    const handleAdjustStock = async () => {
+        if (!selectedItem) return;
+        try {
+            await inventory.adjustStock(selectedItem.id, adjustAmount, adjustReason);
+            await refetch();
+            setShowAdjustModal(false);
+        } catch (error) {
+            console.error('Error adjusting stock:', error);
+            alert('Failed to adjust stock');
+        }
+    };
+
+    const handleViewHistory = async (item: InventoryItem) => {
+        setSelectedItem(item);
+        try {
+            const logs = await inventory.getHistory(item.id);
+            setHistoryLogs(logs);
+            setShowHistoryModal(true);
+        } catch (error) {
+            console.error('Error fetching history:', error);
         }
     };
 
@@ -256,7 +325,7 @@ export default function InventoryPage() {
                 </div>
                 <div className="flex gap-2">
                     <button
-                        onClick={fetchData}
+                        onClick={refetch}
                         className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition flex items-center gap-2"
                     >
                         <RefreshCw className="h-4 w-4" />
@@ -482,6 +551,20 @@ export default function InventoryPage() {
                                                         <Eye className="h-4 w-4 text-gray-600" />
                                                     </button>
                                                     <button
+                                                        onClick={() => handleOpenAdjust(item)}
+                                                        className="p-1 hover:bg-gray-100 rounded transition"
+                                                        title="Adjust Stock"
+                                                    >
+                                                        <RefreshCw className="h-4 w-4 text-orange-600" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleViewHistory(item)}
+                                                        className="p-1 hover:bg-gray-100 rounded transition"
+                                                        title="View History"
+                                                    >
+                                                        <BarChart3 className="h-4 w-4 text-purple-600" />
+                                                    </button>
+                                                    <button
                                                         onClick={() => handleEditItem(item)}
                                                         className="p-1 hover:bg-gray-100 rounded transition"
                                                         title="Edit"
@@ -544,330 +627,438 @@ export default function InventoryPage() {
             </div>
 
             {/* Add/Edit Modal */}
-            {(showAddModal || showEditModal) && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-gray-900">
-                                {showEditModal ? 'Edit Item' : 'Add New Item'}
-                            </h2>
-                            <button
-                                onClick={() => {
-                                    setShowAddModal(false);
-                                    setShowEditModal(false);
-                                }}
-                                className="p-1 hover:bg-gray-100 rounded transition"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+            {
+                (showAddModal || showEditModal) && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-gray-900">
+                                    {showEditModal ? 'Edit Item' : 'Add New Item'}
+                                </h2>
+                                <button
+                                    onClick={() => {
+                                        setShowAddModal(false);
+                                        setShowEditModal(false);
+                                    }}
+                                    className="p-1 hover:bg-gray-100 rounded transition"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                                        <input
+                                            type="text"
+                                            value={formData.productName}
+                                            onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={formData.sku}
+                                                onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                                placeholder="Enter or scan SKU"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleScanCode}
+                                                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2"
+                                                title="Scan Barcode/QR Code"
+                                            >
+                                                <Scan className="h-4 w-4" />
+                                                Scan
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                        <input
+                                            type="text"
+                                            value={formData.category}
+                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse</label>
+                                        <select
+                                            value={formData.warehouseId}
+                                            onChange={(e) => setFormData({ ...formData, warehouseId: parseInt(e.target.value) })}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        >
+                                            {warehouseList.map(wh => (
+                                                <option key={wh.id} value={wh.id}>{wh.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                                        <input
+                                            type="number"
+                                            value={formData.quantity}
+                                            onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Reorder Point</label>
+                                        <input
+                                            type="number"
+                                            value={formData.reorderPoint}
+                                            onChange={(e) => setFormData({ ...formData, reorderPoint: parseInt(e.target.value) })}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={formData.unitPrice}
+                                            onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) })}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Supplier (Optional)</label>
                                     <input
                                         type="text"
-                                        value={formData.productName}
-                                        onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
+                                        value={formData.supplier}
+                                        onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                     />
                                 </div>
+                            </div>
+                            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+                                <button
+                                    onClick={() => {
+                                        setShowAddModal(false);
+                                        setShowEditModal(false);
+                                    }}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveItem}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                                >
+                                    {showEditModal ? 'Update Item' : 'Add Item'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Details Modal */}
+            {
+                showDetailsModal && selectedItem && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl max-w-2xl w-full">
+                            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-gray-900">Product Details</h2>
+                                <button
+                                    onClick={() => setShowDetailsModal(false)}
+                                    className="p-1 hover:bg-gray-100 rounded transition"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Product Name</p>
+                                        <p className="text-lg font-semibold text-gray-900">{selectedItem.productName}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">SKU</p>
+                                        <p className="text-lg font-mono text-gray-900">{selectedItem.sku}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Category</p>
+                                        <p className="text-lg text-gray-900">{selectedItem.category}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Warehouse</p>
+                                        <p className="text-lg text-gray-900">
+                                            {warehouseList.find(w => w.id === selectedItem.warehouseId)?.name}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Current Stock</p>
+                                        <p className="text-2xl font-bold text-gray-900">{selectedItem.quantity.toLocaleString()}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Reorder Point</p>
+                                        <p className="text-2xl font-bold text-orange-600">{selectedItem.reorderPoint.toLocaleString()}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Unit Price</p>
+                                        <p className="text-2xl font-bold text-green-600">${selectedItem.unitPrice.toFixed(2)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Total Value</p>
+                                        <p className="text-2xl font-bold text-blue-600">
+                                            ${(selectedItem.quantity * selectedItem.unitPrice).toFixed(2)}
+                                        </p>
+                                    </div>
+                                </div>
+                                {selectedItem.supplier && (
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Supplier</p>
+                                        <p className="text-lg text-gray-900">{selectedItem.supplier}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Adjust Stock Modal */}
+            {
+                showAdjustModal && selectedItem && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl max-w-md w-full">
+                            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-gray-900">Adjust Stock</h2>
+                                <button onClick={() => setShowAdjustModal(false)} className="p-1 hover:bg-gray-100 rounded transition">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                                    <p className="text-gray-900 font-medium">{selectedItem.productName} ({selectedItem.sku})</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Current Quantity</label>
+                                    <p className="text-gray-900">{selectedItem.quantity}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Adjustment Amount</label>
+                                    <input
+                                        type="number"
+                                        value={adjustAmount}
+                                        onChange={(e) => setAdjustAmount(parseInt(e.target.value))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        placeholder="+10 or -5"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Use positive numbers to add stock, negative to remove.</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                                    <input
+                                        type="text"
+                                        value={adjustReason}
+                                        onChange={(e) => setAdjustReason(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        placeholder="e.g. Restock, Damaged, Sold"
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+                                <button onClick={() => setShowAdjustModal(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+                                <button onClick={handleAdjustStock} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">Confirm Adjustment</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* History Modal */}
+            {
+                showHistoryModal && selectedItem && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-gray-900">Stock History</h2>
+                                <button onClick={() => setShowHistoryModal(false)} className="p-1 hover:bg-gray-100 rounded transition">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div className="p-6">
+                                <div className="mb-4">
+                                    <h3 className="font-medium text-gray-900">{selectedItem.productName} ({selectedItem.sku})</h3>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Change</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            {historyLogs.map((log: any) => (
+                                                <tr key={log.id}>
+                                                    <td className="px-4 py-2 text-sm text-gray-900">{new Date(log.created_at).toLocaleString()}</td>
+                                                    <td className="px-4 py-2 text-sm text-gray-900">{log.user_name || 'Unknown'}</td>
+                                                    <td className={`px-4 py-2 text-sm font-medium ${log.change_amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {log.change_amount > 0 ? '+' : ''}{log.change_amount}
+                                                    </td>
+                                                    <td className="px-4 py-2 text-sm text-gray-500">{log.reason}</td>
+                                                </tr>
+                                            ))}
+                                            {historyLogs.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={4} className="px-4 py-8 text-center text-gray-500">No history found.</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Barcode/QR Scanner Modal */}
+            {
+                showScanner && (
+                    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl max-w-2xl w-full">
+                            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <Camera className="h-6 w-6 text-blue-600" />
+                                    Scan Barcode or QR Code
+                                </h2>
+                                <button
+                                    onClick={() => {
+                                        setShowScanner(false);
+                                        setScannerActive(false);
+                                    }}
+                                    className="p-1 hover:bg-gray-100 rounded transition"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <div className="p-6">
+                                {/* Scanner View */}
+                                <div className="bg-gray-900 rounded-lg aspect-video flex items-center justify-center mb-4 relative overflow-hidden">
+                                    {scannerActive ? (
+                                        <div className="relative w-full h-full">
+                                            <BarcodeScannerComponent
+                                                width="100%"
+                                                height="100%"
+                                                onUpdate={(err, result) => {
+                                                    if (result) {
+                                                        handleScanResult(result.getText());
+                                                    }
+                                                }}
+                                            />
+
+                                            {/* Scan frame overlay */}
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                <div className="w-64 h-64 border-4 border-blue-500 rounded-lg relative">
+                                                    <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-400"></div>
+                                                    <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-400"></div>
+                                                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-400"></div>
+                                                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-400"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center">
+                                            <Scan className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                                            <p className="text-gray-400">Click "Start Scanner" to begin</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Supported Formats */}
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                    <p className="text-sm font-medium text-blue-900 mb-2">Supported Formats:</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['QR Code', 'EAN-13', 'EAN-8', 'UPC-A', 'UPC-E', 'Code 128', 'Code 39', 'ITF', 'Codabar'].map((format) => (
+                                            <span key={format} className="px-2 py-1 bg-white border border-blue-300 rounded text-xs text-blue-700">
+                                                {format}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Manual Input Option */}
+                                <div className="border-t border-gray-200 pt-4">
+                                    <p className="text-sm text-gray-600 mb-2">Or enter code manually:</p>
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
-                                            value={formData.sku}
-                                            onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                                            placeholder="Enter barcode/SKU manually"
                                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                            placeholder="Enter or scan SKU"
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    const value = (e.target as HTMLInputElement).value;
+                                                    if (value) {
+                                                        handleScanResult(value);
+                                                    }
+                                                }
+                                            }}
                                         />
                                         <button
-                                            type="button"
-                                            onClick={handleScanCode}
-                                            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2"
-                                            title="Scan Barcode/QR Code"
+                                            onClick={() => {
+                                                const input = document.querySelector('input[placeholder="Enter barcode/SKU manually"]') as HTMLInputElement;
+                                                if (input && input.value) {
+                                                    handleScanResult(input.value);
+                                                }
+                                            }}
+                                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
                                         >
-                                            <Scan className="h-4 w-4" />
-                                            Scan
+                                            Use Code
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                    <input
-                                        type="text"
-                                        value={formData.category}
-                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse</label>
-                                    <select
-                                        value={formData.warehouseId}
-                                        onChange={(e) => setFormData({ ...formData, warehouse_id: parseInt(e.target.value) })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    >
-                                        {warehouseList.map(wh => (
-                                            <option key={wh.id} value={wh.id}>{wh.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                                    <input
-                                        type="number"
-                                        value={formData.quantity}
-                                        onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Reorder Point</label>
-                                    <input
-                                        type="number"
-                                        value={formData.reorderPoint}
-                                        onChange={(e) => setFormData({ ...formData, reorder_point: parseInt(e.target.value) })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Unit Price ($)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        value={formData.unitPrice}
-                                        onChange={(e) => setFormData({ ...formData, unit_price: parseFloat(e.target.value) })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Supplier (Optional)</label>
-                                <input
-                                    type="text"
-                                    value={formData.supplier}
-                                    onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                />
-                            </div>
-                        </div>
-                        <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
-                            <button
-                                onClick={() => {
-                                    setShowAddModal(false);
-                                    setShowEditModal(false);
-                                }}
-                                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSaveItem}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-                            >
-                                {showEditModal ? 'Update Item' : 'Add Item'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* Details Modal */}
-            {showDetailsModal && selectedItem && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-2xl w-full">
-                        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-gray-900">Product Details</h2>
-                            <button
-                                onClick={() => setShowDetailsModal(false)}
-                                className="p-1 hover:bg-gray-100 rounded transition"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Product Name</p>
-                                    <p className="text-lg font-semibold text-gray-900">{selectedItem.productName}</p>
+                                {/* Test Scan Button (simulates scanning) */}
+                                <div className="mt-4 flex gap-2">
+                                    <button
+                                        onClick={() => setScannerActive(!scannerActive)}
+                                        className={`flex-1 px-4 py-2 rounded-lg transition ${scannerActive
+                                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                            }`}
+                                    >
+                                        {scannerActive ? 'Stop Scanner' : 'Start Scanner'}
+                                    </button>
+                                    {scannerActive && (
+                                        <button
+                                            onClick={() => handleScanResult(`SKU-${Math.random().toString(36).substr(2, 9).toUpperCase()}`)}
+                                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+                                        >
+                                            Simulate Scan
+                                        </button>
+                                    )}
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">SKU</p>
-                                    <p className="text-lg font-mono text-gray-900">{selectedItem.sku}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Category</p>
-                                    <p className="text-lg text-gray-900">{selectedItem.category}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Warehouse</p>
-                                    <p className="text-lg text-gray-900">
-                                        {warehouseList.find(w => w.id === selectedItem.warehouseId)?.name}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Current Stock</p>
-                                    <p className="text-2xl font-bold text-gray-900">{selectedItem.quantity.toLocaleString()}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Reorder Point</p>
-                                    <p className="text-2xl font-bold text-orange-600">{selectedItem.reorderPoint.toLocaleString()}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Unit Price</p>
-                                    <p className="text-2xl font-bold text-green-600">${selectedItem.unitPrice.toFixed(2)}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Total Value</p>
-                                    <p className="text-2xl font-bold text-blue-600">
-                                        ${(selectedItem.quantity * selectedItem.unitPrice).toFixed(2)}
+
+                                {/* Instructions */}
+                                <div className="mt-4 bg-gray-50 rounded-lg p-3">
+                                    <p className="text-xs text-gray-600">
+                                        <strong>Note:</strong> For production use, this will activate your device camera.
+                                        Ensure good lighting and hold the barcode steady within the frame for best results.
                                     </p>
                                 </div>
                             </div>
-                            {selectedItem.supplier && (
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Supplier</p>
-                                    <p className="text-lg text-gray-900">{selectedItem.supplier}</p>
-                                </div>
-                            )}
                         </div>
                     </div>
-                </div>
-            )}
-
-            {/* Barcode/QR Scanner Modal */}
-            {showScanner && (
-                <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-2xl w-full">
-                        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                <Camera className="h-6 w-6 text-blue-600" />
-                                Scan Barcode or QR Code
-                            </h2>
-                            <button
-                                onClick={() => {
-                                    setShowScanner(false);
-                                    setScannerActive(false);
-                                }}
-                                className="p-1 hover:bg-gray-100 rounded transition"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-
-                        <div className="p-6">
-                            {/* Scanner View */}
-                            <div className="bg-gray-900 rounded-lg aspect-video flex items-center justify-center mb-4 relative overflow-hidden">
-                                {scannerActive ? (
-                                    <div className="relative w-full h-full">
-                                        {/* Camera placeholder - In production, use react-qr-barcode-scanner */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="text-center">
-                                                <Camera className="h-16 w-16 text-white mx-auto mb-4 animate-pulse" />
-                                                <p className="text-white text-lg">Camera View</p>
-                                                <p className="text-gray-400 text-sm mt-2">Position barcode within frame</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Scan frame overlay */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="w-64 h-64 border-4 border-blue-500 rounded-lg relative">
-                                                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-400"></div>
-                                                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-400"></div>
-                                                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-400"></div>
-                                                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-400"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-center">
-                                        <Scan className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                                        <p className="text-gray-400">Click "Start Scanner" to begin</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Supported Formats */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                                <p className="text-sm font-medium text-blue-900 mb-2">Supported Formats:</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {['QR Code', 'EAN-13', 'EAN-8', 'UPC-A', 'UPC-E', 'Code 128', 'Code 39', 'ITF', 'Codabar'].map((format) => (
-                                        <span key={format} className="px-2 py-1 bg-white border border-blue-300 rounded text-xs text-blue-700">
-                                            {format}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Manual Input Option */}
-                            <div className="border-t border-gray-200 pt-4">
-                                <p className="text-sm text-gray-600 mb-2">Or enter code manually:</p>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter barcode/SKU manually"
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                        onKeyPress={(e) => {
-                                            if (e.key === 'Enter') {
-                                                const value = (e.target as HTMLInputElement).value;
-                                                if (value) {
-                                                    handleScanResult(value);
-                                                }
-                                            }
-                                        }}
-                                    />
-                                    <button
-                                        onClick={() => {
-                                            const input = document.querySelector('input[placeholder="Enter barcode/SKU manually"]') as HTMLInputElement;
-                                            if (input && input.value) {
-                                                handleScanResult(input.value);
-                                            }
-                                        }}
-                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-                                    >
-                                        Use Code
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Test Scan Button (simulates scanning) */}
-                            <div className="mt-4 flex gap-2">
-                                <button
-                                    onClick={() => setScannerActive(!scannerActive)}
-                                    className={`flex-1 px-4 py-2 rounded-lg transition ${scannerActive
-                                        ? 'bg-red-600 hover:bg-red-700 text-white'
-                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                        }`}
-                                >
-                                    {scannerActive ? 'Stop Scanner' : 'Start Scanner'}
-                                </button>
-                                {scannerActive && (
-                                    <button
-                                        onClick={() => handleScanResult(`SKU-${Math.random().toString(36).substr(2, 9).toUpperCase()}`)}
-                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-                                    >
-                                        Simulate Scan
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Instructions */}
-                            <div className="mt-4 bg-gray-50 rounded-lg p-3">
-                                <p className="text-xs text-gray-600">
-                                    <strong>Note:</strong> For production use, this will activate your device camera.
-                                    Ensure good lighting and hold the barcode steady within the frame for best results.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

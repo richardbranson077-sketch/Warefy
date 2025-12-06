@@ -10,9 +10,9 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 
 from backend.database_lite import get_db
-from backend.auth import get_current_active_user, User
+from backend.auth_lite import get_current_active_user, User
 
-router = APIRouter(prefix="/api/labor", tags=["Labor Management"])
+router = APIRouter(prefix="/api/v1/labor", tags=["Labor Management"])
 
 # ========================================================================
 # PYDANTIC SCHEMAS
@@ -269,3 +269,81 @@ def get_schedules(
         ]
     
     return filtered_schedules
+
+@router.get("/employees")
+def get_employees(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get list of employees (operational roles)"""
+    # In a real app, we would query the User table. 
+    # For this mock/lite version, we'll assume we can fetch them or return a mock list if User table isn't fully populated with roles.
+    # We will try to fetch from DB first.
+    
+    users = db.query(User).all()
+    
+    # Mock data if no users in DB (for demo purposes)
+    if not users:
+        return [
+            {"id": 101, "name": "John Doe", "role": "picker", "status": "active", "current_shift": None},
+            {"id": 102, "name": "Jane Smith", "role": "packer", "status": "active", "current_shift": None},
+            {"id": 103, "name": "Bob Wilson", "role": "driver", "status": "active", "current_shift": None},
+            {"id": 104, "name": "Alice Brown", "role": "warehouse_manager", "status": "active", "current_shift": None}
+        ]
+
+    employees = [
+        {
+            "id": u.id,
+            "name": u.full_name or u.username,
+            "role": u.role,
+            "status": "active" if u.is_active else "inactive",
+            "current_shift": next((s for s in schedules if s["user_id"] == u.id and s["shift_date"].date() == datetime.utcnow().date()), None)
+        }
+        for u in users
+        if u.role in ["picker", "packer", "driver", "warehouse_manager", "admin"] # Include admin for demo
+    ]
+    
+    return employees
+
+@router.get("/analytics/team-performance")
+def get_team_performance(
+    days: int = 7,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get aggregated team performance metrics"""
+    
+    cutoff_date = datetime.utcnow() - timedelta(days=days)
+    
+    # Group metrics by user
+    user_metrics = {}
+    for m in productivity_data:
+        if m["date"] >= cutoff_date:
+            uid = m["user_id"]
+            if uid not in user_metrics:
+                user_metrics[uid] = []
+            user_metrics[uid].append(m)
+    
+    leaderboard = []
+    for uid, metrics in user_metrics.items():
+        # Find user name (inefficient but works for lite)
+        user = db.query(User).filter(User.id == uid).first()
+        name = user.full_name or user.username if user else f"User {uid}"
+        
+        avg_picks = sum(m["picks_per_hour"] for m in metrics) / len(metrics)
+        avg_accuracy = sum(m["accuracy_percentage"] for m in metrics) / len(metrics)
+        total_orders = sum(m["orders_processed"] for m in metrics)
+        
+        leaderboard.append({
+            "user_id": uid,
+            "name": name,
+            "avg_picks_per_hour": round(avg_picks, 1),
+            "avg_accuracy": round(avg_accuracy, 1),
+            "total_orders": total_orders,
+            "score": round((avg_picks * 0.4) + (avg_accuracy * 0.6), 1) # Simple score formula
+        })
+    
+    # Sort by score desc
+    leaderboard.sort(key=lambda x: x["score"], reverse=True)
+    
+    return leaderboard

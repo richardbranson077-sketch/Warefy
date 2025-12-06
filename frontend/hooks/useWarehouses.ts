@@ -40,7 +40,7 @@ export function useWarehouses(options: UseWarehousesOptions = {}) {
     const createWarehouse = async (warehouse: CreateWarehouse) => {
         try {
             const newWarehouse = await warehousesService.create(warehouse);
-            setData([...data, newWarehouse]);
+            setData(prev => [...prev, newWarehouse]);
             return newWarehouse;
         } catch (err: any) {
             throw new Error(getErrorMessage(err));
@@ -50,7 +50,7 @@ export function useWarehouses(options: UseWarehousesOptions = {}) {
     const updateWarehouse = async (id: number, updates: UpdateWarehouse) => {
         try {
             const updated = await warehousesService.update(id, updates);
-            setData(data.map(wh => wh.id === id ? updated : wh));
+            setData(prev => prev.map(wh => wh.id === id ? updated : wh));
             return updated;
         } catch (err: any) {
             throw new Error(getErrorMessage(err));
@@ -60,7 +60,7 @@ export function useWarehouses(options: UseWarehousesOptions = {}) {
     const deleteWarehouse = async (id: number) => {
         try {
             await warehousesService.delete(id);
-            setData(data.filter(wh => wh.id !== id));
+            setData(prev => prev.filter(wh => wh.id !== id));
         } catch (err: any) {
             throw new Error(getErrorMessage(err));
         }
@@ -87,7 +87,7 @@ export function useWarehouses(options: UseWarehousesOptions = {}) {
     const updateLayout = async (id: number, layout: any) => {
         try {
             const updated = await warehousesService.updateLayout(id, layout);
-            setData(data.map(wh => wh.id === id ? updated : wh));
+            setData(prev => prev.map(wh => wh.id === id ? updated : wh));
             return updated;
         } catch (err: any) {
             throw new Error(getErrorMessage(err));

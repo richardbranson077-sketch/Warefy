@@ -12,9 +12,9 @@ import math
 
 from backend.database_lite import get_db
 from backend.models_lite import Order, OrderItem, Inventory
-from backend.auth import get_current_active_user, User
+from backend.auth_lite import get_current_active_user, User
 
-router = APIRouter(prefix="/api/forecasting", tags=["Predictive Forecasting"])
+router = APIRouter(prefix="/api/v1/forecasting", tags=["Predictive Forecasting"])
 
 # ========================================================================
 # PYDANTIC SCHEMAS

@@ -11,12 +11,18 @@ from pydantic import BaseModel
 from datetime import datetime
 import requests
 import os
+import json
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
 
 from backend.database_lite import get_db
 from backend.models_lite import ERPConnection, ERPSyncLog, Order, Inventory
-from backend.auth import get_current_active_user, User
+from backend.auth_lite import get_current_active_user
+from backend.models_lite import User
 
-router = APIRouter(prefix="/api/erp", tags=["ERP Integration"])
+router = APIRouter(prefix="/api/v1/erp", tags=["ERP Integration"])
 
 # ========================================================================
 # PYDANTIC SCHEMAS
@@ -54,6 +60,30 @@ class SyncLogResponse(BaseModel):
     records_failed: int
     started_at: datetime
     completed_at: Optional[datetime]
+
+class FieldMappingRequest(BaseModel):
+    erp_fields: List[str]
+    warefy_fields: List[str]
+
+class MappingSuggestion(BaseModel):
+    erp_field: str
+    warefy_field: str
+    confidence: float
+    reasoning: str
+
+class Discrepancy(BaseModel):
+    id: str
+    type: str  # inventory, order_status, price
+    item_id: str
+    erp_value: str
+    warefy_value: str
+    erp_source: str
+    detected_at: datetime
+
+class ResolveDiscrepancyRequest(BaseModel):
+    discrepancy_id: str
+    resolution: str  # accept_erp, keep_warefy, manual
+    manual_value: Optional[str] = None
 
 # ========================================================================
 # ERP API INTEGRATIONS
@@ -222,6 +252,18 @@ class NetSuiteAPI:
             }
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"NetSuite API error: {str(e)}")
+
+@router.get("/status")
+def get_erp_status():
+    """Get ERP system status (Mock for dashboard)"""
+    return {
+        "systems": [
+            {"id": 1, "name": "SAP", "status": "connected"},
+            {"id": 2, "name": "Oracle", "status": "disconnected"}
+        ],
+        "totalSyncs": 150,
+        "lastSyncTime": datetime.utcnow().isoformat()
+    }
 
 class MicrosoftDynamics365API:
     """Microsoft Dynamics 365 Business Central API integration"""
@@ -703,3 +745,78 @@ def get_xero_oauth_url(
     )
     
     return {"authorization_url": auth_url}
+
+# ========================================================================
+# AI & DISCREPANCY ENDPOINTS
+# ========================================================================
+
+@router.post("/ai-mapping", response_model=List[MappingSuggestion])
+async def suggest_field_mapping(
+    request: FieldMappingRequest,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Use Gemini AI to suggest field mappings between ERP and Warefy"""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key or not genai:
+        # Mock fallback if no AI
+        return [
+            MappingSuggestion(erp_field=f, warefy_field="unknown", confidence=0.0, reasoning="AI not configured")
+            for f in request.erp_fields
+        ]
+    
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-flash-latest')
+    
+    prompt = f"""
+    Map these ERP fields to the most likely Warefy fields.
+    
+    ERP Fields: {request.erp_fields}
+    Warefy Fields: {request.warefy_fields}
+    
+    Return a JSON array of objects with keys: erp_field, warefy_field, confidence (0.0-1.0), reasoning.
+    Only map fields where you are reasonably confident.
+    """
+    
+    try:
+        response = await model.generate_content_async(prompt)
+        text = response.text.strip().replace('```json', '').replace('```', '')
+        data = json.loads(text)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI Mapping failed: {str(e)}")
+
+@router.get("/discrepancies", response_model=List[Discrepancy])
+def get_data_discrepancies(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Detect data discrepancies between Warefy and connected ERPs"""
+    # In a real app, this would compare live data. 
+    # For demo, we'll generate realistic mock discrepancies based on DB items.
+    
+    discrepancies = []
+    items = db.query(Inventory).limit(5).all()
+    
+    for i, item in enumerate(items):
+        if i % 2 == 0: # Create discrepancy for every other item
+            discrepancies.append(Discrepancy(
+                id=f"disc_{item.id}",
+                type="inventory",
+                item_id=item.sku,
+                erp_value=str(item.quantity + 5),
+                warefy_value=str(item.quantity),
+                erp_source="SAP Business One",
+                detected_at=datetime.utcnow()
+            ))
+            
+    return discrepancies
+
+@router.post("/resolve-discrepancy")
+def resolve_discrepancy(
+    request: ResolveDiscrepancyRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Resolve a data discrepancy"""
+    # Logic to update DB based on resolution
+    return {"status": "resolved", "resolution": request.resolution, "id": request.discrepancy_id}

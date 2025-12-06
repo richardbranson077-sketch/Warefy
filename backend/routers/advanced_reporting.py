@@ -12,9 +12,9 @@ import json
 
 from backend.database_lite import get_db
 from backend.models_lite import Inventory, Order, OrderItem
-from backend.auth import get_current_active_user, User
+from backend.auth_lite import get_current_active_user, User
 
-router = APIRouter(prefix="/api/reporting", tags=["Advanced Reporting"])
+router = APIRouter(prefix="/api/v1/reporting", tags=["Advanced Reporting"])
 
 # ========================================================================
 # PYDANTIC SCHEMAS
@@ -103,6 +103,242 @@ report_templates = {
         "category": "Quality"
     }
 }
+
+# ========================================================================
+# REAL REPORT GENERATION
+# ========================================================================
+
+class ReportType(str):
+    INVENTORY_VALUATION = "inventory_valuation"
+    SALES_PERFORMANCE = "sales_performance"
+    LOW_STOCK = "low_stock"
+    ORDER_FULFILLMENT = "order_fulfillment"
+
+@router.get("/generate")
+async def generate_report(
+    report_type: str,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Generate a report with real data from the database.
+    """
+    if not start_date:
+        start_date = datetime.utcnow() - timedelta(days=30)
+    if not end_date:
+        end_date = datetime.utcnow()
+
+    data = []
+    summary = {}
+
+    if report_type == "inventory_valuation":
+        # Query inventory and calculate value
+        inventory_items = db.query(Inventory).all()
+        
+        # Group by category
+        category_stats = {}
+        total_value = 0
+        total_items = 0
+
+        for item in inventory_items:
+            value = (item.quantity or 0) * (item.unit_price or 0)
+            cat = item.category or "Uncategorized"
+            
+            if cat not in category_stats:
+                category_stats[cat] = {"value": 0, "count": 0, "items": 0}
+            
+            category_stats[cat]["value"] += value
+            category_stats[cat]["count"] += 1
+            category_stats[cat]["items"] += (item.quantity or 0)
+            
+            total_value += value
+            total_items += (item.quantity or 0)
+            
+            # Add detailed row
+            data.append({
+                "sku": item.sku,
+                "product_name": item.product_name,
+                "category": cat,
+                "quantity": item.quantity,
+                "unit_price": item.unit_price,
+                "total_value": round(value, 2)
+            })
+
+        summary = {
+            "total_inventory_value": round(total_value, 2),
+            "total_items_count": total_items,
+            "category_breakdown": category_stats
+        }
+
+    elif report_type == "sales_performance":
+        # Query orders within date range
+        orders = db.query(Order).filter(
+            Order.created_at >= start_date,
+            Order.created_at <= end_date
+        ).all()
+
+        # Group by date
+        daily_stats = {}
+        total_revenue = 0
+        total_orders = 0
+
+        for order in orders:
+            date_str = order.created_at.strftime("%Y-%m-%d")
+            revenue = order.total_amount or 0
+            
+            if date_str not in daily_stats:
+                daily_stats[date_str] = {"revenue": 0, "orders": 0}
+            
+            daily_stats[date_str]["revenue"] += revenue
+            daily_stats[date_str]["orders"] += 1
+            
+            total_revenue += revenue
+            total_orders += 1
+            
+            data.append({
+                "order_id": order.id,
+                "date": date_str,
+                "customer": order.customer_name,
+                "amount": revenue,
+                "status": order.status
+            })
+
+        # Convert daily stats to list for charts
+        chart_data = [
+            {"date": date, "revenue": stats["revenue"], "orders": stats["orders"]}
+            for date, stats in sorted(daily_stats.items())
+        ]
+
+        summary = {
+            "total_revenue": round(total_revenue, 2),
+            "total_orders": total_orders,
+            "average_order_value": round(total_revenue / total_orders, 2) if total_orders > 0 else 0,
+            "chart_data": chart_data
+        }
+
+    elif report_type == "low_stock":
+        # Query items below reorder point
+        low_stock_items = db.query(Inventory).filter(Inventory.quantity <= Inventory.reorder_point).all()
+        
+        for item in low_stock_items:
+            data.append({
+                "sku": item.sku,
+                "product_name": item.product_name,
+                "quantity": item.quantity,
+                "reorder_point": item.reorder_point,
+                "supplier": item.supplier,
+                "shortage": (item.reorder_point - item.quantity)
+            })
+            
+        summary = {
+            "total_low_stock_items": len(low_stock_items),
+            "critical_items": len([i for i in low_stock_items if i.quantity == 0])
+        }
+
+    elif report_type == "order_fulfillment":
+        # Query orders and group by status
+        orders = db.query(Order).filter(
+            Order.created_at >= start_date,
+            Order.created_at <= end_date
+        ).all()
+        
+        status_counts = {}
+        for order in orders:
+            status = order.status or "unknown"
+            status_counts[status] = status_counts.get(status, 0) + 1
+            
+            data.append({
+                "order_id": order.id,
+                "status": status,
+                "date": order.created_at.strftime("%Y-%m-%d"),
+                "amount": order.total_amount
+            })
+            
+        summary = {
+            "total_orders": len(orders),
+            "status_breakdown": status_counts,
+            "fulfillment_rate": f"{round((status_counts.get('delivered', 0) / len(orders) * 100), 1)}%" if len(orders) > 0 else "0%"
+        }
+
+    else:
+        raise HTTPException(status_code=400, detail="Invalid report type")
+
+    return {
+        "report_type": report_type,
+        "generated_at": datetime.utcnow(),
+        "summary": summary,
+        "data": data[:100]  # Limit detailed rows for performance
+    }
+
+class AIInsightsRequest(BaseModel):
+    report_type: str
+    summary: Dict[str, Any]
+    data_sample: List[Dict[str, Any]]
+
+@router.post("/ai-insights")
+async def generate_ai_insights(
+    request: AIInsightsRequest,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Generate AI insights based on report data using Gemini.
+    """
+    try:
+        import google.generativeai as genai
+        import os
+        
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return {
+                "insights": [
+                    "AI insights are unavailable (Missing API Key).",
+                    "Please configure GEMINI_API_KEY in your environment."
+                ],
+                "recommendations": []
+            }
+            
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-pro')
+        
+        prompt = f"""
+        Analyze this {request.report_type} report data and provide executive insights.
+        
+        Summary: {json.dumps(request.summary, default=str)}
+        Data Sample: {json.dumps(request.data_sample[:5], default=str)}
+        
+        Provide a JSON response with:
+        1. 'insights': List of 3-5 key observations (trends, anomalies, good/bad performance).
+        2. 'recommendations': List of 3 actionable steps to improve.
+        
+        Keep it professional, concise, and business-focused.
+        """
+        
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        
+        # Clean up code blocks if present
+        if text.startswith("```json"):
+            text = text[7:]
+        if text.endswith("```"):
+            text = text[:-3]
+            
+        return json.loads(text)
+        
+    except Exception as e:
+        print(f"AI Error: {str(e)}")
+        # Fallback mock response
+        return {
+            "insights": [
+                "Unable to generate AI insights at this time.",
+                f"Error: {str(e)}"
+            ],
+            "recommendations": [
+                "Check system logs for details.",
+                "Verify API connectivity."
+            ]
+        }
 
 # ========================================================================
 # API ENDPOINTS

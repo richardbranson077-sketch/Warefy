@@ -11,9 +11,10 @@ from datetime import datetime
 from enum import Enum
 
 from backend.database_lite import get_db
-from backend.auth import get_current_active_user, User
+from backend.auth_lite import get_current_active_user
+from backend.models_lite import User
 
-router = APIRouter(prefix="/api/rbac", tags=["RBAC"])
+router = APIRouter(prefix="/api/v1/rbac", tags=["RBAC"])
 
 # ========================================================================
 # ENUMS & SCHEMAS
@@ -95,8 +96,253 @@ roles_db = {
     }
 }
 
-workflows_db = []
 audit_logs = []
+
+# ========================================================================
+# USER MANAGEMENT SCHEMAS
+# ========================================================================
+
+class UserBase(BaseModel):
+    email: str
+    username: str
+    full_name: Optional[str] = None
+    role: str = "viewer"
+    is_active: bool = True
+
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(BaseModel):
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+    password: Optional[str] = None
+
+class UserResponse(UserBase):
+    id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# ========================================================================
+# USER ENDPOINTS
+# ========================================================================
+
+@router.get("/users", response_model=List[UserResponse])
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get all users (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    return db.query(User).all()
+
+@router.post("/users", response_model=UserResponse)
+def create_user(
+    user: UserCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new user (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Check if username exists
+    if db.query(User).filter(User.username == user.username).first():
+        raise HTTPException(status_code=400, detail="Username already registered")
+    
+    # Check if email exists
+    if db.query(User).filter(User.email == user.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    from backend.auth_lite import get_password_hash
+    
+    new_user = User(
+        email=user.email,
+        username=user.username,
+        full_name=user.full_name,
+        hashed_password=get_password_hash(user.password),
+        role=user.role,
+        is_active=user.is_active
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # Log action
+    audit_logs.append({
+        "user_id": current_user.id,
+        "action": "create_user",
+        "module": "users",
+        "target_user": new_user.username,
+        "timestamp": datetime.now().isoformat()
+    })
+    
+    return new_user
+
+@router.put("/users/{user_id}", response_model=UserResponse)
+def update_user(
+    user_id: int,
+    user_update: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update a user (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update fields
+    if user_update.email:
+        db_user.email = user_update.email
+    if user_update.full_name:
+        db_user.full_name = user_update.full_name
+    if user_update.role:
+        db_user.role = user_update.role
+    if user_update.is_active is not None:
+        db_user.is_active = user_update.is_active
+    if user_update.password:
+        from backend.auth_lite import get_password_hash
+        db_user.hashed_password = get_password_hash(user_update.password)
+    
+    db.commit()
+    db.refresh(db_user)
+    
+    return db_user
+
+@router.delete("/users/{user_id}")
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete a user (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if current_user.id == user_id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db.delete(db_user)
+    db.commit()
+    
+    return {"message": "User deleted successfully"}
+
+# ========================================================================
+# ROLE MANAGEMENT SCHEMAS
+# ========================================================================
+
+class RoleResponse(BaseModel):
+    id: str
+    name: str
+    description: str
+    permissions: Dict[str, List[str]]
+    field_restrictions: Dict[str, List[str]]
+
+# ========================================================================
+# ROLE ENDPOINTS
+# ========================================================================
+
+@router.get("/roles", response_model=List[RoleResponse])
+def get_all_roles(
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get all roles"""
+    # Convert dict mock db to list for response
+    roles_list = []
+    for role_id, role_data in roles_db.items():
+        roles_list.append({
+            "id": role_id,
+            **role_data
+        })
+    return roles_list
+
+@router.post("/roles", response_model=RoleResponse)
+def create_role(
+    role: RoleCreate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new role (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    role_id = role.name.lower().replace(" ", "_")
+    if role_id in roles_db:
+        raise HTTPException(status_code=400, detail="Role already exists")
+    
+    roles_db[role_id] = role.dict()
+    
+    # Log action
+    audit_logs.append({
+        "user_id": current_user.id,
+        "action": "create_role",
+        "module": "rbac",
+        "target_role": role_id,
+        "timestamp": datetime.now().isoformat()
+    })
+    
+    return {"id": role_id, **roles_db[role_id]}
+
+@router.put("/roles/{role_id}", response_model=RoleResponse)
+def update_role(
+    role_id: str,
+    role_update: RoleCreate,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update a role (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if role_id not in roles_db:
+        raise HTTPException(status_code=404, detail="Role not found")
+    
+    if role_id == "admin":
+        raise HTTPException(status_code=400, detail="Cannot modify Admin role")
+    
+    roles_db[role_id] = role_update.dict()
+    
+    return {"id": role_id, **roles_db[role_id]}
+
+@router.delete("/roles/{role_id}")
+def delete_role(
+    role_id: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete a role (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if role_id not in roles_db:
+        raise HTTPException(status_code=404, detail="Role not found")
+    
+    if role_id == "admin":
+        raise HTTPException(status_code=400, detail="Cannot delete Admin role")
+    
+    del roles_db[role_id]
+    
+    return {"message": "Role deleted successfully"}
+
+@router.get("/permissions")
+def get_available_permissions(
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get all available permissions and modules"""
+    return {
+        "modules": [m.value for m in Module],
+        "permissions": [p.value for p in Permission]
+    }
 
 # ========================================================================
 # API ENDPOINTS

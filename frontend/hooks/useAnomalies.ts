@@ -20,7 +20,7 @@ export function useAnomalies() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/anomalies');
+            const response = await apiClient.get('/api/v1/anomalies');
             setData(response.data);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch anomalies');

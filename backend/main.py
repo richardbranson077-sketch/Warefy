@@ -10,18 +10,23 @@ import os
 from dotenv import load_dotenv
 
 # Import database initialization
-from database import init_db
+from backend.database_lite import init_db
 
 # Import routers
-from routers import (
+from backend.routers import (
     auth,
     inventory,
+    orders,
     warehouses,
     demand,
     routes,
     ai_recommendations,
+    ai_command,
+    ai_reports,
     anomalies,
     vehicles,
+    settings,
+    users,
     # Enterprise Integration
     shipping,
     reorder,
@@ -33,9 +38,17 @@ from routers import (
     quality,
     rbac,
     advanced_reporting,
+    reports,
+    # Analytics & AI
     # Analytics & AI
     benchmarking,
-    forecasting
+    forecasting,
+    edge_ai,
+    computer_vision,
+    # Other Features
+    blockchain,
+    collaboration,
+    knowledge_base
 )
 
 # Import mobile API
@@ -63,6 +76,21 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+# Logging & Monitoring
+from backend.logging_config import setup_logging
+from backend.middleware.logging import RequestLoggingMiddleware
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+# Setup logging
+logger = setup_logging()
+
+# Security & Rate Limiting
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from backend.limiter import limiter
+from backend.middleware.security import SecurityHeadersMiddleware
 
 # CORS middleware
 app.add_middleware(
@@ -73,14 +101,39 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add Request Logging (First, to capture everything)
+app.add_middleware(RequestLoggingMiddleware)
+
+# Add Security Headers
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Add Rate Limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+# Global Exception Handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error. Please check logs for details."}
+    )
+
 # Include routers
 # Core routers
 app.include_router(auth.router)
+app.include_router(settings.router)
+app.include_router(users.router)
 app.include_router(inventory.router)
+app.include_router(orders.router)
 app.include_router(warehouses.router)
 app.include_router(demand.router)
 app.include_router(routes.router)
 app.include_router(ai_recommendations.router)
+app.include_router(ai_command.router)
+app.include_router(ai_reports.router)
 app.include_router(anomalies.router)
 app.include_router(vehicles.router)
 app.include_router(driver_router)
@@ -88,8 +141,6 @@ app.include_router(driver_router)
 # Enterprise Integration routers
 app.include_router(shipping.router)
 app.include_router(reorder.router)
-app.include_router(erp_sync.router)
-app.include_router(ecommerce_sync.router)
 
 # Advanced Features routers
 app.include_router(returns.router)
@@ -97,10 +148,21 @@ app.include_router(labor.router)
 app.include_router(quality.router)
 app.include_router(rbac.router)
 app.include_router(advanced_reporting.router)
+app.include_router(reports.router)
 
 # Analytics & AI routers
 app.include_router(benchmarking.router)
 app.include_router(forecasting.router)
+app.include_router(edge_ai.router)
+app.include_router(computer_vision.router)
+
+# Other Features routers
+app.include_router(blockchain.router)
+app.include_router(collaboration.router)
+app.include_router(knowledge_base.router)
+app.include_router(erp_sync.router)
+app.include_router(ecommerce_sync.router)
+
 
 # WebSocket connection manager
 class ConnectionManager:

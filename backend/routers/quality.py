@@ -10,9 +10,9 @@ from pydantic import BaseModel
 from datetime import datetime
 
 from backend.database_lite import get_db
-from backend.auth import get_current_active_user, User
+from backend.auth_lite import get_current_active_user, User
 
-router = APIRouter(prefix="/api/quality", tags=["Quality Control"])
+router = APIRouter(prefix="/api/v1/quality", tags=["Quality Control"])
 
 # ========================================================================
 # PYDANTIC SCHEMAS
@@ -145,6 +145,28 @@ def list_defects(
         filtered = [d for d in filtered if d["supplier"] == supplier]
     
     return filtered
+
+@router.put("/defects/{defect_id}")
+def update_defect_status(
+    defect_id: int,
+    status: str,
+    resolution_notes: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update defect status (e.g., open -> resolved)"""
+    
+    defect = next((d for d in defects if d["id"] == defect_id), None)
+    if not defect:
+        raise HTTPException(status_code=404, detail="Defect not found")
+    
+    defect["status"] = status
+    if resolution_notes:
+        defect["resolution_notes"] = resolution_notes
+        defect["resolved_at"] = datetime.utcnow()
+        defect["resolved_by"] = current_user.id
+    
+    return defect
 
 @router.get("/supplier-quality/{supplier}")
 def get_supplier_quality_score(

@@ -10,7 +10,7 @@ export function useEcommerce() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/ecommerce');
+            const response = await apiClient.get('/api/v1/ecommerce/stats');
             setData(response.data);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch e-commerce data');

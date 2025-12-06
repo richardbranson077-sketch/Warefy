@@ -19,6 +19,7 @@ export interface Warehouse {
     isActive?: boolean;
     createdAt?: string;
     updatedAt?: string;
+    utilization?: number;
 }
 
 export interface CreateWarehouse {
@@ -57,7 +58,7 @@ export const warehousesService = {
      * Get all warehouses
      */
     getAll: async () => {
-        const response = await apiClient.get<Warehouse[]>('/warehouses');
+        const response = await apiClient.get<Warehouse[]>('/api/v1/warehouses');
         return response.data;
     },
 
@@ -65,7 +66,7 @@ export const warehousesService = {
      * Get warehouse by ID
      */
     getById: async (id: number) => {
-        const response = await apiClient.get<Warehouse>(`/warehouses/${id}`);
+        const response = await apiClient.get<Warehouse>(`/api/v1/warehouses/${id}`);
         return response.data;
     },
 
@@ -73,7 +74,7 @@ export const warehousesService = {
      * Create new warehouse
      */
     create: async (data: CreateWarehouse) => {
-        const response = await apiClient.post<Warehouse>('/warehouses', data);
+        const response = await apiClient.post<Warehouse>('/api/v1/warehouses', data);
         return response.data;
     },
 
@@ -81,7 +82,7 @@ export const warehousesService = {
      * Update warehouse
      */
     update: async (id: number, data: UpdateWarehouse) => {
-        const response = await apiClient.put<Warehouse>(`/warehouses/${id}`, data);
+        const response = await apiClient.put<Warehouse>(`/api/v1/warehouses/${id}`, data);
         return response.data;
     },
 
@@ -89,14 +90,14 @@ export const warehousesService = {
      * Delete warehouse
      */
     delete: async (id: number) => {
-        await apiClient.delete(`/warehouses/${id}`);
+        await apiClient.delete(`/api/v1/warehouses/${id}`);
     },
 
     /**
      * Get warehouse summary/statistics
      */
     getSummary: async (id: number) => {
-        const response = await apiClient.get<WarehouseSummary>(`/inventory/warehouse/${id}/summary`);
+        const response = await apiClient.get<WarehouseSummary>(`/api/v1/inventory/warehouse/${id}/summary`);
         return response.data;
     },
 
@@ -104,7 +105,7 @@ export const warehousesService = {
      * Update warehouse layout
      */
     updateLayout: async (id: number, layout: any) => {
-        const response = await apiClient.patch<Warehouse>(`/warehouses/${id}/layout`, {
+        const response = await apiClient.patch<Warehouse>(`/api/v1/warehouses/${id}/layout`, {
             layout_config: JSON.stringify(layout)
         });
         return response.data;

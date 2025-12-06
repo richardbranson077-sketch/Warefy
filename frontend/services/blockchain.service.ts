@@ -1,23 +1,37 @@
 import apiClient from '../lib/api';
 
-export interface BlockchainTransaction {
-    id: string;
-    hash: string;
-    status: 'pending' | 'confirmed' | 'failed';
-    createdAt: string;
-    confirmedAt?: string;
+export interface AuditLog {
+    id: number;
+    user_id: number;
+    target_user_id?: number;
+    action: string;
+    details?: string;
+    extra_data?: any;
+    hash?: string;
+    previous_hash?: string;
+    timestamp: string;
 }
 
-export const getTransactions = async (): Promise<BlockchainTransaction[]> => {
-    const response = await apiClient.get<BlockchainTransaction[]>('/api/v1/blockchain/transactions');
-    return response.data;
-};
+export interface ChainStatus {
+    isValid: boolean;
+    totalBlocks: number;
+    compromisedBlockId?: number;
+    message: string;
+}
 
-export const submitTransaction = async (tx: Partial<BlockchainTransaction>): Promise<BlockchainTransaction> => {
-    const response = await apiClient.post<BlockchainTransaction>('/api/v1/blockchain/transactions', tx);
-    return response.data;
-};
+export const blockchainService = {
+    getBlocks: async (limit: number = 50): Promise<AuditLog[]> => {
+        const response = await apiClient.get<AuditLog[]>('/api/v1/blockchain/blocks', { params: { limit } });
+        return response.data;
+    },
 
-export const deleteTransaction = async (id: string): Promise<void> => {
-    await apiClient.delete(`/api/v1/blockchain/transactions/${id}`);
+    verifyChain: async (): Promise<ChainStatus> => {
+        const response = await apiClient.post<ChainStatus>('/api/v1/blockchain/verify');
+        return response.data;
+    },
+
+    analyzeChain: async (query: string): Promise<{ analysis: string }> => {
+        const response = await apiClient.post<{ analysis: string }>('/api/v1/blockchain/analyze', null, { params: { query } });
+        return response.data;
+    }
 };

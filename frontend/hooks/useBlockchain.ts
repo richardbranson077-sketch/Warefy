@@ -18,7 +18,7 @@ export function useBlockchain() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/blockchain');
+            const response = await apiClient.get('/api/v1/blockchain/transactions');
             setData(response.data);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch blockchain data');

@@ -20,7 +20,7 @@ import {
     Shield,
     ShoppingCart,
     DollarSign,
-    PackageOpen,
+    // PackageOpen,
     Zap,
     Link2,
     ShoppingBag,
@@ -44,33 +44,34 @@ const navigation = [
     { name: 'Fleet Management', href: '/dashboard/vehicles', icon: Truck, section: 'operations' },
 
     // Enterprise Integration
-    { name: 'Multi-Carrier Shipping', href: '/dashboard/shipping', icon: PackageOpen, section: 'integration' },
-    { name: 'Smart Reorder', href: '/dashboard/reorder', icon: Zap, section: 'integration' },
+    // { name: 'Multi-Carrier Shipping', href: '/dashboard/shipping', icon: PackageOpen, section: 'integration' }, // Removed as per user request
+    // { name: 'Smart Reorder', href: '/dashboard/reorder', icon: Zap, section: 'integration' }, // Removed as per user request
     { name: 'ERP Integration', href: '/dashboard/erp', icon: Link2, section: 'integration' },
     { name: 'E-commerce', href: '/dashboard/ecommerce', icon: ShoppingBag, section: 'integration' },
 
     // Advanced Features
-    { name: 'Returns Management', href: '/dashboard/returns', icon: RotateCcw, section: 'advanced' },
+    // { name: 'Returns Management', href: '/dashboard/returns', icon: RotateCcw, section: 'advanced' }, // Removed as per user request
     { name: 'Labor Management', href: '/dashboard/labor', icon: Clock, section: 'advanced' },
     { name: 'Quality Control', href: '/dashboard/quality', icon: CheckCircle, section: 'advanced' },
     { name: 'RBAC & Permissions', href: '/dashboard/rbac', icon: Lock, section: 'advanced' },
+    { name: 'User Management', href: '/dashboard/admin/users', icon: User, section: 'advanced' },
 
     // Analytics & AI
     { name: 'Demand Forecast', href: '/dashboard/demand', icon: TrendingUp, section: 'analytics' },
     { name: 'ML Forecasting', href: '/dashboard/forecasting', icon: TrendingUpIcon, section: 'analytics' },
-    { name: 'Performance Benchmarking', href: '/dashboard/benchmarking', icon: Target, section: 'analytics' },
+    // { name: 'Performance Benchmarking', href: '/dashboard/benchmarking', icon: Target, section: 'analytics' },  // Removed - future feature
     { name: 'AI Reports', href: '/dashboard/ai-reports', icon: FileText, section: 'analytics' },
     { name: 'Advanced Reporting', href: '/dashboard/reporting', icon: BarChart3, section: 'analytics' },
 
     // AI & Innovation
     { name: 'AI Command Center', href: '/dashboard/ai-command', icon: Brain, section: 'ai' },
     { name: 'AI Recommendations', href: '/dashboard/recommendations', icon: BrainCircuit, section: 'ai' },
-    { name: 'Computer Vision', href: '/dashboard/computer-vision', icon: Camera, section: 'ai' },
+    // { name: 'Computer Vision', href: '/dashboard/computer-vision', icon: Camera, section: 'ai' },  // Removed - future feature
     { name: 'Edge AI', href: '/dashboard/edge-ai', icon: Laptop, section: 'ai' },
 
     // Other
     { name: 'Anomalies', href: '/dashboard/anomalies', icon: AlertTriangle, section: 'other' },
-    { name: 'Financials', href: '/dashboard/financials', icon: DollarSign, section: 'other' },
+    // { name: 'Financials', href: '/dashboard/financials', icon: DollarSign, section: 'other' }, // Removed as per user request
     { name: 'Audit Trail', href: '/dashboard/blockchain', icon: Shield, section: 'other' },
     { name: 'Collaboration', href: '/dashboard/collaboration', icon: User, section: 'other' },
     { name: 'Knowledge Base', href: '/dashboard/knowledge-base', icon: BookOpen, section: 'other' },

@@ -11,7 +11,7 @@ from datetime import datetime
 
 from backend.database_lite import get_db
 from backend.models_lite import Order, Inventory
-from backend.auth import get_current_active_user, User
+from backend.auth_lite import get_current_active_user, User
 
 router = APIRouter(prefix="/api/returns", tags=["Returns Management"])
 

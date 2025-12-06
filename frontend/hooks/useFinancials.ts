@@ -10,7 +10,7 @@ export function useFinancials() {
         try {
             setLoading(true);
             setError(null);
-            const response = await apiClient.get('/financials');
+            const response = await apiClient.get('/api/v1/financials/summary');
             setData(response.data);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch financial data');

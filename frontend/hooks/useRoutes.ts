@@ -24,7 +24,7 @@ export function useRoutes(options: UseRoutesOptions = {}) {
         try {
             setLoading(true);
             setError(null);
-            const routes = await routesService.getAll({ status, vehicleId });
+            const routes = await routesService.getRoutes(status);
             setData(routes);
         } catch (err: any) {
             setError(getErrorMessage(err));
@@ -39,11 +39,15 @@ export function useRoutes(options: UseRoutesOptions = {}) {
         }
     }, [autoFetch, fetchRoutes]);
 
-    const optimizeRoute = async (routeData: OptimizeRouteRequest) => {
+    const optimizeRoute = async (routeData: any) => {
         try {
             setLoading(true);
-            const optimized = await routesService.optimize(routeData);
-            setData([optimized, ...data]);
+            const optimized = await routesService.optimizeRoute(routeData);
+            // Optimization returns a result, not necessarily a saved route yet, 
+            // but if it does return a route structure, we can add it.
+            // The service returns OptimizationResult which is different from Route.
+            // We might not want to add it to 'data' directly unless it's saved.
+            // For now, let's just return it.
             return optimized;
         } catch (err: any) {
             throw new Error(getErrorMessage(err));
@@ -52,30 +56,43 @@ export function useRoutes(options: UseRoutesOptions = {}) {
         }
     };
 
-    const createRoute = async (routeData: Partial<Route>) => {
+    const createRoute = async (routeData: any) => {
         try {
-            const newRoute = await routesService.create(routeData);
-            setData([newRoute, ...data]);
+            const response = await routesService.createRoute(routeData);
+            // response might be { message, route }
+            const newRoute = response.route || response;
+            setData(prev => [newRoute, ...prev]);
             return newRoute;
         } catch (err: any) {
             throw new Error(getErrorMessage(err));
         }
     };
 
-    const updateRoute = async (id: number, updates: Partial<Route>) => {
+    const updateRouteStatus = async (id: string, status: string) => {
         try {
-            const updated = await routesService.update(id, updates);
-            setData(data.map(route => route.id === id ? updated : route));
+            const updated = await routesService.updateStatus(id, status);
+            setData(prev => prev.map(route => route.id === id || route.route_id === id ? updated : route));
             return updated;
         } catch (err: any) {
             throw new Error(getErrorMessage(err));
         }
     };
 
-    const deleteRoute = async (id: number) => {
+    const assignDriver = async (routeId: string, driverId: string, driverName: string) => {
         try {
-            await routesService.delete(id);
-            setData(data.filter(route => route.id !== id));
+            const response = await routesService.assignDriver(routeId, driverId, driverName);
+            const updated = response.route;
+            setData(prev => prev.map(route => route.id === routeId || route.route_id === routeId ? updated : route));
+            return updated;
+        } catch (err: any) {
+            throw new Error(getErrorMessage(err));
+        }
+    };
+
+    const deleteRoute = async (id: string) => {
+        try {
+            await routesService.deleteRoute(id);
+            setData(prev => prev.filter(route => route.id !== id && route.route_id !== id));
         } catch (err: any) {
             throw new Error(getErrorMessage(err));
         }
@@ -88,7 +105,8 @@ export function useRoutes(options: UseRoutesOptions = {}) {
         refetch: fetchRoutes,
         optimizeRoute,
         createRoute,
-        updateRoute,
+        updateRouteStatus,
+        assignDriver,
         deleteRoute,
     };
 }

@@ -2,10 +2,11 @@
 Pydantic schemas for request/response validation in Warefy API.
 """
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from backend.base_schema import CamelCaseModel
 
 from typing import Optional, List, Dict, Any
+import json
 from datetime import datetime
 
 # ============= User Schemas =============
@@ -24,11 +25,19 @@ class UserUpdate(BaseModel):
     is_2fa_enabled: Optional[bool] = None
     full_name: Optional[str] = None
     password: Optional[str] = None
+    avatar_url: Optional[str] = None
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
 
 class UserResponse(UserBase):
     id: int
     is_active: bool
     is_2fa_enabled: Optional[bool] = False
+    avatar_url: Optional[str] = None
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
     created_at: datetime
     
     class Config:
@@ -86,7 +95,7 @@ class InventoryResponse(InventoryBase):
     id: int
     warehouse_id: int
     last_restocked: Optional[datetime] = None
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -185,7 +194,17 @@ class AnomalyResponse(CamelCaseModel):
     description: str
     detected_at: datetime
     resolved: bool
-    metadata: Optional[Dict[str, Any]] = None
+    extra_data: Optional[Dict[str, Any]] = None
+    
+    @field_validator('extra_data', mode='before')
+    @classmethod
+    def parse_extra_data(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except:
+                return {}
+        return v
     
     class Config:
         from_attributes = True
