@@ -5,7 +5,7 @@ Automatic purchase order generation based on reorder points and demand forecasti
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel
 from datetime import datetime
 from backend.auth_lite import get_current_active_user
