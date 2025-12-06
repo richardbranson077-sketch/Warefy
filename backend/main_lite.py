@@ -254,6 +254,10 @@ app.include_router(benchmarking.router) # Prefix defined in router: /api/v1/benc
 app.include_router(ecommerce_sync.router) # Prefix defined in router: /api/v1/ecommerce
 app.include_router(erp_sync.router) # Prefix defined in router: /api/v1/erp
 
+# Seed API (for initial database population)
+from backend import seed_api
+app.include_router(seed_api.router, prefix="/api/v1", tags=["Seed"])
+
 # Real Inventory Router
 from backend.routers import inventory
 app.include_router(inventory.router)
