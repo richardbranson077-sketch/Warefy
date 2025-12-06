@@ -11,6 +11,9 @@ import os
 # Check if we're in production (Render sets DATABASE_URL)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# DEBUG: Print to see if variable is detected
+print(f"🔍 DATABASE_URL detected: {DATABASE_URL[:50] if DATABASE_URL else 'None'}")
+
 if DATABASE_URL:
     # Production: Use PostgreSQL
     # Render provides postgres:// but SQLAlchemy needs postgresql://
