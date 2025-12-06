@@ -221,20 +221,20 @@ app.include_router(reorder.router, prefix="/api/v1", tags=["Reorder"])
 
 # AI Routers (Real)
 from backend.routers import ai_recommendations, computer_vision, demand, ai_reports
-app.include_router(ai_recommendations.router, prefix="/api/v1/recommendations", tags=["AI Recommendations"])
+app.include_router(ai_recommendations.router) # Prefix defined in router: /api/v1/recommendations
 app.include_router(computer_vision.router, prefix="/api/v1/vision", tags=["Computer Vision"])
-app.include_router(demand.router, prefix="/api/v1/demand", tags=["Demand Forecasting"])
+app.include_router(demand.router) # Prefix defined in router: /api/v1/demand
 app.include_router(ai_reports.router, tags=["AI Reports"])
 
 # Admin & Security routers
-app.include_router(rbac.router, prefix="/api/v1", tags=["RBAC"])
+app.include_router(rbac.router) # Prefix defined in router: /api/v1/rbac
 
 # AI & Analytics routers
-app.include_router(benchmarking.router, prefix="/api/v1", tags=["Benchmarking"])
+app.include_router(benchmarking.router) # Prefix defined in router: /api/v1/benchmarking
 
 # Integration routers
-app.include_router(ecommerce_sync.router, prefix="/api/v1", tags=["E-commerce Sync"])
-app.include_router(erp_sync.router, prefix="/api/v1", tags=["ERP Sync"])
+app.include_router(ecommerce_sync.router) # Prefix defined in router: /api/v1/ecommerce
+app.include_router(erp_sync.router) # Prefix defined in router: /api/v1/erp
 
 # Real Inventory Router
 from backend.routers import inventory
