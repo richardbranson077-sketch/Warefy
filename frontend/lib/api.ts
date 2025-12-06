@@ -5,14 +5,21 @@
 
 import axios from 'axios';
 
-const API_URL = process.env.NODE_ENV === 'production'
-    ? 'https://warefy-production.up.railway.app'
-    : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000');
+// robust URL detection
+let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-console.log('API Config:', {
-    NODE_ENV: process.env.NODE_ENV,
-    API_URL: API_URL
-});
+// Force HTTPS on Vercel (Client-side)
+if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    url = 'https://warefy-production.up.railway.app';
+}
+// Force HTTPS in Production (Server-side / Build-time)
+else if (process.env.NODE_ENV === 'production') {
+    url = 'https://warefy-production.up.railway.app';
+}
+
+const API_URL = url;
+
+console.log('API Config Loaded:', `Env: ${process.env.NODE_ENV}, URL: ${API_URL}`);
 
 // Create axios instance
 const api = axios.create({
