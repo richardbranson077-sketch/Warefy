@@ -21,6 +21,19 @@ const api = axios.create({
     },
 });
 
+// CRITICAL: Force HTTPS on every request (runs at request-time, not build-time)
+api.interceptors.request.use((config) => {
+    if (config.baseURL && config.baseURL.startsWith('http://')) {
+        config.baseURL = config.baseURL.replace('http://', 'https://');
+        console.log('⚠️ Fixed HTTP to HTTPS:', config.baseURL);
+    }
+    if (config.url && config.url.startsWith('http://')) {
+        config.url = config.url.replace('http://', 'https://');
+        console.log('⚠️ Fixed HTTP to HTTPS in URL:', config.url);
+    }
+    return config;
+});
+
 // Add auth token to requests
 if (typeof window !== 'undefined') {
     api.interceptors.request.use((config) => {
