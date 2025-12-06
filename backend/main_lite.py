@@ -5,6 +5,8 @@ AI-Powered Supply Chain Optimizer with SQLite backend
 
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from sqlalchemy.orm import Session
 from typing import List
 import os
@@ -105,6 +107,22 @@ from backend.routers import (
 ALLOWED_ORIGINS_STR = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,https://warefy.vercel.app,https://warefy-git-main-fastrocketdelivery.vercel.app")
 ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS_STR.split(",")]
 logger.info(f"CORS allowed origins: {ALLOWED_ORIGINS}")
+
+# CRITICAL: Add middleware to handle X-Forwarded-Proto header from Railway proxy
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.datastructures import Headers
+
+class ProxyHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # Trust X-Forwarded-Proto header from proxy
+        forwarded_proto = request.headers.get("x-forwarded-proto", "")
+        if forwarded_proto == "https":
+            # Override the URL scheme to https
+            request.scope["scheme"] = "https"
+        response = await call_next(request)
+        return response
+
+app.add_middleware(ProxyHeadersMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
