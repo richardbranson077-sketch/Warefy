@@ -39,18 +39,8 @@ if DATABASE_URL:
     engine = create_engine(DATABASE_URL)
 else:
     # Local development: Use SQLite
-    # On Railway, use /data volume for persistence
-    if RAILWAY_ENV:
-        # Railway persistent volume
-        DATABASE_PATH = "/data/warefy.db"
-        print(f"🚂 Using Railway SQLite with persistent volume: {DATABASE_PATH}")
-    else:
-        # Local development
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        DATABASE_PATH = os.path.join(BASE_DIR, 'warefy.db')
-        print(f"💻 Using local SQLite: {DATABASE_PATH}")
-    
-    DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATABASE_URL = f"sqlite:///{os.path.join(BASE_DIR, 'warefy.db')}"
     engine = create_engine(
         DATABASE_URL,
         connect_args={"check_same_thread": False}
