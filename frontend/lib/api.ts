@@ -5,13 +5,13 @@
 
 import axios from 'axios';
 
-// ALWAYS use HTTPS except on localhost
-const API_URL = typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:8000'
-    : 'https://warefy-production.up.railway.app';
+// NUCLEAR FIX: Just hardcode it for production
+const isLocalhost = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-console.log('🔧 API URL:', API_URL, '| Host:', typeof window !== 'undefined' ? window.location.hostname : 'SSR');
+const API_URL = isLocalhost ? 'http://localhost:8000' : 'https://warefy-production.up.railway.app';
+
+console.log('🚀 API URL HARDCODED:', API_URL);
 
 // Create axios instance
 const api = axios.create({
