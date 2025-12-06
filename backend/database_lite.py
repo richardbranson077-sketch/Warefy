@@ -8,18 +8,34 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# Check if we're in production (Render sets DATABASE_URL)
+# Check if we're on Railway (they set RAILWAY_ENVIRONMENT)
+RAILWAY_ENV = os.getenv("RAILWAY_ENVIRONMENT")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # DEBUG: Print to see if variable is detected
 print(f"🔍 DATABASE_URL detected: {DATABASE_URL[:50] if DATABASE_URL else 'None'}")
+print(f"🚂 RAILWAY_ENVIRONMENT: {RAILWAY_ENV}")
+
+# Force PostgreSQL on Railway even if DATABASE_URL isn't detected
+if RAILWAY_ENV and not DATABASE_URL:
+    # Use Railway's internal PostgreSQL DNS
+    PGHOST = os.getenv("PGHOST", "postgres.railway.internal")
+    PGPORT = os.getenv("PGPORT", "5432")
+    PGDATABASE = os.getenv("PGDATABASE", "railway")
+    PGUSER = os.getenv("PGUSER", "postgres")
+    PGPASSWORD = os.getenv("PGPASSWORD", "")
+    
+    if PGPASSWORD:
+        DATABASE_URL = f"postgresql://{PGUSER}:{PGPASSWORD}@{PGHOST}:{PGPORT}/{PGDATABASE}"
+        print(f"✅ Constructed Railway DATABASE_URL from individual variables")
 
 if DATABASE_URL:
     # Production: Use PostgreSQL
-    # Render provides postgres:// but SQLAlchemy needs postgresql://
+    # Render/Railway might provide postgres:// but SQLAlchemy needs postgresql://
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     
+    print(f"🐘 Using PostgreSQL: {DATABASE_URL[:50]}...")
     engine = create_engine(DATABASE_URL)
 else:
     # Local development: Use SQLite
