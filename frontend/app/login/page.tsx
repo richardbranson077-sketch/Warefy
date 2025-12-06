@@ -196,7 +196,7 @@ export default function LoginPage() {
                                 <span>•</span>
                                 <div>256-bit Encryption</div>
                             </div>
-                            <div className="text-gray-400 font-mono">v1.3 (Interceptor Fix)</div>
+                            <div className="text-gray-400 font-mono">v1.4 (Nuclear Fix)</div>
                         </div>
                     </div>
 
